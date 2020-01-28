@@ -164,7 +164,7 @@ Markov but garfield. No parameters are required."""
         await self.bot.loop.run_in_executor(None, to_run)
 
         saved = Image.open(f"{root_directory}/lobstero/data/downloaded/garkovraw.png")
-        finished = saved.crop((206, 435, 818, 650))
+        finished = saved.crop((206, 445, 818, 660))
 
         buffer = BytesIO()
         finished.save(buffer, "png")
