@@ -28,7 +28,9 @@ root_directory = f"{sys.path[0]}/".replace("\\", "/")
 nouns = {x.name().split('.', 1)[0] for x in wn.all_synsets('n')}
 verbs = {x.name().split('.', 1)[0] for x in wn.all_synsets('v')}
 mazes = {}
-config = imgkit.config(wkhtmltoimage=lc.config.wkhtmltoimage_path)
+
+if lc.config.wkhtmltoimage_path != "None":
+    config = imgkit.config(wkhtmltoimage=lc.config.wkhtmltoimage_path)
 
 unogames = games.uno_game_collector()
 
@@ -149,9 +151,14 @@ All parameters are required."""
         """<garkov
 
 Markov but garfield. No parameters are required."""
+        if lc.config.wkhtmltoimage_path != "None":
+            conf = {"config": config}
+        else:
+            conf = {}
+
         to_run = functools.partial(
             imgkit.from_url, "http://joshmillard.com/garkov/",
-            f"{root_directory}/lobstero/data/downloaded/garkovraw.png", config=config)
+            f"{root_directory}/lobstero/data/downloaded/garkovraw.png", **conf)
 
         await self.bot.loop.run_in_executor(None, to_run)
 
