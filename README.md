@@ -15,17 +15,16 @@ Any and all pull requests are welcomed. However, before diving head-first into a
  - You'll need Poetry to install dependencies. This is to save everyone an aneurysm.
  - You'll need git. On windows, GitHub Desktop or the (much better) Git Bash will suffice. If you're on Linux I don't need to explain this to you. 
  - Python 3.7+ is required. While technically compatible with Python 3.6, the bot has only been tested with 3.7.6 and above. Use Python 3.6 at your own peril!
- - With all of this in hand, use [Poetry](https://python-poetry.org/) to install required dependencies. It's rather simple:
+ - With all of this in hand, use [Poetry](https://python-poetry.org/) to install required dependencies and then continue from there. It's rather simple:
 
-.. code:: sh
-
-	poetry install
-	# "copy" on windows, instead of "cp"
-	cp lobstero_config.example.py  lobstero_config.py
-	# read and edit to taste in your favorite editor
-	# "python" on windows, instead of "python3"
-	poetry run python3 launcher.py
-	
+```sh
+poetry install
+# "copy" on windows, instead of "cp"
+cp lobstero_config.example.py  lobstero_config.py
+# read and edit to taste in your favorite editor
+# "python" on windows, instead of "python3"
+poetry run python3 launcher.py
+```
 
 ## Additional notes
 
