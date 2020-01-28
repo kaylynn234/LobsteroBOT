@@ -1,6 +1,6 @@
 
 # LobsteroBOT
-A discord bot badly written by somebody with way too much time.
+A bad discord bot written by somebody with way too much time.
 Lobstero is publicly available on discord already - invite it to your server using [this link](https://discordapp.com/api/oauth2/authorize?client_id=642538503711752234&scope=bot).
 
 ## Bugs
