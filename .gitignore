@@ -1,0 +1,16 @@
+
+*.png
+*.jpg
+*.gif
+lobstero/data/static/cursedcats/Random_cat_image-2
+*.webp
+lobstero/data/static/cursedcats/Random_cat_image-3
+lobstero/data/static/cursedcats/Random_cat_image-1
+lobstero/data/static/cursedcats/Random_cat_image
+lobstero/data/static/gnomes/jquery.min.js.download
+lobstero/data/static/gnomes/bootstrap.min.css
+*.pyc
+.vscode/launch.json
+.vscode/settings.json
+testcode/uno.py
+lobstero/lobstero_config.py
