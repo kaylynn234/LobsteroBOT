@@ -25,13 +25,6 @@ cp lobstero_config.example.py  lobstero_config.py
 # "python" on windows, instead of "python3"
 poetry run python3 launcher.py
 ```
- - And at this point the illusion of simplicity is entirely shattered. For whatever reason, venvs are not equipped to handle ext.menus, so we need to do some work ourselves. Try running the bot. It will fail. This is what we want. Grab the location of the venv from the traceback, and cd into it. Keep cd'ing until you're in site-packages. From here, cd into discord/ext. Create a folder named "menus" and cd into it. Then, it's curl time:
- 
- ```sh
- curl https://raw.githubusercontent.com/Rapptz/discord-ext-menus/master/discord/ext/menus/__init__.py --output __init__.py
- ```
- 
-  - From here, you should be good to go. Poetry, pls fix.
 
 ## Additional notes
 
