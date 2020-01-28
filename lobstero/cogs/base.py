@@ -306,7 +306,8 @@ Also has a link to join Lobstero's support server."""
                 f"This instance of Lobstero is owned by {lc.config.owner_name}."
                 "Find the bot on GitHub at https://github.com/kaylynn234/LobsteroBOT"))
         embed.add_field(name="Lobstero's support server", value=lc.config.support_server_url)
-        _id = await self.bot.application_info().id
+        appinfo = await self.bot.application_info()
+        _id = appinfo.id
         embed.add_field(
             name="Invite Lobstero to your server",
             value=f"https://discordapp.com/api/oauth2/authorize?client_id={_id}&scope=bot")
