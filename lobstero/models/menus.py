@@ -5,6 +5,7 @@ import asyncio
 import pendulum
 import discord
 from discord.ext import menus 
+from lobstero.models import games
 
 
 class ListEmbedMenu(menus.ListPageSource):
@@ -105,7 +106,7 @@ class MaizeMenu(menus.Menu):
     def __init__(self):
         """Does the things."""
         super().__init__(timeout=30, clear_reactions_after=True)
-        self.maze = maize_array()
+        self.maze = games.maize_array()
         self.tries = 3
         self.movements = 0
 
