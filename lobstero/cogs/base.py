@@ -302,8 +302,8 @@ Also has a link to join Lobstero's support server."""
         embed = discord.Embed(
             color=16202876,
             description=(
-                f"Lobstero is a badly programmed discord bot developed by Kaylynn#4444."
-                f"This instance of Lobstero is owned by {lc.config.owner_name}."
+                f"Lobstero is a badly programmed discord bot developed by Kaylynn#4444. "
+                f"This instance of Lobstero is owned by {lc.config.owner_name}. "
                 "Find the bot on GitHub at https://github.com/kaylynn234/LobsteroBOT"))
         embed.add_field(name="Lobstero's support server", value=lc.config.support_server_url)
         appinfo = await self.bot.application_info()
