@@ -155,10 +155,11 @@ Markov but garfield. No parameters are required."""
             conf = {"config": config}
         else:
             conf = {}
+            options = {"xvfb": ""}
 
         to_run = functools.partial(
             imgkit.from_url, "http://joshmillard.com/garkov/",
-            f"{root_directory}/lobstero/data/downloaded/garkovraw.png", **conf)
+            f"{root_directory}/lobstero/data/downloaded/garkovraw.png", **conf, **options)
 
         await self.bot.loop.run_in_executor(None, to_run)
 
