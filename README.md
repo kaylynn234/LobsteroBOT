@@ -12,15 +12,24 @@ Any and all pull requests are welcomed. However, before diving head-first into a
 ## Installation
  I would really, really prefer if you did not run an instance of Lobstero. One is enough. However, I can't stop you, so if you're that type:
 
+ - You'll need Poetry to install dependencies. This is to save everyone an aneurysm.
  - You'll need git. On windows, GitHub Desktop or the (much better) Git Bash will suffice. If you're on Linux I don't need to explain this to you. 
- - Python 3.6+ is required, but the bot has only been tested with 3.7.6 and above. Use Python 3.6 at your own peril!
- - The experimental discord.py extension [ext.menus](https://github.com/Rapptz/discord-ext-menus) is required.
- - Use [Poetry](https://python-poetry.org/) to install other required dependencies:
- - (something about using poetry here)
+ - Python 3.7+ is required. While technically compatible with Python 3.6, the bot has only been tested with 3.7.6 and above. Use Python 3.6 at your own peril!
+ - With all of this in hand, use [Poetry](https://python-poetry.org/) to install required dependencies. It's rather simple:
 
-## After installation
-Copy lobstero_config.example.py, rename to lobstero_config.py and edit. It's a lengthy config file, and I recommend taking your time filling everything in. I've tried to document what everything does as much as possible, but you'll have to figure out parts of it yourself.
+.. code:: sh
+
+	poetry install
+	# "copy" on windows, instead of "cp"
+	cp lobstero_config.example.py  lobstero_config.py
+	# read and edit to taste in your favorite editor
+	# "python" on windows, instead of "python3"
+	poetry run python3 launcher.py
+	
+
+## Additional notes
+
 Make sure to have a Redis database running as well. Lobstero's markov functionality depends on this, and active learning can be turned on through the config file.
-Once you've got all of this running, run launcher.py. Everything should be automatic from there.
+Database schema for everything *should* be handled automatically. No guarantees, though.
 
 
