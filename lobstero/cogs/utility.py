@@ -203,7 +203,7 @@ Person can be an ID, mention, or name"""
     @commands.guild_only()
     async def on_message(self, message):
 
-        for member in enumerate(self.bot.afks):
+        for member in self.bot.afks:
             if member.user == message.author:
                 result = db.return_afk_message(message.author.id)
                 readable = date.delta(
