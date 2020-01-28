@@ -155,7 +155,7 @@ Markov but garfield. No parameters are required."""
             conf = {"config": config}
         else:
             conf = {}
-            options = {"xvfb": ""}
+            options = {"options": {"xvfb": ""}}
 
         to_run = functools.partial(
             imgkit.from_url, "http://joshmillard.com/garkov/",
