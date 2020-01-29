@@ -317,12 +317,16 @@ Also has a link to join Lobstero's support server."""
             for c, _ in zip(latest, range(3)):
                 embed.description += f"\n[``{c.commit.sha[:7]}``]({c.commit.url}) {c.commit.message}"
 
-        embed.add_field(name="Lobstero's support server", value=lc.config.support_server_url)
+        embed.add_field(
+            name="Lobstero's support server", 
+            value=f"[``Click here``]({lc.config.support_server_url})")
         appinfo = await self.bot.application_info()
         _id = appinfo.id
         embed.add_field(
             name="Invite Lobstero to your server",
-            value=f"https://discordapp.com/api/oauth2/authorize?client_id={_id}&scope=bot")
+            value=(
+                "[``Click here``](https://discordapp.com/api/oauth2/authorize"
+                f"?client_id={_id}&scope=bot)"))
         embed.set_footer(text=f"Connected on {(len(self.bot.guilds))} servers.")
         await ctx.send(embed=embed)
 
