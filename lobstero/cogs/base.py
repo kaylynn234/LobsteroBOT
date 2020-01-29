@@ -374,6 +374,24 @@ A base command for repo interactions."""
 
         await ctx.send("Github is not configured on this instance!.")
 
+    @git.command(name="unlabel")
+    @commands.is_owner()
+    @commands.guild_only()
+    async def git_remove_label(self, ctx, issue_n: int, *, label):
+        if self.manager:
+            r = self.manager.get_repo(lc.config.github_repo)
+            issue = r.get_issue(issue_n)
+            current_labels = [x.name for x in issue.labels]
+            try:
+                current_labels.remove(label)
+            except ValueError:
+                return await ctx.send("No label by this name for this issue.")
+            issue.edit(labels=current_labels)
+
+            return await ctx.send("Label removed.")
+
+        await ctx.send("Github is not configured on this instance!.")
+
 
 def setup(bot):
     """Help"""
