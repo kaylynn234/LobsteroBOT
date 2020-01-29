@@ -20,7 +20,6 @@ class Cog(commands.Cog, name="Bot Owner"):
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
