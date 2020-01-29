@@ -206,7 +206,6 @@ Allows the specified object access to bot functionality.
                 f"{str(message.author)}:\n{str(message.content)}"
                 f"\n\nHas attachments: {attachments}"))
 
-
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
