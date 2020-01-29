@@ -1,8 +1,7 @@
 """Provides a set of tools for handling errors."""
 
 import traceback
-import sys
-import pendulum
+import io
 
 import discord
 
@@ -13,7 +12,6 @@ from urllib3.exceptions import InsecureRequestWarning
 from discord.ext import commands
 from lobstero.utils import embeds, strings, misc
 from lobstero import lobstero_config
-from jishaku.exception_handling import send_traceback
 
 lc = lobstero_config.LobsteroCredentials()
 
@@ -108,14 +106,19 @@ class LobsterHandler():
                 misc.utclog(ctx, f"Exception {error_name} handled, but message was not sent.")
 
         if not handled:
+            f = io.StringIO()
+            traceback.print_exc(8, f)  # Prints to a stream
+            to_be_formatted = f.getvalue()
+            sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
+
             for userid in lc.config.owner_id:
                 destination = await ctx.bot.fetch_user(userid)
                 try:
-                    etype, value, trace = sys.exc_info()
-                    await send_traceback(destination, 8, etype, value, trace)
+                    for to_send in sendable:
+                        await destination.send(to_send)
                 except Exception as exc:
                     print(f"Exception: {exc}")  # Can't be helped
-        
+
             raise error
 
 
