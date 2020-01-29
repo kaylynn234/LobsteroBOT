@@ -338,7 +338,7 @@ Misuse of this command will result in a blacklist."""
 
         await ctx.send("Github is not configured on this instance!.")
 
-    @commands.group()
+    @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.is_owner()
     @commands.guild_only()
     async def git(self, ctx):
@@ -347,7 +347,7 @@ Misuse of this command will result in a blacklist."""
 A base command for repo interactions."""
         await ctx.send("Use a subcommand.")
 
-    @git.command()
+    @git.command(name="close")
     @commands.is_owner()
     @commands.guild_only()
     async def git_close_issue(self, ctx, issue_n: int, *, reason):
@@ -360,7 +360,7 @@ A base command for repo interactions."""
 
         await ctx.send("Github is not configured on this instance!.")
 
-    @git.command()
+    @git.command(name="label")
     @commands.is_owner()
     @commands.guild_only()
     async def git_add_label(self, ctx, issue_n: int, *, label):
