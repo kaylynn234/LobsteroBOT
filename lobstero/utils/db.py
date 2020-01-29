@@ -620,4 +620,4 @@ def all_welcome_messages_for_guild(guilidid: str):
 
 
 def query_db(expr: str):
-    return (db.query(expr)
+    return (db.query(expr))
