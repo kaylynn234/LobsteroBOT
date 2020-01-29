@@ -315,10 +315,12 @@ Also has a link to join Lobstero's support server."""
             r = self.manager.get_repo(lc.config.github_repo)
             latest = r.get_commits()
             for c, _ in zip(latest, range(3)):
-                embed.description += f"\n[``{c.commit.sha[:7]}``]({c.commit.url}) {c.commit.message}"
+                embed.description += (
+                    f"\n[``{c.commit.sha[:7]}``]"
+                    f"({c.html_url}) {c.commit.message}")
 
         embed.add_field(
-            name="Lobstero's support server", 
+            name="Lobstero's support server",
             value=f"[``Click here``]({lc.config.support_server_url})")
         appinfo = await self.bot.application_info()
         _id = appinfo.id
