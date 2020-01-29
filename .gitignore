@@ -10,6 +10,7 @@ lobstero/data/static/cursedcats/Random_cat_image
 lobstero/data/static/gnomes/jquery.min.js.download
 lobstero/data/static/gnomes/bootstrap.min.css
 *.pyc
+*.db
 .vscode/launch.json
 .vscode/settings.json
 testcode/uno.py
