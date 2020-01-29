@@ -121,7 +121,7 @@ class LobsterHandler():
                             await destination.send(to_send)
                     except Exception as exc:
                         print(f"Exception: {exc}")  # Can't be helped
-            
+
             raise error  # Raise again, now that it's been logged on discord.
 
 
