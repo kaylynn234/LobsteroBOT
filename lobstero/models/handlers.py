@@ -107,15 +107,15 @@ class LobsterHandler():
             except discord.Forbidden:
                 misc.utclog(ctx, f"Exception {error_name} handled, but message was not sent.")
 
-        for userid in lc.config.owner_id:
-            destination = await ctx.bot.fetch_user(userid)
-            try:
-                etype, value, trace = sys.exc_info()
-                await send_traceback(destination, 8, etype, value, trace)
-            except Exception as exc:
-                print(exc)  # Can't be helped
-
         if not handled:
+            for userid in lc.config.owner_id:
+                destination = await ctx.bot.fetch_user(userid)
+                try:
+                    etype, value, trace = sys.exc_info()
+                    await send_traceback(destination, 8, etype, value, trace)
+                except Exception as exc:
+                    print("Exception: {exc}")  # Can't be helped
+        
             raise error
 
 
