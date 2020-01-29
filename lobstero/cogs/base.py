@@ -343,7 +343,7 @@ Misuse of this command will result in a blacklist."""
             bug_report_label = r.get_label("bug")
             pending_review_label = r.get_label("pending review")
             r.create_issue(
-                f"{str(ctx.author)}: {problem}", text,
+                f"{str(ctx.author)}: {problem}", f"Submitted via discord:\n\n{text}",
                 assignee="kaylynn234", labels=[bug_report_label, pending_review_label])
 
             return await ctx.send("Report submitted.")
