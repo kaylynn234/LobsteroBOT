@@ -12,6 +12,10 @@ from urllib3.exceptions import InsecureRequestWarning
 
 from discord.ext import commands
 from lobstero.utils import embeds, strings, misc
+from lobstero import lobstero_config
+from jishaku.exception_handling import send_traceback
+
+lc = lobstero_config.LobsteroCredentials()
 
 
 class LobsterHandler():
@@ -80,6 +84,10 @@ class LobsterHandler():
         if isinstance(error, commands.errors.BadArgument):
             handled, message = embeds.errorbed(
                 "Bad argument provided! Check your capitalisation and spelling.")
+        
+        if isinstance(error, commands.errors.DisabledCommand):
+            handled, message = embeds.errorbed(
+                "This command is currently disabled.")
 
         if handled and message:
             misc.utclog(ctx, (
@@ -98,6 +106,13 @@ class LobsterHandler():
                 await ctx.send(embed=message, delete_after=10)
             except discord.Forbidden:
                 misc.utclog(ctx, f"Exception {error_name} handled, but message was not sent.")
+
+        for userid in lc.config.owner_id:
+            destination = ctx.bot.get_user(userid)
+            try:
+                await send_traceback(destination, 8, *sys.exc_info())
+            except discord.errors.Forbidden:
+                pass  # Can't be helped
 
         if not handled:
             raise error
