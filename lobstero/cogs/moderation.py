@@ -533,7 +533,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
                 future.content = f"in {future.content}"
             parsed = dateparser.parse(future.content, settings={'TIMEZONE': 'UTC'})
         if parsed:
-            expires_at = pendulum.parse(parsed)
+            expires_at = pendulum.parse(str(parsed))
             rn = expires_at
 
             readable = rn.strftime((
