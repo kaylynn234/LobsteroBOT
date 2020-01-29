@@ -117,7 +117,7 @@ Usage: <clear"""
         messagelist = [m async for m in ctx.channel.history(limit=10) if m.author == ctx.guild.me]
         await ctx.channel.delete_messages(messagelist)
 
-    @commands.command(disabled=True)
+    @commands.command(enabled=False)
     async def profile(self, ctx, *, user: discord.Member = None):
         """View the lobstero profile of a user - including earned badges, hugs given, and role colour.
 Usage: <profile Person

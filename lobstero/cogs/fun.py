@@ -69,7 +69,7 @@ class Cog(commands.Cog, name="Fun"):
         self.task.cancel()
         self.session.close()
 
-    @commands.command(disabled=(lc.auth.cat_api_kay == "None"))
+    @commands.command(enabled=(lc.auth.cat_api_kay != "None"))
     async def cat(self, ctx):
         """images of the felines"""
         url = f"https://api.thecatapi.com/v1/images/search?api_key={lc.auth.cat_api_kay}"
@@ -390,7 +390,7 @@ Usage: <inspire"""
         embed.set_image(url=pagecontent)
         await ctx.send(embed=embed)
 
-    @commands.command(disabled=(lc.auth.spotify_client_id == "None"))
+    @commands.command(enabled=(lc.auth.spotify_client_id != "None"))
     @commands.guild_only()
     async def suggestmusic(self, ctx):
         """Music from Kaylynn's spotify library.
