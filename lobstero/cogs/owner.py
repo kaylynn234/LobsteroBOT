@@ -206,16 +206,6 @@ Allows the specified object access to bot functionality.
                 f"{str(message.author)}:\n{str(message.content)}"
                 f"\n\nHas attachments: {attachments}"))
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.is_owner()
-    async def syslogs(self, ctx):
-        if sys.platform.lower() not in ["linux", "linux2"]:
-            return await ctx.send("You're not on linux! This command will not help you.")
-
-        sh_command = self.bot.get_command("jsk sh")
-        await ctx.invoke(sh_command, "journalctl -u lobstero")
-
 
 def setup(bot):
     """Fuck you flake8"""
