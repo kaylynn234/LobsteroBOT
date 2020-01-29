@@ -106,20 +106,23 @@ class LobsterHandler():
                 misc.utclog(ctx, f"Exception {error_name} handled, but message was not sent.")
 
         if not handled:
-            f = io.StringIO()
-            traceback.print_exc(8, f)  # Prints to a stream
-            to_be_formatted = f.getvalue()
-            sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
+            try:
+                raise error
+            except Exception as e:
+                f = io.StringIO()
+                traceback.print_exc(8, f)  # Prints to a stream
+                to_be_formatted = f.getvalue()
+                sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
 
-            for userid in lc.config.owner_id:
-                destination = await ctx.bot.fetch_user(userid)
-                try:
-                    for to_send in sendable:
-                        await destination.send(to_send)
-                except Exception as exc:
-                    print(f"Exception: {exc}")  # Can't be helped
-
-            raise error
+                for userid in lc.config.owner_id:
+                    destination = await ctx.bot.fetch_user(userid)
+                    try:
+                        for to_send in sendable:
+                            await destination.send(to_send)
+                    except Exception as exc:
+                        print(f"Exception: {exc}")  # Can't be helped
+            
+            raise error  # Raise again, now that it's been logged on discord.
 
 
 class GreedyMention(commands.Converter):
