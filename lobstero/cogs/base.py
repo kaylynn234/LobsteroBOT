@@ -366,11 +366,9 @@ A base command for repo interactions."""
     async def git_add_label(self, ctx, issue_n: int, *, label):
         if self.manager:
             r = self.manager.get_repo(lc.config.github_repo)
-            label_to_add = r.get_label(label)
             issue = r.get_issue(issue_n)
-            current_labels = issue.labels
-            new_labels = current_labels + [label_to_add]
-            issue.edit(labels=new_labels)
+            current_labels = [x.name for x in issue.labels]
+            issue.edit(labels=[label] + current_labels)
 
             return await ctx.send("Label added.")
 
