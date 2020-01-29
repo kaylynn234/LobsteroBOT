@@ -84,7 +84,7 @@ class LobsterHandler():
         if isinstance(error, commands.errors.BadArgument):
             handled, message = embeds.errorbed(
                 "Bad argument provided! Check your capitalisation and spelling.")
-        
+
         if isinstance(error, commands.errors.DisabledCommand):
             handled, message = embeds.errorbed(
                 "This command is currently disabled.")
@@ -108,11 +108,12 @@ class LobsterHandler():
                 misc.utclog(ctx, f"Exception {error_name} handled, but message was not sent.")
 
         for userid in lc.config.owner_id:
-            destination = ctx.bot.get_user(userid)
+            destination = await ctx.bot.fetch_user(userid)
             try:
-                await send_traceback(destination, 8, *sys.exc_info())
-            except discord.errors.Forbidden:
-                pass  # Can't be helped
+                etype, value, trace = sys.exc_info()
+                await send_traceback(destination, 8, etype, value, trace)
+            except Exception as exc:
+                print(exc)  # Can't be helped
 
         if not handled:
             raise error
