@@ -114,7 +114,7 @@ class LobsterHandler():
                     etype, value, trace = sys.exc_info()
                     await send_traceback(destination, 8, etype, value, trace)
                 except Exception as exc:
-                    print("Exception: {exc}")  # Can't be helped
+                    print(f"Exception: {exc}")  # Can't be helped
         
             raise error
 
