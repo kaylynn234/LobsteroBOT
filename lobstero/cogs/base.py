@@ -12,15 +12,23 @@ from lobstero import lobstero_config
 status_position = collections.deque([0, 1, 2, 3])
 lc = lobstero_config.LobsteroCredentials()
 
+
 class Cog(commands.Cog, name="Miscellaneous"):
     """The commands that don't really fit anywhere."""
 
     def __init__(self, bot):
         self.bot = bot
         self.manager = None
+        self.recent_commits = []
         self.status_change.start()
         if "None" not in [lc.auth.github_username, lc.auth.github_password]:
             self.manager = Github(lc.auth.github_username, lc.auth.github_password)
+
+        if self.manager:
+            r = self.manager.get_repo(lc.config.github_repo)
+            latest = r.get_commits()
+            for c, _ in zip(latest, range(3)):
+                self.recent_commits.append(c)
 
     def cog_unload(self):
         self.status_change.cancel()
@@ -312,9 +320,7 @@ Also has a link to join Lobstero's support server."""
                 "\n\n**Recent updates**:\n"))
 
         if self.manager:
-            r = self.manager.get_repo(lc.config.github_repo)
-            latest = r.get_commits()
-            for c, _ in zip(latest, range(3)):
+            for c in self.recent_commits:
                 embed.description += (
                     f"\n[``{c.commit.sha[:7]}``]"
                     f"({c.html_url}) {c.commit.message}")
