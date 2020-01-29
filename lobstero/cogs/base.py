@@ -308,7 +308,15 @@ Also has a link to join Lobstero's support server."""
             description=(
                 f"Lobstero is a badly programmed discord bot developed by Kaylynn#4444. "
                 f"This instance of Lobstero is owned by {lc.config.owner_name}. "
-                "Find the bot on GitHub at https://github.com/kaylynn234/LobsteroBOT"))
+                "Find the bot on GitHub at https://github.com/kaylynn234/LobsteroBOT"
+                "\n\n**Recent updates**:\n"))
+
+        if self.manager:
+            r = self.manager.get_repo(lc.config.github_repo)
+            latest = r.get_commits()
+            for c, _ in zip(latest, range(3)):
+                embed.description += f"\n``{c.commit.sha}`` {c.commit.message}"
+
         embed.add_field(name="Lobstero's support server", value=lc.config.support_server_url)
         appinfo = await self.bot.application_info()
         _id = appinfo.id
