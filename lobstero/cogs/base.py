@@ -4,6 +4,7 @@ This is mainly just help commands."""
 import collections
 import discord
 
+from github import Github
 from discord.ext import commands, tasks
 from lobstero.utils import strings
 from lobstero import lobstero_config
@@ -16,7 +17,10 @@ class Cog(commands.Cog, name="Miscellaneous"):
 
     def __init__(self, bot):
         self.bot = bot
+        self.manager = None
         self.status_change.start()
+        if "None" not in [lc.auth.github_username, lc.auth.github_password]:
+            self.manager = Github(lc.auth.github_username, lc.auth.github_password)
 
     def cog_unload(self):
         self.status_change.cancel()
@@ -313,6 +317,64 @@ Also has a link to join Lobstero's support server."""
             value=f"https://discordapp.com/api/oauth2/authorize?client_id={_id}&scope=bot")
         embed.set_footer(text=f"Connected on {(len(self.bot.guilds))} servers.")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.guild_only()
+    async def bugreport(self, ctx, problem, *, text):
+        """<bugreport (problem) (description)
+
+Opens an issue on GitHub as a bug report. **THE TEXT YOU SUPPLY IS PUBLIC**.
+Misuse of this command will result in a blacklist."""
+        if self.manager:
+            r = self.manager.get_repo(lc.config.github_repo)
+            bug_report_label = r.get_label("bug")
+            pending_review_label = r.get_label("pending review")
+            r.create_issue(
+                f"{str(ctx.author)}: {problem}", text,
+                assignee="kaylynn234", labels=[bug_report_label, pending_review_label])
+
+            return await ctx.send("Report submitted.")
+
+        await ctx.send("Github is not configured on this instance!.")
+
+    @commands.group()
+    @commands.is_owner()
+    @commands.guild_only()
+    async def git(self, ctx):
+        """<git
+
+A base command for repo interactions."""
+        await ctx.send("Use a subcommand.")
+
+    @git.command()
+    @commands.is_owner()
+    @commands.guild_only()
+    async def git_close_issue(self, ctx, issue_n: int, *, reason):
+        if self.manager:
+            r = self.manager.get_repo(lc.config.github_repo)
+            issue = r.get_issue(issue_n)
+            issue.lock(reason)
+
+            return await ctx.send("Issue closed.")
+
+        await ctx.send("Github is not configured on this instance!.")
+
+    @git.command()
+    @commands.is_owner()
+    @commands.guild_only()
+    async def git_add_label(self, ctx, issue_n: int, *, label):
+        if self.manager:
+            r = self.manager.get_repo(lc.config.github_repo)
+            label_to_add = r.get_label(label)
+            issue = r.get_issue(issue_n)
+            current_labels = issue.labels
+            new_labels = current_labels + [label_to_add]
+            issue.edit(labels=new_labels)
+
+            return await ctx.send("Label added.")
+
+        await ctx.send("Github is not configured on this instance!.")
 
 
 def setup(bot):

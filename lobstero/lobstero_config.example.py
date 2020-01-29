@@ -96,6 +96,18 @@ class LobsteroCredentials():
         # FFMPEG path: SHould be a string
         self.config.ffmpeg = "..."
 
+        # Manager account username: Should be a string. Can be "Npne"
+        # This is the github username of the repo management account.
+        self.auth.github_username = "None"
+
+        # Manager account password: Should be a string. Can be "Npne"
+        # This is the github password of the repo management account.
+        self.auth.github_password = "None"
+
+        # GitHub repo: Should be a string. 
+        # This is where the manager does things.
+        self.config.github_repo = "..."
+
         # The section below is used directly by the bot.
         # It shouldn't be changed unless you know what you're doing.
         # Editing some of these these will almost certainly break things!
