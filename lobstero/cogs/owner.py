@@ -207,6 +207,13 @@ Allows the specified object access to bot functionality.
                 f"\n\nHas attachments: {attachments}"))
 
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_owner()
+    async def querydb(self, ctx, *, text):
+        await ctx.send(f"{db.query_db(text)}")
+
+
 def setup(bot):
     """Fuck you flake8"""
     bot.add_cog(Cog(bot))

@@ -617,3 +617,7 @@ def all_welcome_messages_for_guild(guilidid: str):
         return res
     else:
         return None
+
+
+def query_db(expr: str):
+    return (db.query(expr)
