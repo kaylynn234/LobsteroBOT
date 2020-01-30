@@ -71,7 +71,7 @@ If no query is given when using the command, it returns nothing."""
                 try:
                     if await x.can_run(ctx):
                         results.append(x)
-                except commands.CheckFailure:
+                except commands.CommandError:
                     pass
 
         if not results:
@@ -102,7 +102,7 @@ If no query is given when using the command, it returns nothing."""
             try:
                 await command.can_run(ctx)
                 yield command
-            except commands.CheckFailure:
+            except commands.CommandError:
                 pass
 
     async def canruncog(self, cogobj, ctx):
@@ -126,7 +126,7 @@ If no query is given when using the command, it returns nothing."""
             if name.lower() in [command.qualified_name] + command.aliases:
                 try:
                     await command.can_run(ctx)
-                except commands.CheckFailure:
+                except commands.CommandError:
                     return None
 
                 if command.aliases:
