@@ -1,16 +1,19 @@
 """Docstring to appease linter.
 This is mainly just help commands."""
 
+import psutil
 import collections
+
 import discord
 
-from github import Github
 from discord.ext import commands, tasks
+from github import Github
 from lobstero.utils import strings
 from lobstero import lobstero_config
 
 status_position = collections.deque([0, 1, 2, 3])
 lc = lobstero_config.LobsteroCredentials()
+psutil.cpu_percent(interval=None, percpu=True)  # Returns a meaningless value on first call, ignore
 
 
 class Cog(commands.Cog, name="Miscellaneous"):
@@ -411,6 +414,32 @@ A base command for repo interactions."""
             return await ctx.send("Label removed.")
 
         await ctx.send("Github is not configured on this instance!.")
+
+    @commands.command(aliases=["hwstats"])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.guild_only()
+    async def hardwarestats(self, ctx):
+        core_count = psutil.cpu_count()
+        thread_count = psutil.cpu_count(logical=False)
+        packet_info = psutil.net_io_counters()
+        running_processes = len(psutil.pids())
+
+        core_info = [
+            f"\nCore {c_n + 1}: ``{c_p}``% usage"
+            for c_n, c_p in enumerate(psutil.cpu_percent(interval=None, percpu=True))]
+
+        embed = discord.Embed(
+            title=f"System information for this machine",
+            description=(
+                f"This machine has {core_count} physical CPU cores, and {thread_count} threads."
+                f"\n{core_info}\n\n{running_processes} are currently running.\n"
+                f"⬆️ {packet_info.bytes_sent / 1048576:,.2f} "
+                "megabytes of data have been sent since boot."
+                f"⬇️ {packet_info.bytes_recv / 1048576:,.2f} "
+                "megabytes of data have been received since boot."),
+            color=16202876)
+
+        await ctx.send(embed)
 
 
 def setup(bot):
