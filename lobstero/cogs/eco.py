@@ -278,15 +278,15 @@ This command has no arguments.
             data = await resp.json()
 
         embed = discord.Embed(title="Big Brain Trivia™!", color=16202876)
-        correct = data["results"]["correct_answer"]
-        dif = data["results"]["difficulty"].capitalize()
+        correct = data["results"][0]["correct_answer"]
+        dif = data["results"][0]["difficulty"].capitalize()
 
         embed.add_field(
-            name="Category:", value=data["results"]["category"], inline=True)
+            name="Category:", value=data["results"][0]["category"], inline=True)
         embed.add_field(
             name="Difficulty:", value=dif, inline=True)
         embed.add_field(
-            name="Question:", value=data["results"]["question"], inline=False)
+            name="Question:", value=data["results"][0]["question"], inline=False)
         embed.set_footer(text="True or False?")
 
         if dif == "Easy":
