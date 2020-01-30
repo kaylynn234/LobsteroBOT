@@ -1,1 +1,0 @@
-python lobstero/main.py
