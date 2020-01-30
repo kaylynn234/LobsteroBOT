@@ -439,7 +439,7 @@ A base command for repo interactions."""
                 "megabytes of data have been received since boot."),
             color=16202876)
 
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
