@@ -424,14 +424,14 @@ A base command for repo interactions."""
         packet_info = psutil.net_io_counters()
         running_processes = len(psutil.pids())
 
-        core_info = [
-            f"\nCore {c_n + 1}: ``{c_p}``% usage"
-            for c_n, c_p in enumerate(psutil.cpu_percent(interval=None, percpu=True))]
+        core_info = "\n".join([
+            f"Core {c_n + 1}: ``{c_p}``% usage"
+            for c_n, c_p in enumerate(psutil.cpu_percent(interval=None, percpu=True))])
 
         embed = discord.Embed(
             title=f"System information for this machine",
             description=(
-                f"This machine has {core_count} physical CPU cores, and {thread_count} threads."
+                f"This machine has {core_count} physical CPU core(s), and {thread_count} thread(s)."
                 f"\n{core_info}\n\n{running_processes} are currently running.\n"
                 f"⬆️ {packet_info.bytes_sent / 1048576:,.2f} "
                 "megabytes of data have been sent since boot."
