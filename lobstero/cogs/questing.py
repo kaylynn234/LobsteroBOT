@@ -90,7 +90,7 @@ User should be a user ID, user mention, user nickname or username. Amount should
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
         crabtools.grant_item(user.id, thing, amount)
-        await self.simple_embed("Item granted!", ctx.channel.id)
+        await self.simple_embed("Item granted!", ctx)
     
     @commands.command(aliases=["take"])
     @commands.guild_only()

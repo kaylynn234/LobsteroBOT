@@ -141,7 +141,7 @@ Striked infractions are not counted. All parameters are required.
             return await embeds.simple_embed(text.mod_member_invalid, ctx.channel.id)
         results = db.find_all_member_infractions(ctx.guild.id, user.id)
         if not results:
-            return await embeds.simple_embed(text.mod_none_assoc, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_none_assoc, ctx)
 
         data = [list(item.items()) for item in list(results)]
         counts = collections.Counter([
@@ -164,20 +164,20 @@ Striked infractions are not counted. All parameters are required.
 Strikes a record. This causes it to not be counted in member summaries, and will make it appear crossed-out when navigating infractions.
         """
         if not id_:
-            return await embeds.simple_embed(text.mod_id_invalid, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
-            return await embeds.simple_embed(text.mod_not_number, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_not_number, ctx)
         res = db.find_specific_infraction(id_)
         if not res:
-            return await embeds.simple_embed(text.mod_none_matching, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
             return await embeds.simple_embed(text.mod_on_other_guild, ctx.channel.id)
 
         if res["redacted"] == "True":
-            await embeds.simple_embed("Record unstriked.", ctx.channel.id)
+            await embeds.simple_embed("Record unstriked.", ctx)
             db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "False")
         else:
-            await embeds.simple_embed("Record striked.", ctx.channel.id)
+            await embeds.simple_embed("Record striked.", ctx)
             db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "True")
 
     @records.command(name="close")
@@ -189,17 +189,17 @@ Close a record. This is not the same as striking a record!
 Closing a record stops it from expiring.
         """
         if not id_:
-            return await embeds.simple_embed(text.mod_id_invalid, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
-            return await embeds.simple_embed(text.mod_not_number, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_not_number, ctx)
         res = db.find_specific_infraction(id_)
         if not res:
-            return await embeds.simple_embed(text.mod_none_matching, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
             return await embeds.simple_embed(text.mod_on_other_guild, ctx.channel.id)
 
         if res["expiry"] != "False":
-            await embeds.simple_embed("Record closed.", ctx.channel.id)
+            await embeds.simple_embed("Record closed.", ctx)
             db.close_infraction(id_)
         else:
             await embeds.simple_embed("Record is already closed.", ctx.channel.id)
