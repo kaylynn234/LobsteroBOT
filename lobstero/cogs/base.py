@@ -432,9 +432,9 @@ A base command for repo interactions."""
             title=f"System information for this machine",
             description=(
                 f"This machine has {core_count} physical CPU core(s), and {thread_count} thread(s)."
-                f"\n{core_info}\n\n{running_processes} are currently running.\n"
+                f"\n{core_info}\n\n{running_processes} processes are currently running.\n"
                 f"⬆️ {packet_info.bytes_sent / 1048576:,.2f} "
-                "megabytes of data have been sent since boot."
+                "megabytes of data have been sent since boot.\n"
                 f"⬇️ {packet_info.bytes_recv / 1048576:,.2f} "
                 "megabytes of data have been received since boot."),
             color=16202876)
