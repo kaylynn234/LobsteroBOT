@@ -460,7 +460,7 @@ Usage: <activitygraph"""
         if message.guild is None:
             return
 
-        if "lobstero " in message.content.lower() and "play " in message.content.lower(): 
+        if "lobstero " in message.content.lower() and "play " in message.content.lower():
             should_continue = 1
         if message.guild.id == 177192169516302336:
             should_continue = 0
@@ -474,7 +474,7 @@ Usage: <activitygraph"""
         if should_continue and th["random_messages"]:
             ytquery = strings.slicer(message.content.lower(), "play").replace("play ", "")
             query_string = urllib.parse.urlencode({"search_query": ytquery})
-            async with self.session.get(query_string) as resp:
+            async with self.session.get(f"https://www.youtube.com/results?{query_string}") as resp:
                 pagecontent = await resp.text()
 
             search_results = re.findall(r'href=\"\/watch\?v=(.{11})', pagecontent)
