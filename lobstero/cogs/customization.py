@@ -65,6 +65,7 @@ Example usage is ``<wm add this is a cool welcome message! hi %u!``
 Emoji, mentions of specific users, specific channels, and specific roles will function normally.
         """
         if message is not None:
+            db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
             db.add_welcome_message(str(ctx.guild.id), message)
             await embeds.simple_embed("Welcome message added!", ctx.message.channel.id)
         else:
@@ -98,7 +99,7 @@ Use ``<channels`` alone to display currently set values.
         embed.description = f"welcome_messages: ``{wm}``\narchives: ``{pa}``\nmoderation: ``{ml}``"
 
         await ctx.send(embed=embed)
-    
+
     @channels.command(name="set")
     async def channels_set(self, ctx, name=None):
         """<channels set (value)
