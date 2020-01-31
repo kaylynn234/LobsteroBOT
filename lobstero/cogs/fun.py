@@ -230,10 +230,10 @@ Usage: <gnome @mention"""
             return await ctx.send(embed=embed)
 
         gnomecount = db.add_gnome(ctx.message.mentions[0].id, 1)
-        gnome_filenames = [x for x in os.listdir(root_directory + "data/gnomes/")]
+        gnome_filenames = [x for x in os.listdir(root_directory + "lobstero/data/gnomes/")]
         gnome_index = random.randint(1, len(gnome_filenames))
         gnomefile = discord.File(
-            f"{root_directory}/data/gnomes/{gnome_filenames[gnome_index]}",
+            f"{root_directory}lobstero/data/gnomes/{gnome_filenames[gnome_index]}",
             filename=gnome_filenames[gnome_index])
 
         gnomebed = discord.Embed(
