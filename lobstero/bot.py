@@ -56,7 +56,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.log = logging.getLogger(__name__)  # type: Type[logging.Logger]
         self.first_run = True
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
-        self.handler = handlers.LobsterHandler()
+        self.handler = handlers.LobsterHandler(self)
 
         super().__init__(command_prefix, **kwargs)
 
@@ -191,3 +191,11 @@ class LobsteroBOT(commands.AutoShardedBot):
 
     async def on_command_error(self, ctx, error) -> None:
         await self.handler.handle(ctx, error)
+
+    async def on_error(self, event_method, *args, **kwargs):
+        msg = f"""**Additional notes:**
+        Event: {event_method}
+        Provided args: {", ".join(args)}
+        Provided kwargs: {", ".join([f"{x}: {y}" for x, y in kwargs])}
+        """
+        await self.handler.format_tb_and_send(additional=msg)

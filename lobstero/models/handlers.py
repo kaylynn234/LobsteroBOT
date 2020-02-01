@@ -21,11 +21,28 @@ class LobsterHandler():
     Allows logging of errors, as well as some special things.
     Namely error tracking. See how many total things have gone wrong!"""
 
-    def __init__(self):
+    def __init__(self, bot):
         self.session_errors = {
             "handled": Counter(),
             "swallowed": Counter(),
             "raised": Counter()}
+        self.bot = bot
+
+    async def format_tb_and_send(self, additional=None):
+        f = io.StringIO()
+        traceback.print_exc(8, f)  # Prints to a stream
+        to_be_formatted = f.getvalue()
+        sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
+
+        for userid in lc.config.owner_id:
+            destination = await self.bot.fetch_user(userid)
+            try:
+                for to_send in sendable:
+                    await destination.send(to_send)
+                if additional:
+                    await destination.send(additional)
+            except Exception as exc:
+                print(f"Exception: {exc}")  # Can't be helped
 
     async def handle(self, ctx: Type[commands.Context], error: Exception) -> None:
         """Handles an exception given context and the exception itself.
@@ -67,7 +84,7 @@ class LobsterHandler():
                 "This command is on cooldown! You can use it again in {:.2f}s!"
                 .format(error.retry_after))
 
-        if isinstance(error, discord.errors.Forbidden) or isinstance(error, discord.Forbidden):
+        if isinstance(error, discord.errors.Forbidden):
             handled = True
             # Nothing we can do about this one.
 
@@ -108,19 +125,8 @@ class LobsterHandler():
         if not handled:
             try:
                 raise error
-            except Exception as e:
-                f = io.StringIO()
-                traceback.print_exc(8, f)  # Prints to a stream
-                to_be_formatted = f.getvalue()
-                sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
-
-                for userid in lc.config.owner_id:
-                    destination = await ctx.bot.fetch_user(userid)
-                    try:
-                        for to_send in sendable:
-                            await destination.send(to_send)
-                    except Exception as exc:
-                        print(f"Exception: {exc}")  # Can't be helped
+            except Exception:
+                await self.format_tb_and_send()
 
             raise error  # Raise again, now that it's been logged on discord.
 
