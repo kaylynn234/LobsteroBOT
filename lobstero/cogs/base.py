@@ -70,7 +70,7 @@ If no query is given when using the command, it returns nothing."""
 
         results = []
         for x in self.bot.commands:
-            if text.lower() in str(x.help).lower() or text.lower() in str(x.qualifed_name).lower():
+            if text.lower() in str(x.help).lower() or text.lower() in str(x.qualified_name).lower():
                 try:
                     if await x.can_run(ctx):
                         results.append(x)
