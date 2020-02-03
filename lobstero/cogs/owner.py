@@ -100,9 +100,9 @@ Allows the specified object access to bot functionality.
         avg_c = int(channels / guilds)
 
         embed = discord.Embed(color=16202876, title="Server information", description=f"""
-        Connected to {str(guilds)} servers.
-        {str(members)} members are visible.
-        {str(channels)} channels are visible.
+        Connected to {guilds} servers.
+        {members} members are visible.
+        {channels} channels are visible.
         On average, each server has {avg_m} members and {avg_c} channels.""")
         await ctx.send(embed=embed)
 
@@ -132,16 +132,16 @@ Allows the specified object access to bot functionality.
 
         servert = f"""
         Server name: {guild.name}.
-        Server region: {str(guild.region)}.
+        Server region: {guild.region}.
         
-        This server has {str(len(guild.voice_channels))} voice channels.
-        This server has {str(len(guild.roles))} roles.
-        This server has {str(guild.member_count)} members.
-        This server has {str(len(guild.channels))} channels.
+        This server has {len(guild.voice_channels)} voice channels.
+        This server has {len(guild.roles)} roles.
+        This server has {guild.member_count)} members.
+        This server has {len(guild.channels)} channels.
         
         This server is {large}.
-        This server is owned by {str(guild.owner)}, and was created at {str(guild.created_at)}.
-        My nickname on this server is {guild.me.nick if guild.me.nick else self.bot.user.name}.
+        This server is owned by {guild.owner}, and was created at {guild.created_at}.
+        My nickname on this server is {guild.me.nick or self.bot.user.name}.
 
         """
         embed = discord.Embed(color=16202876, title="Server information", description=servert)
