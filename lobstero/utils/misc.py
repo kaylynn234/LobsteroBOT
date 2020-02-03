@@ -48,12 +48,14 @@ async def handle_dm(owners, message) -> None:
     if message.attachments:
         attachment_urls = "\n".join([x.url for x in message.attachments])
     if "https://discord" in message.content.lower():
+        appinfo = await self.bot.application_info()
+        _id = appinfo.id
         await message.channel.send(embed=discord.Embed(
             title="Hol' up!", description=(
                 "To invite Lobstero to your server, use this link: https://discordapp.com"
-                "/api/oauth2/authorize?client_id=642538503711752234&scope=bot.\n\n"
+                f"/api/oauth2/authorize?client_id={_id}&scope=bot.\n\n"
                 "You must be signed in to discord on your web browser and have "
-                "manage server permissions on the server you wish to add the bot to.")))
+                "manage server permissions in the server you wish to add the bot to.")))
 
     else:
         await message.channel.send(embed=discord.Embed(

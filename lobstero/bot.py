@@ -153,7 +153,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         else:
             owners = [self.get_user(id_) for id_ in lc.config.owner.owner_id]
-            misc.handle_dm(owners, message)
+            await misc.handle_dm(owners, message)
 
         blacklists = (
             db.is_not_blacklisted(str(message.channel.id), "channel"),
