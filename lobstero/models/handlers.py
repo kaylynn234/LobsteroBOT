@@ -61,7 +61,7 @@ class LobsterHandler():
 
         if isinstance(error, commands.errors.MissingRequiredArgument):
             handled, message = embeds.errorbed(
-                f"Missing required argumen ``{error.param.name}``")
+                f"Missing required argument ``{error.param.name}``")
 
         if isinstance(error, commands.errors.TooManyArguments):
             handled, message = embeds.errorbed(
