@@ -136,7 +136,7 @@ Allows the specified object access to bot functionality.
         
         This server has {len(guild.voice_channels)} voice channels.
         This server has {len(guild.roles)} roles.
-        This server has {guild.member_count)} members.
+        This server has {guild.member_count} members.
         This server has {len(guild.channels)} channels.
         
         This server is {large}.
