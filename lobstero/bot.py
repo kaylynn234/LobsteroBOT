@@ -153,7 +153,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         else:
             owners = [self.get_user(id_) for id_ in lc.config.owner.owner_id]
-            await misc.handle_dm(owners, message)
+            return await misc.handle_dm(owners, message)
 
         blacklists = (
             db.is_not_blacklisted(str(message.channel.id), "channel"),
@@ -167,7 +167,11 @@ class LobsteroBOT(commands.AutoShardedBot):
                 await message.add_reaction("\N{CHESTNUT}")
                 await message.add_reaction("\N{ALARM CLOCK}")
 
-            if self.user.mentioned_in(message) and th["respond_on_mention"]:
+            user_mentioned = (
+                f"<@{message.guild.me.id}>" in message.content or
+                f"<@!{message.guild.me.id}>" in message.content)
+
+            if th["respond_on_mention"] and user_mentioned:
                 should_continue = True
 
             elif random.randint(1, 567) == 567 and th["random_messages"]:
