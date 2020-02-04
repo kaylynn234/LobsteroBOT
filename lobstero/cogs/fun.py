@@ -120,7 +120,7 @@ Thanks Luggi."""
         embed = discord.Embed(title=f"Cursed cat image #{cat_num + 1}", color=16202876)
         filename = f"{root_directory}lobstero/data/static/cursedcats/{cat_filenames[cat_num]}"
         to_send = discord.File(filename, filename=cat_filenames[cat_num])
-        embed.set_image(url=f"attachment://{filename}")
+        embed.set_image(url=f"attachment://{cat_filenames[cat_num]}")
         await ctx.send(file=to_send, embed=embed)
 
     @commands.command()
