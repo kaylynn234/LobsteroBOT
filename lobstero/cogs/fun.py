@@ -110,7 +110,7 @@ Sends either a specific or random cursed cat. All parameters are optional.
 Nobody knows where they came from originally.
 Thanks Luggi."""
 
-        cat_filenames = [x for x in os.listdir(root_directory + "data/cursedcats/")]
+        cat_filenames = [x for x in os.listdir(root_directory + "data/static/cursedcats/")]
 
         if number is None:
             cat_num = int(random.randint(0, len(cat_filenames) - 1))
