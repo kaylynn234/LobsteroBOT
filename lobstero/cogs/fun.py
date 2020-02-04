@@ -110,7 +110,7 @@ Sends either a specific or random cursed cat. All parameters are optional.
 Nobody knows where they came from originally.
 Thanks Luggi."""
 
-        cat_filenames = [x for x in os.listdir(root_directory + "data/static/cursedcats/")]
+        cat_filenames = [x for x in os.listdir(root_directory + "lobstero/data/static/cursedcats/")]
 
         if number is None:
             cat_num = int(random.randint(0, len(cat_filenames) - 1))
@@ -118,8 +118,8 @@ Thanks Luggi."""
             cat_num = misc.clamp(number, 0, len(cat_filenames - 1))
 
         embed = discord.Embed(title=f"Cursed cat image #{cat_num + 1}", color=16202876)
-        filename = f"{root_directory}data/static/cursedcats/{cat_filenames[cat_num]}"
-        to_send = discord.File("some_file_path", filename=cat_filenames[cat_num])
+        filename = f"{root_directory}lobstero/data/static/cursedcats/{cat_filenames[cat_num]}"
+        to_send = discord.File(cat_filenames[cat_num], filename=cat_filenames[cat_num])
         embed.set_image(url=f"attachment://{filename}")
         await ctx.send(file=to_send, embed=embed)
 
