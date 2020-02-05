@@ -620,4 +620,13 @@ def all_welcome_messages_for_guild(guilidid: str):
 
 
 def query_db(expr: str):
-    return (db.query(expr))
+    return db.query(expr)
+
+
+def add_vault_note(ownerid: str, title: str, content: str):
+    rn = pendulum.now("Atlantic/Reykjavik")  # utc+0 baybee
+    data = {"userid": ownerid, "title": title, "content": content, "added": str(rn)}
+    table = db['vault']
+    table.upsert(data, ["userid", "title"])
+
+

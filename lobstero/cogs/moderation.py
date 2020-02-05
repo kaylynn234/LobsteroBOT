@@ -45,10 +45,10 @@ class Cog(commands.Cog, name="Moderation"):
         file_ext = file_name.split(".", 1)[1]
 
         async with self.session.get(file_url) as resp:
-            with open(f"{root_directory}data/downloaded/{file_name}", 'wb+') as f:
+            with open(f"{root_directory}lobstero/data/downloaded/{file_name}", 'wb+') as f:
                 f.write(await resp.read())
 
-        return [f"{root_directory}data/downloaded/{file_name}", file_ext]
+        return [f"{root_directory}lobstero/data/downloaded/{file_name}", file_ext]
 
     @commands.group(invoke_without_command=True, ignore_extra=False, aliases=records_aliases)
     @commands.guild_only()
