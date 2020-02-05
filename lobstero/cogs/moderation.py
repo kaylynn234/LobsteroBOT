@@ -761,6 +761,7 @@ Archives pins for the current channel. No parameters are required.
             title="<a:loading:521107731940376576> Archiving pins...", color=16202876)
         mesg = await ctx.send(embed=embed_mesg)
 
+        failures = 0
         pinchn = discord.utils.get(ctx.guild.channels, id=int(channel))
         for x in await ctx.message.channel.pins():
 
@@ -773,7 +774,10 @@ Archives pins for the current channel. No parameters are required.
             for y in x.attachments:
                 atturl = y.url
                 fname = await self.imgdownload(str(atturl))
-                await pinchn.send(file=discord.File(fname[0]))
+                try:
+                    await pinchn.send(file=discord.File(fname[0]))
+                except discord.HTTPException:
+                    failures += 1
 
             for embed in x.embeds:
                 await pinchn.send(embed=embed)
@@ -781,6 +785,11 @@ Archives pins for the current channel. No parameters are required.
             await x.unpin()
 
         embed2 = discord.Embed(title="✅ Pins archived!", color=16202876)
+        if failures:
+            embed2.description = (
+                f"However, {failures} file(s) could not be sent, presumably because they were too "
+                "large. The rest of the channel has been archived normally.")
+
         await mesg.edit(embed=embed2)
 
 
