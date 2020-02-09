@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands
 from discord.ext.menus import MenuPages
 from lobstero.utils import db, embeds, strings
-from lobstero.models import menus
+from lobstero.models import menus, handlers
 
 root_directory = sys.path[0] + "/"
 
@@ -211,6 +211,13 @@ Allows the specified object access to bot functionality.
     @commands.is_owner()
     async def querydb(self, ctx, *, text):
         await ctx.send(f"{db.query_db(text)}")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_owner()
+    @handlers.blueprints()
+    async def scapegoat(self, ctx):
+        await ctx.send(f"hi")
 
 
 def setup(bot):
