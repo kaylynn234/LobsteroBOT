@@ -393,7 +393,7 @@ Removes a blueprint by ID.
             return await embeds.simple_embed(text.bp_on_other_guild, ctx)
 
         await embeds.simple_embed("Blueprint removed.", ctx)
-        db.close_infraction(id_)
+        db.clear_blueprint(str(ctx.guild.id), id_)
 
 
 def setup(bot):
