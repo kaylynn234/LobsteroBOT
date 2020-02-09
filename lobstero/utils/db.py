@@ -630,3 +630,6 @@ def add_vault_note(ownerid: str, title: str, content: str):
     table.upsert(data, ["userid", "title"])
 
 
+def add_blueprint(guilid: str, command: str, key, value, requires):
+    """Adds a blueprint to a command."""
+    pass
