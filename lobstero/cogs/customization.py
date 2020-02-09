@@ -343,7 +343,7 @@ No parameters are required. Displays a list of all blueprints if a subcommand is
         """
         dbresults = sorted(db.blueprints_for_guild(ctx.guild.id), key=lambda x: x["command"])
         results = [
-            f"Blueprint ID {x['id']}: **``{x['criteria_type']}``** for ``<{x['command']}``"
+            f"Blueprint #{x['id']}: **``{x['criteria_type']}``** for **``<{x['command']}``**"
             for x in dbresults]
 
         desc = (
