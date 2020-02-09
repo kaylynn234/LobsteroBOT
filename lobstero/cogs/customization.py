@@ -367,7 +367,7 @@ Displays specific details about a blueprint based on blueprint ID.
         res = db.blueprint_by_id(id_)
         if not res:
             return await embeds.simple_embed(text.bp_none_matching, ctx)
-        if str(res["guild"]) != str(ctx.guild.id):
+        if str(res["guildid"]) != str(ctx.guild.id):
             return await embeds.simple_embed(text.bp_on_other_guild, ctx)
 
         valstr = "succeed" if res["criteria_requires"] else "fail"
