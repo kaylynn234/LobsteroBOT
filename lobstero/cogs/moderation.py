@@ -332,7 +332,8 @@ Warns a user (or users) and logs it to the channel (or channels) specified using
     async def m_mute(self, ctx, *, arg: handlers.GreedyMention):
         """<m mute (users) (reason)
 
-Mutes a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``. A mute role is created and set up if it does not already exist.
+Mutes a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
+A mute role is created and set up if it does not already exist.
         """
         r = await self.handle_confirmation_logging_and_expiry(
             ctx, arg, text.action_mute,
@@ -355,7 +356,8 @@ Mutes a user (or users) and logs it to the channel (or channels) specified using
     async def m_deafen(self, ctx, *, arg: handlers.GreedyMention):
         """<m deafen (users) (reason)
 
-Deafens a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``. A deafen role is created and set up if it does not already exist.
+Deafens a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
+A deafen role is created and set up if it does not already exist.
         """
         r = await self.handle_confirmation_logging_and_expiry(
             ctx, arg, text.action_deafen, "User deafened", "Users deafened")

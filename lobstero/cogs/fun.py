@@ -539,8 +539,10 @@ Use <inventory to see the fish you own."""
 
         if db.economy_check(ctx.author.id) < 11:
             embed = discord.Embed(
-                description="You don't have enough <a:cheese:533544087484366848> to fish!")
-            return await ctx.send(embed=embed, color=16202876)
+                description="You don't have enough <a:cheese:533544087484366848> to fish!",
+                color=16202876)
+
+            return await ctx.send(embed=embed)
 
         result = random.choice(fishchances)
 
