@@ -242,10 +242,10 @@ class Cog(commands.Cog, name="Custom Reactions"):
                             print("x = '", x, "'")
                             return await message.add_reaction(x)
 
-                    is_image = any(
+                    is_image = any([
                         response.lower().endswith(".png"), response.lower().endswith(".jpg"),
                         response.lower().endswith(".jpeg"), response.lower().endswith(".webp"),
-                        response.lower().endswith(".bmp"))
+                        response.lower().endswith(".bmp")])
 
                     if validators.url(response) and is_image:
                         embed = discord.Embed(title=reaction["trigger"], color=16202876)
