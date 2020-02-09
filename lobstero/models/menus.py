@@ -30,10 +30,11 @@ class ListEmbedMenu(menus.ListPageSource):
 
 class ListEmbedMenuClean(menus.ListPageSource):
     """A simple menu class for paginating lists with formatting."""
-    def __init__(self, data, title, per_page: int = 10, footer=None):
+    def __init__(self, data, title, per_page: int = 10, footer=None, desc=None):
         super().__init__(data, per_page=per_page)
         self.title = title
         self.footer = footer
+        self.desc = desc
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(

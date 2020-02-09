@@ -339,14 +339,18 @@ Usable values:
 
 The base command for all blueprints-related commands.
 Blueprints are used to configure who can use what command.
-No parameters are required - displays a list of all blueprints by default.
+No parameters are required. Displays a list of all blueprints if a subcommand is not used.
         """
-        results = db.blueprints_for_guild(ctx.guild.id)
+        dbresults = sorted(db.blueprints_for_guild(ctx.guild.id), key=lambda x: x["command"])
+        results = [
+            f"Blueprint ID {x['id']}: **``{x['criteria_type']}``** for ``<{x['command']}``"
+            for x in dbresults]
+
         desc = (
             "Displaying all blueprints on this server - use the reactions below "
             "to navigate, or use a subcommand to see more detailed information. "
             "This menu will time out in 60 seconds. ")
-        pages = menus.ListEmbedMenu(results, "Blueprints", 10, True, desc)
+        pages = menus.ListEmbedMenuClean(results, "Blueprints", 10, True, desc)
         m = MenuPages(source=pages, clear_reactions_after=True)
         await m.start(ctx)
 
