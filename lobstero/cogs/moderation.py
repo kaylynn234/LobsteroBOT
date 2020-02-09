@@ -52,7 +52,6 @@ class Cog(commands.Cog, name="Moderation"):
 
     @commands.group(invoke_without_command=True, ignore_extra=False, aliases=records_aliases)
     @commands.guild_only()
-    @commands.is_owner()
     async def records(self, ctx):
         """<records
 
@@ -138,7 +137,7 @@ Striked infractions are not counted. All parameters are required.
             pass
 
         if not user:
-            return await embeds.simple_embed(text.mod_member_invalid, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_member_invalid, ctx)
         results = db.find_all_member_infractions(ctx.guild.id, user.id)
         if not results:
             return await embeds.simple_embed(text.mod_none_assoc, ctx)
@@ -171,7 +170,7 @@ Strikes a record. This causes it to not be counted in member summaries, and will
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
-            return await embeds.simple_embed(text.mod_on_other_guild, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_on_other_guild)
 
         if res["redacted"] == "True":
             await embeds.simple_embed("Record unstriked.", ctx)
@@ -196,13 +195,13 @@ Closing a record stops it from expiring.
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
-            return await embeds.simple_embed(text.mod_on_other_guild, ctx.channel.id)
+            return await embeds.simple_embed(text.mod_on_other_guild, ctx)
 
         if res["expiry"] != "False":
             await embeds.simple_embed("Record closed.", ctx)
             db.close_infraction(id_)
         else:
-            await embeds.simple_embed("Record is already closed.", ctx.channel.id)
+            await embeds.simple_embed("Record is already closed.", ctx)
 
     @records.command(name="filter")
     async def records_filter(self, ctx, *args):

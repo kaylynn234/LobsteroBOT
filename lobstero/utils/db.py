@@ -630,6 +630,60 @@ def add_vault_note(ownerid: str, title: str, content: str):
     table.upsert(data, ["userid", "title"])
 
 
-def add_blueprint(guilid: str, command: str, key, value, requires):
+def add_blueprint(guildid: str, command: str, key: str, value: str, requires: bool):
     """Adds a blueprint to a command."""
-    pass
+    table = db['blueprints']
+    data = {
+        "guildid": guildid, "command": command, "criteria_type": key,
+        "criteria_value": value, "criteria_requires": requires}
+
+    table.insert(data)
+
+
+def blueprints_for(guildid: str, command: str):
+    """Returns blueprints needed for a command to run"""
+    table = db['blueprints']
+    data = {"guildid": guildid, "command": command}
+    res = table.find(**data)
+    if res:
+        return list(res)
+    else:
+        return None
+
+
+def blueprints_for_guild(guildid: str):
+    """Returns all blueprints for a guild."""
+    table = db['blueprints']
+    data = {"guildid": guildid}
+    res = table.find(**data)
+    if res:
+        return list(res)
+    else:
+        return None
+
+
+def blueprint_by_id(_id: str):
+    """Returns a blueprint by ID."""
+    table = db['blueprints']
+    data = {"id": _id}
+    res = table.find(**data)
+    if res:
+        return list(res)[0]
+    else:
+        return None
+
+
+def clear_blueprints_for(guildid: str, command: str):
+    """Removes blueprints for a command."""
+    table = db['blueprints']
+    res = blueprints_for(guildid, command)
+    if res:
+        data = {"guildid": guildid, "command": command}
+        table.delete(**data)
+
+
+def clear_blueprint(guildid: str, _id: str):
+    """Removes a blueprint by id."""
+    table = db['blueprints']
+    data = {"guildid": guildid, "id": _id}
+    table.delete(**data)

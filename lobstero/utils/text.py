@@ -239,3 +239,10 @@ cardurls_2 = {
 cardurls_3 = "https://cdn.discordapp.com/attachments/506665745229545472/589216141604290560/back_cards-07.png"
 
 cardurls_4 = "https://cdn.discordapp.com/attachments/506665745229545472/v589216141604290560/back_cards-07.png"
+
+bp_id_invalid = "Make sure to provide a valid blueprint ID when using this command."
+bp_not_number = "That's not a number! Make sure to provide a valid blueprint ID when using this command."
+bp_none_matching = "Couldn't find an blueprint with a matching ID. Make sure to provide a valid blueprint ID when using this command."
+bp_on_other_guild = "A blueprint with this ID exists, but belongs to another server and cannot be viewed."
+bp_member_invalid = "Couldn't find a matching member. Make sure to provide a valid member name, mention, nickname or ID when using this command."
+bp_none_assoc = "Couldn't find any blueprints associated to this command."

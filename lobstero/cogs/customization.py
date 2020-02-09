@@ -4,7 +4,7 @@ import json
 import discord
 
 from discord.ext.menus import MenuPages
-from lobstero.utils import db, embeds, misc
+from lobstero.utils import db, embeds, misc, text
 from lobstero.models import menus
 from discord.ext import commands
 
@@ -316,6 +316,11 @@ Usable values:
             th = misc.populate(table[member.guild.id])
 
         if th["welcome_messages"] is True:
+            try:
+                th["wmessagechannel"]
+            except KeyError:
+                return
+
             welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
             welcmessage = random.choice([x["message"] for x in welcomemessagelist])
 
@@ -325,6 +330,71 @@ Usable values:
             channel = self.bot.get_channel(th["wmessagechannel"])
 
             await channel.send(welcmessage)
+
+    @commands.group(invoke_without_command=True, ignore_extra=False, enabled=False)
+    @commands.guild_only()
+    @commands.is_owner()
+    async def blueprints(self, ctx):
+        """<blueprints
+
+The base command for all blueprints-related commands.
+Blueprints are used to configure who can use what command.
+No parameters are required - displays a list of all blueprints by default.
+        """
+        results = db.blueprints_for_guild(ctx.guild.id)
+        desc = (
+            "Displaying all blueprints on this server - use the reactions below "
+            "to navigate, or use a subcommand to see more detailed information. "
+            "This menu will time out in 60 seconds. ")
+        pages = menus.ListEmbedMenu(results, "Blueprints", 10, True, desc)
+        m = MenuPages(source=pages, clear_reactions_after=True)
+        await m.start(ctx)
+
+    @blueprints.command(name="id", enabled=False)
+    async def blueprints_id(self, ctx, id_=None):
+        """<blueprints id
+
+Displays specific details about a blueprint based on blueprint ID.
+        """
+        if not id_:
+            return await embeds.simple_embed(text.bp_id_invalid, ctx)
+        elif not id_.isnumeric():
+            return await embeds.simple_embed(text.bp_not_number, ctx)
+        res = db.blueprint_by_id(id_)
+        if not res:
+            return await embeds.simple_embed(text.bp_none_matching, ctx)
+        if str(res["guild"]) != str(ctx.guild.id):
+            return await embeds.simple_embed(text.bp_on_other_guild, ctx)
+
+        valstr = "succeed" if res["criteria_requires"] else "fail"
+        typestr = f"The ``{res['criteria_type']}`` check must {valstr} for this command to run."
+        embed = discord.Embed(color=16202876, title=f"Blueprint #{str(id_)}")
+        embed.add_field(name="Command", value=f"<{res['command']}", inline=False)
+        embed.add_field(name="Blueprint requirement", value=typestr, inline=False)
+        embed.add_field(name="Internal blueprint value", value=res["criteria_value"], inline=False)
+
+        await ctx.send(embed=embed)
+
+    @blueprints.command(name="remove", aliases=["delete"], enabled=False)
+    @commands.has_permissions(manage_messages=True)
+    async def blueprints_remove(self, ctx, id_=None):
+        """<blueprints remove (id)
+
+Removes a blueprint by ID.
+        """
+        if not id_:
+            return await embeds.simple_embed(text.bp_id_invalid, ctx)
+        elif not id_.isnumeric():
+            return await embeds.simple_embed(text.bp_not_number, ctx)
+        res = db.blueprint_by_id(id_)
+        if not res:
+            return await embeds.simple_embed(text.bp_none_matching, ctx)
+        if str(res["guildid"]) != str(ctx.guild.id):
+            return await embeds.simple_embed(text.bp_on_other_guild, ctx)
+
+        if res["expiry"] != "False":
+            await embeds.simple_embed("Blueprint removed.", ctx)
+            db.close_infraction(id_)
 
 
 def setup(bot):

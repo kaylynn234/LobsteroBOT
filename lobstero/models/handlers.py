@@ -10,7 +10,8 @@ from typing import Type
 from urllib3.exceptions import InsecureRequestWarning
 
 from discord.ext import commands
-from lobstero.utils import embeds, strings, misc
+from lobstero.models.exceptions import BlueprintFailure
+from lobstero.utils import embeds, strings, misc, db
 from lobstero import lobstero_config
 
 lc = lobstero_config.LobsteroCredentials()
@@ -104,6 +105,10 @@ class LobsterHandler():
             handled, message = embeds.errorbed(
                 "This command is currently disabled.")
 
+        if isinstance(error, BlueprintFailure):
+            handled, message = embeds.errorbed(
+                error.description)
+
         if handled and message:
             misc.utclog(ctx, (
                 f"Handled {error_name} in {ctx.guild or '(No guild)'} "
@@ -150,10 +155,10 @@ class GreedyMention(commands.Converter):
                             condensed = list(set(valid))
                             return [condensed, argument[argument.find(string):]]
                     else:
-                        condensed = list(set(valid)) 
+                        condensed = list(set(valid))
                         return [condensed, argument[argument.find(string):]]
 
-                condensed = list(set(valid)) 
+                condensed = list(set(valid))
                 return [condensed, None]
 
             else:
@@ -165,3 +170,59 @@ class GreedyMention(commands.Converter):
 
         else:
             raise commands.BadArgument(message=f"Expected str instance, got {type(argument)}")
+
+
+def blueprints():
+    """A check that allows overriding of other command checks."""
+
+    def predicate(ctx):
+        res = db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
+        if res is None:
+            return False
+
+        successful, failed = [], []
+        for check in res:
+            if check["criteria_type"] == "has_any_role":
+                if bool(ctx.author.roles) is check["criteria_requires"]:
+                    successful.append(check)
+                else:
+                    failed.append(check)
+            elif check["criteria_type"] == "has_role":
+                role = check["criteria_value"] in [str(x.id) for x in ctx.author.roles]
+                if role is check["criteria_requires"]:
+                    successful.append(check)
+                else:
+                    failed.append(check)
+            elif check["criteria_type"] == "has_permissions":
+                perms = ctx.author.permissions_in(ctx.channel)
+                can_run = getattr(perms, check["criteria_value"], False)
+                if can_run is check["criteria_requires"]:
+                    successful.append(check)
+                else:
+                    failed.append(check)
+            elif check["criteria_type"] == "has_strict_permissions":
+                perms = ctx.author.permissions
+                can_run = getattr(perms, check["criteria_value"], False)
+                if can_run is check["criteria_requires"]:
+                    successful.append(check)
+                else:
+                    failed.append(check)
+            elif check["criteria_type"] == "is_specific_user":
+                can_run = str(ctx.author.id) == check["criteria_value"]
+                if can_run == check["criteria_requires"]:
+                    successful.append(check)
+                else:
+                    failed.append(check)
+            elif check["criteria_type"] == "is_guild_owner":
+                can_run = str(ctx.author.id) == str(ctx.guild.owner.id)
+                if str(ctx.author.id) == check["criteria_requires"]:
+                    successful.append(check)
+                else:
+                    failed.append(check)
+
+        if failed:
+            raise BlueprintFailure(ctx.bot, successful, failed)
+        else:
+            return True
+
+    return commands.check(predicate)
