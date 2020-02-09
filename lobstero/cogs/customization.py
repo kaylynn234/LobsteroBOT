@@ -392,9 +392,8 @@ Removes a blueprint by ID.
         if str(res["guildid"]) != str(ctx.guild.id):
             return await embeds.simple_embed(text.bp_on_other_guild, ctx)
 
-        if res["expiry"] != "False":
-            await embeds.simple_embed("Blueprint removed.", ctx)
-            db.close_infraction(id_)
+        await embeds.simple_embed("Blueprint removed.", ctx)
+        db.close_infraction(id_)
 
 
 def setup(bot):
