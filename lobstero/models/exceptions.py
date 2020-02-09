@@ -95,8 +95,8 @@ class BlueprintFailure(commands.CheckFailure):
 
             elif check["criteria_type"] == "is_guild_owner":
                 if not check["criteria_requires"]:
-                    why.append(f"🚫 **|** You are not the server owner.")
-                else:
                     why.append(f"🚫 **|** You are the server owner.")
+                else:
+                    why.append(f"🚫 **|** You are not the server owner.")
 
         self.description = "\n".join(why)
