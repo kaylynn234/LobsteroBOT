@@ -20,7 +20,7 @@ from PIL import Image
 from nltk.corpus import wordnet as wn
 from collections import Counter
 from lobstero.utils import misc, db, strings, text, embeds
-from lobstero.models import games, menus
+from lobstero.models import games, menus, handlers
 from lobstero import lobstero_config 
 
 lc = lobstero_config.LobsteroCredentials()
@@ -70,6 +70,7 @@ class Cog(commands.Cog, name="Fun"):
         self.session.close()
 
     @commands.command(enabled=(lc.auth.cat_api_kay != "None"))
+    @handlers.blueprints_or()
     async def cat(self, ctx):
         """images of the felines"""
         url = f"https://api.thecatapi.com/v1/images/search?api_key={lc.auth.cat_api_kay}"
@@ -81,6 +82,7 @@ class Cog(commands.Cog, name="Fun"):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def dog(self, ctx):
         """images of the canines"""
         url = "https://dog.ceo/api/breeds/image/random"
@@ -92,6 +94,7 @@ class Cog(commands.Cog, name="Fun"):
         await ctx.send(embed=embed)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def fox(self, ctx):
         """Sends a random fox picture. """
         url = "https://randomfox.ca/floof/"
@@ -103,6 +106,7 @@ class Cog(commands.Cog, name="Fun"):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["luggi", "sadcat"])
+    @handlers.blueprints_or()
     async def cursedcat(self, ctx, number: int = None):
         """<cursedcat (number)
 
@@ -125,6 +129,7 @@ Thanks Luggi."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def dice(self, ctx, sides: int):
         """Usage: <dice (number)
 
@@ -135,8 +140,8 @@ It's not every day you experience the rolling of the dice.
         await ctx.send("🎲 **You rolled ** ``" + str(numero) + "``.")
 
     @commands.command()
-    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def say(self, ctx, *, mesgg: str):
         """<say (text)
 
@@ -147,6 +152,7 @@ All parameters are required."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def garkov(self, ctx):
         """<garkov
 
@@ -177,6 +183,7 @@ Markov but garfield. No parameters are required."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def conglomerate(self, ctx):
         """<conglomerate
 
@@ -192,6 +199,7 @@ Randomized text madness. No parameters are required.
 
     @commands.command(aliases=["g"])
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def gnome(self, ctx, *, member=None):
         """I'm gnot a gnoblin, I'm gnot a gnelf...
 Usage: <gnome @mention"""
@@ -249,6 +257,7 @@ Usage: <gnome @mention"""
     @commands.command(aliases=["h", "huggy", "shareamethneedlewith"])
     @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def hug(self, ctx, *, user=None):
         """<hug (@mentions)
 
@@ -284,6 +293,7 @@ Up to 6 people can be hugged at once.
     @commands.command(aliases=["mh", "megahuggy"])
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def megahug(self, ctx, *, user=None):
         """<megahug (@mention)
 
@@ -315,10 +325,11 @@ You can only hug one person this tightly.
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def haiku(self, ctx):
         """<haiku
 
-This is most definitely poetry. No parameters required.
+This is most definitely poetry. No parameters are required.
 Spits out a haiku."""
         async with self.session.get("http://randomhaiku.com/") as resp:
             pagecontent = await resp.text()
@@ -329,6 +340,7 @@ Spits out a haiku."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def dadjoke(self, ctx):
         """<dadjoke
 
@@ -342,6 +354,7 @@ Gives you a tidbit of "humour." This was a terrible idea.
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def corpus(self, ctx, *, text: str = None):
         """Cephalon lobstero
 Usage: <corpus some text here"""
@@ -360,6 +373,7 @@ Usage: <corpus some text here"""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def love(self, ctx, person1: str = None, person2: str = None):
         """Calculates chance of love between two people.
 Usage: <love person1 "person with name longer then 1 word" """
@@ -380,6 +394,7 @@ Usage: <love person1 "person with name longer then 1 word" """
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def inspire(self, ctx):
         """Inspirobot is very inspiring.
 Usage: <inspire"""
@@ -392,8 +407,9 @@ Usage: <inspire"""
 
     @commands.command(enabled=(lc.auth.spotify_client_id != "None"))
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def suggestmusic(self, ctx):
-        """Music from Kaylynn's spotify library.
+        """Music from the bot owner's spotify library.
 Usage: <suggestmusic"""
         client_credentials_manager = SpotifyClientCredentials(
             lc.auth.spotify_client_id, lc.auth.spotify_client_secret)
@@ -422,6 +438,7 @@ Usage: <suggestmusic"""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def activitygraph(self, ctx):
         """It's educational!
 Usage: <activitygraph"""
@@ -453,7 +470,6 @@ Usage: <activitygraph"""
         await ctx.send(file=image, embed=embed)
 
     @commands.Cog.listener()
-    @commands.guild_only()
     async def on_message(self, message):
         should_continue = 0
 
@@ -482,6 +498,7 @@ Usage: <activitygraph"""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def lmgtfy(self, ctx, *, query):
         val = urllib.parse.quote_plus(query)
         embed = discord.Embed(
@@ -492,6 +509,7 @@ Usage: <activitygraph"""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def fortune(self, ctx):
         """Fortune cookies, with (of course) a twist."""
         async with self.session.get("http://yerkee.com/api/fortune") as resp:
@@ -512,6 +530,7 @@ Usage: <activitygraph"""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def punchline(self, ctx):
         """Creates a /funny/ surreal meme."""
 
@@ -531,6 +550,7 @@ Usage: <activitygraph"""
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.user)
+    @handlers.blueprints_or()
     async def fish(self, ctx):
         """<fish
 
@@ -558,6 +578,7 @@ Use <inventory to see the fish you own."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def shareatag(self, ctx):
         """Find out who shares a tag with you."""
         discrim = ctx.author.discriminator
@@ -571,6 +592,7 @@ Use <inventory to see the fish you own."""
     @commands.guild_only()
     @commands.max_concurrency(1, commands.BucketType.guild)
     @commands.cooldown(1, 60, commands.BucketType.user)
+    @handlers.blueprints_or()
     async def maizemaze(self, ctx):
         mazes[ctx.author] = menus.MaizeMenu()
         await mazes[ctx.author].start(ctx)
@@ -578,6 +600,7 @@ Use <inventory to see the fish you own."""
     @commands.command(aliases=["gn", "bedtime"])
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def goodnight(self, ctx, *, user: discord.User):
         await embeds.simple_embed("User bedtime'd.", ctx.message.channel.id)
         embed = discord.Embed(title="It is bed o'clock", color=16202876)
@@ -587,6 +610,7 @@ Use <inventory to see the fish you own."""
 
     @commands.command(name="88x31", aliases=["31x88"])
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def buttoncmd(self, ctx):
         """
         <88x31

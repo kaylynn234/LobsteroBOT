@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 from discord.ext.menus import MenuPages
 from lobstero.utils import embeds, db, strings
-from lobstero.models import menus
+from lobstero.models import menus, handlers
 
 root_directory = sys.path[0] + "/"
 
@@ -21,7 +21,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cradd(self, ctx, trigger, *, response):
         """Add a custom reaction."""
         if db.find_matching_response(str(ctx.guild.id), trigger):
@@ -93,7 +93,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crdel(self, ctx, *, trigger):
         """Delete a custom reaction."""
         if db.find_matching_response(str(ctx.guild.id), trigger):
@@ -108,7 +108,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crdeny(self, ctx):
         """Deny the current channel access to custom reactions."""
         if not db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
@@ -126,7 +126,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crallow(self, ctx):
         """Allow the current channel access to custom reactions."""
         if db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
@@ -144,6 +144,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crlist(self, ctx):
         """List all custom reactions on this server."""
         reactions = db.return_server_reacts_list(str(ctx.guild.id))
@@ -168,6 +169,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crinfo(self, ctx, *, trigger):
         """Vuew info on a custom reaction with the provided trigger."""
         reactions = db.return_server_reacts_list(str(ctx.guild.id))
@@ -193,6 +195,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crsearch(self, ctx, *, query=None):
         """Search for a custom reaction based on a query."""
         fetched = []
@@ -217,6 +220,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.Cog.listener()
     @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def on_message(self, message):
         """Called every message. Handles reactions."""
         if message.author.bot is False and message.guild:

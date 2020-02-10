@@ -8,7 +8,7 @@ import dateparser
 import pendulum
 
 from lobstero.utils import embeds, db, strings, misc
-from lobstero.models import menus
+from lobstero.models import menus, handlers
 from discord.ext.menus import MenuPages
 from datetime import timedelta
 from natural import date
@@ -45,6 +45,7 @@ class Cog(commands.Cog, name="Utilities"):
         self.check_reminders.cancel()
 
     @commands.command(aliases=["e", "emote"])
+    @handlers.blueprints_or()
     async def emoji(self, ctx, emoji: str):
         """Gets a large version of an emoji."""
         em = strings.split_count(emoji)
@@ -65,8 +66,11 @@ class Cog(commands.Cog, name="Utilities"):
         await ctx.send(embed=embed_mesg)
 
     @commands.command(aliases=["a", "pfp"])
+    @handlers.blueprints_or()
     async def avatar(self, ctx, user: str = None):
-        """Gets the avatar of a member"""
+        """<avatar (member)
+
+Gets the avatar of a member. If no parameters are present, returns the author's avatar."""
         if user is None:
             member = ctx.message.mentions[0]
         else:
@@ -76,14 +80,17 @@ class Cog(commands.Cog, name="Utilities"):
         await ctx.send(embed=embed_mesg)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def afk(self, ctx, *, reason="afk"):
-        """Set an afk status so that people know why you're not in chat.
-Usage: <afk reason"""
+        """<afk (reason)
+
+Set an afk status so that people know why you're not in chat."""
         await ctx.send(f"I set your AFK - {reason}")
         data = afkh(ctx.author, reason)
         self.bot.afks.append(data)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def afkmessage(self, ctx, *, message="Welcome back. I removed your afk."):
         """<afkmessage (message)
 
@@ -103,6 +110,7 @@ Usage: <afkmessage your text here"""
                 await embeds.simple_embed("AFK message changed!", ctx)
 
     @commands.command(aliases=["p", "pong"])
+    @handlers.blueprints_or()
     async def ping(self, ctx):
         """Check how bad Kay's australian internet is.
 Usage: <ping"""
@@ -110,14 +118,17 @@ Usage: <ping"""
         await ctx.send(f"{racket} **Pong!** Took {round(self.bot.latency * 1000, 2)} ms.")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def clear(self, ctx):
-        """Clear recent messages sent by the bot.
-Usage: <clear"""
+        """<clear
+
+Clear recent messages sent by the bot."""
 
         messagelist = [m async for m in ctx.channel.history(limit=10) if m.author == ctx.guild.me]
         await ctx.channel.delete_messages(messagelist)
 
     @commands.command(enabled=False)
+    @handlers.blueprints_or()
     async def profile(self, ctx, *, user: discord.Member = None):
         """View the lobstero profile of a user - including earned badges, hugs given, and role colour.
 Usage: <profile Person
@@ -221,6 +232,7 @@ Person can be an ID, mention, or name"""
                 await message.channel.send(member.print(), delete_after=10)
 
     @commands.command(aliases=["w", "wi", "who", "userinfo"])
+    @handlers.blueprints_or()
     async def whois(self, ctx, user: discord.User = None):
         """<whois (person)
 
@@ -252,7 +264,7 @@ Finds details about the provided tag."""
 
     @tag.command(name="add")
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def addtag(self, ctx, tagname=None, *, tagvalue=None):
         """<tag add (name) (value)
 
@@ -264,7 +276,7 @@ Adds a tag for this server. Make sure you quote arguments that are multiple word
 
     @tag.command(name="remove")
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def removetag(self, ctx, tagname=None):
         """<tag remove (text)
 
@@ -276,6 +288,7 @@ Removes a tag from this server by name. Make sure you quote arguments that are m
 
     @tag.command(name="list")
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def taglist(self, ctx):
         """<tag list
 
@@ -289,6 +302,7 @@ Lists all tags on this server."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def math(self, ctx, *, equation):
         """<math (equation)
 
@@ -312,6 +326,7 @@ Does math for you."""
     @commands.command(aliases=["reminder", "remind"])
     @commands.guild_only()
     @commands.cooldown(1, 60, commands.BucketType.user)
+    @handlers.blueprints_or()
     async def remindme(self, ctx, *, resdate=None):
         """<remindme (reason) (date)
 

@@ -172,8 +172,8 @@ class GreedyMention(commands.Converter):
             raise commands.BadArgument(message=f"Expected str instance, got {type(argument)}")
 
 
-def blueprints():
-    """A check that allows overriding of other command checks."""
+def blueprint_check():
+    """A preliminary check that enables blueprint functionality.."""
 
     def predicate(ctx):
         res = db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
@@ -224,5 +224,35 @@ def blueprints():
             raise BlueprintFailure(ctx.bot, successful, failed)
         else:
             return True
+
+    return commands.check(predicate)
+
+
+def blueprints_or(c=None):
+    """A check to make blueprints work."""
+
+    async def predicate(ctx):
+        blueprinted = blueprint_check().predicate
+        blueprints_passed = await blueprinted(ctx)
+        # this can raise an error, which will propgate if it does
+
+        # test the non-blueprint check
+        if c is not None:
+            try:
+                pred = c.predicate
+            except AttributeError:
+                raise TypeError('%r must be wrapped by commands.check decorator' % c) from None
+        else:
+            return True
+
+        try:
+            value = await pred(ctx)
+        except commands.CheckFailure as e:
+            raise commands.CheckAnyFailure(pred, [e])
+        else:
+            # if blueprints_passed is False there were no blueprints for the command
+            # if it's True, the blueprint passed
+            if (value and not blueprints_passed) or (not value and blueprints_passed):
+                return True
 
     return commands.check(predicate)

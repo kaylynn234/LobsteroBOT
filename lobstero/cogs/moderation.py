@@ -52,6 +52,7 @@ class Cog(commands.Cog, name="Moderation"):
 
     @commands.group(invoke_without_command=True, ignore_extra=False, aliases=records_aliases)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def records(self, ctx):
         """<records
 
@@ -70,6 +71,7 @@ No parameters are required.
         await m.start(ctx)
 
     @records.command(name="id")
+    @handlers.blueprints_or()
     async def records_id(self, ctx, id_=None):
         """<records id
 
@@ -97,6 +99,7 @@ Displays specific details about an infraction based on case ID.
         await ctx.send(embed=embed)
 
     @records.command(name="member", aliases=["user"])
+    @handlers.blueprints_or()
     async def records_member(self, ctx, member=None):
         """<records member
 
@@ -124,6 +127,7 @@ Displays all infractions committed by a specific member.
         await m.start(ctx)
 
     @records.command(name="summary", aliases=["viewall"])
+    @handlers.blueprints_or()
     async def records_summary(self, ctx, member=None):
         """<records summary (member)
 
@@ -156,7 +160,7 @@ Striked infractions are not counted. All parameters are required.
         await ctx.send(embed=embed)
 
     @records.command(name="strike")
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def records_strike(self, ctx, id_=None):
         """<records strike (id)
 
@@ -180,7 +184,7 @@ Strikes a record. This causes it to not be counted in member summaries, and will
             db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "True")
 
     @records.command(name="close")
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def records_close(self, ctx, id_=None):
         """<records close (id)
 
@@ -204,6 +208,7 @@ Closing a record stops it from expiring.
             await embeds.simple_embed("Record is already closed.", ctx)
 
     @records.command(name="filter")
+    @handlers.blueprints_or()
     async def records_filter(self, ctx, *args):
         """<records filter (pairs)
 
@@ -292,6 +297,7 @@ The specific pairs that you pass are optional, but the command requires at least
 
     @commands.group(invoke_without_command=True, ignore_extra=False, aliases=m_aliases)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def m(self, ctx):
         """A base command for all moderation actions."""
         embed = discord.Embed(color=16202876, title="Moderation")
@@ -300,12 +306,9 @@ The specific pairs that you pass are optional, but the command requires at least
 
     @m.command(name="warn")
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     @commands.bot_has_permissions(
-        read_message_history=True,
-        send_messages=True,
-        embed_links=True,
-        attach_files=True)
+        read_message_history=True, send_messages=True, embed_links=True, attach_files=True)
     async def m_warn(self, ctx, *, arg: handlers.GreedyMention):
         """<m warn (users) (reason)
 
@@ -321,12 +324,9 @@ Warns a user (or users) and logs it to the channel (or channels) specified using
 
     @m.command(name="mute")
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_roles=True))
     @commands.bot_has_permissions(
-        read_message_history=True,
-        send_messages=True,
-        embed_links=True,
-        attach_files=True,
+        read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         manage_roles=True)
     async def m_mute(self, ctx, *, arg: handlers.GreedyMention):
         """<m mute (users) (reason)
@@ -345,12 +345,9 @@ A mute role is created and set up if it does not already exist.
 
     @m.command(name="deafen")
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_roles=True))
     @commands.bot_has_permissions(
-        read_message_history=True,
-        send_messages=True,
-        embed_links=True,
-        attach_files=True,
+        read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         manage_roles=True)
     async def m_deafen(self, ctx, *, arg: handlers.GreedyMention):
         """<m deafen (users) (reason)
@@ -367,12 +364,9 @@ A deafen role is created and set up if it does not already exist.
 
     @m.command(name="kick")
     @commands.guild_only()
-    @commands.has_permissions(kick_members=True)
+    @handlers.blueprints_or(commands.has_permissions(kick_members=True))
     @commands.bot_has_permissions(
-        read_message_history=True,
-        send_messages=True,
-        embed_links=True,
-        attach_files=True,
+        read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         kick_members=True)
     async def m_kick(self, ctx, *, arg: handlers.GreedyMention):
         """<m kick (users) (reason)
@@ -388,12 +382,9 @@ Kicks a user (or users) and logs it to the channel (or channels) specified using
 
     @m.command(name="ban")
     @commands.guild_only()
-    @commands.has_permissions(ban_members=True)
+    @handlers.blueprints_or(commands.has_permissions(ban_members=True))
     @commands.bot_has_permissions(
-        read_message_history=True,
-        send_messages=True,
-        embed_links=True,
-        attach_files=True,
+        read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         ban_members=True)
     async def m_ban(self, ctx, *, arg: handlers.GreedyMention):
         """<m ban (users) (reason)
@@ -409,12 +400,9 @@ Bans a user (or users) and logs it to the channel (or channels) specified using 
 
     @m.command(name="softban")
     @commands.guild_only()
-    @commands.has_permissions(ban_members=True)
+    @handlers.blueprints_or(commands.has_permissions(ban_members=True))
     @commands.bot_has_permissions(
-        read_message_history=True,
-        send_messages=True,
-        embed_links=True,
-        attach_files=True,
+        read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         ban_members=True)
     async def m_softban(self, ctx, *, arg: handlers.GreedyMention):
         """<m softban
@@ -665,7 +653,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def prune(self, ctx, *args):
         """<prune (pairs)
 
@@ -743,7 +731,7 @@ The above will delete the most recent 25 messages in this channel with images, e
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 300, commands.BucketType.channel)
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def archive(self, ctx):
         """<archive
 

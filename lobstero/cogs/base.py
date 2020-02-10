@@ -418,6 +418,7 @@ A base command for repo interactions."""
     @commands.command(aliases=["hwstats"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def hardwarestats(self, ctx):
         core_count = psutil.cpu_count()
         thread_count = psutil.cpu_count(logical=False)

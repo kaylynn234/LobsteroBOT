@@ -7,7 +7,7 @@ import asyncio
 from discord.ext.menus import MenuPages
 from discord.ext import commands
 from lobstero.utils import embeds, text, db
-from lobstero.models import menus
+from lobstero.models import menus, handlers
 
 root_directory = sys.path[0] + "/"
 
@@ -37,6 +37,7 @@ class Cog(commands.Cog, name="Economy & Games"):
 
     @commands.command(aliases=["$", "money", "check", "bal"])
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def balance(self, ctx):
         if ctx.message.mentions:
             user = ctx.message.mentions[0]
@@ -58,6 +59,7 @@ class Cog(commands.Cog, name="Economy & Games"):
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def guess(self, ctx, arg=None):
         """<guess
 
@@ -247,6 +249,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             await sentembed.edit(embed=newembed)
 
     @guess.command(name="prices")
+    @handlers.blueprints_or()
     async def guess_prices(self, ctx):
         chs = "<a:cheese:533544087484366848>"
         embed = discord.Embed(title="Card guessing prices", color=16202876)
@@ -267,6 +270,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def bigbrain(self, ctx):
         """<bigbrain
 
@@ -316,6 +320,7 @@ This command has no arguments.
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def flip(self, ctx):
         """<fip
 
@@ -333,6 +338,7 @@ Flip a coin and test your luck. No arguments are required."""
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def cheeseboard(self, ctx):
         """<cheeseboard
 
@@ -359,6 +365,7 @@ Who's the richest of them all?
 
     @commands.command(aliases=["inv"])
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def inventory(self, ctx, user: discord.Member = None):
         """<inventory [user]
 
@@ -415,6 +422,7 @@ User should be a user ID, user mention, user nickname or username. Amount should
 
     @commands.command()
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def pay(self, ctx, user: discord.Member, *, sobject):
         """<grant (user) (object) (amount)
 

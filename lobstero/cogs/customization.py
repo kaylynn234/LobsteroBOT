@@ -5,7 +5,7 @@ import discord
 
 from discord.ext.menus import MenuPages
 from lobstero.utils import db, embeds, misc, text
-from lobstero.models import menus
+from lobstero.models import menus, handlers
 from discord.ext import commands
 
 root_directory = sys.path[0] + "/"
@@ -44,13 +44,14 @@ Valid usage would be something along the lines of ``<settings respond_on_mention
 
     @commands.group(invoke_without_command=True, ignore_extra=False, aliases=["welcomemessages", "wmessages"])
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def wm(self, ctx):
         """A base command for all welcome messages."""
         pass
 
     @wm.command(name="add", aliases=["create"])
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def wm_add(self, ctx, *, message=None):
         """<wm add (message)
 
@@ -73,6 +74,7 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
                 "Please provide the message that you wish to add as a welcome message.", ctx)
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
+    @handlers.blueprints_or()
     async def channels(self, ctx):
         """<channels
 
@@ -101,6 +103,7 @@ Use ``<channels`` alone to display currently set values.
         await ctx.send(embed=embed)
 
     @channels.command(name="set")
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def channels_set(self, ctx, name=None):
         """<channels set (value)
 
@@ -169,7 +172,7 @@ Usable values:
 
     @wm.command(name="delete", aliases=["remove"])
     @commands.guild_only()
-    @commands.has_permissions(manage_messages=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def wm_del(self, ctx, *, message):
         """Removes a welcome message from this server by index. """
         res = db.remove_welcome_message(str(ctx.guild.id), message)
@@ -180,6 +183,7 @@ Usable values:
 
     @wm.command(name="list")
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def wm_list(self, ctx):
         """Lists all welcome messages on this server. """
         data = db.all_welcome_messages_for_guild(str(ctx.guild.id))
@@ -192,6 +196,7 @@ Usable values:
     @commands.command(aliases=["selfrole", "sr"])
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def iam(self, ctx, *, wanted=None):
         """Add or remove self-assignable roles from yourself."""
 
@@ -219,6 +224,7 @@ Usable values:
     @commands.command(aliases=["iamn", "notselfrole", "nsr"])
     @commands.bot_has_permissions(manage_roles=True)
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def iamnot(self, ctx, *, wanted=None):
         """Add or remove self-assignable roles from yourself."""
 
@@ -245,7 +251,7 @@ Usable values:
 
     @commands.command(aliases=["addselfrole", "asar"])
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_roles=True))
     async def addassignable(self, ctx, *, wanted):
         """Adds a self-assignable role on this server."""
 
@@ -268,7 +274,7 @@ Usable values:
 
     @commands.command(aliases=["removeselfrole", "rsar"])
     @commands.guild_only()
-    @commands.has_permissions(manage_roles=True)
+    @handlers.blueprints_or(commands.has_permissions(manage_roles=True))
     async def removeassignable(self, ctx, *, wanted: discord.Role = None):
         """Removes a self-assignable role from this server."""
 
@@ -289,6 +295,7 @@ Usable values:
 
     @commands.command(aliases=["listselfrole", "lsar"])
     @commands.guild_only()
+    @handlers.blueprints_or()
     async def listassignables(self, ctx, page: int = 1):
         """Lists all self-assignable roles on this server."""
         roles = db.assignables_check(ctx.guild.id)
@@ -300,13 +307,12 @@ Usable values:
 
     @commands.command(aliases=["setprefix", "prefix"])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @handlers.blueprints_or(commands.has_permissions(administrator=True))
     async def changeprefix(self, ctx, *, new):
         db.add_prefix(ctx.guild.id, new)
         await embeds.simple_embed("Prefix updated!", ctx)
 
     @commands.Cog.listener()
-    @commands.guild_only()
     async def on_member_join(self, member):
 
         table = db.give_table()
