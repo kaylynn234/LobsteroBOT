@@ -215,7 +215,7 @@ Allows the specified object access to bot functionality.
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
-    @handlers.blueprints()
+    @handlers.blueprints_or()
     async def scapegoat(self, ctx):
         await ctx.send(f"hi")
 
