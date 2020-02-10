@@ -9,6 +9,7 @@ import discord
 from discord.ext import commands, tasks
 from github import Github
 from lobstero.utils import strings
+from lobstero.models import handlers
 from lobstero import lobstero_config
 
 status_position = collections.deque([0, 1, 2, 3])
