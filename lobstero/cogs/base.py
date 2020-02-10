@@ -125,41 +125,41 @@ If no query is given when using the command, it returns nothing."""
     async def help_by_command_name(self, name, ctx):
         """Exactly what it says on the tin."""
 
-        scommands = list(self.bot.walk_commands())
-        for command in scommands:
-            if name.lower() in [command.qualified_name] + command.aliases:
-                try:
-                    await command.can_run(ctx)
-                except commands.CommandError:
-                    return None
+        command = self.bot.get_command(name)
+        if command is not None:
 
-                if command.aliases:
-                    aliases = f"the following aliases:\n{strings.blockjoin(command.aliases)}" 
-                else:
-                    aliases = "no aliases."
+            try:
+                await command.can_run(ctx)
+            except commands.CommandError:
+                return None
 
-                if isinstance(command, commands.Group):
-                    subcommands = (
-                        f"This command has {str(len(command.commands))} subcommands."
-                        f"These are:\n{strings.blockjoin([x.name for x in command.commands])}")
-                else:
-                    subcommands = "This command has no subcommands."
+            if command.aliases:
+                aliases = f"the following aliases:\n{strings.blockjoin(command.aliases)}" 
+            else:
+                aliases = "no aliases."
 
-                cd = getattr(command._buckets._cooldown, 'per', None)
-                cooldown = f"a {str(cd)} second" if cd else "no"
+            if isinstance(command, commands.Group):
+                subcommands = (
+                    f"This command has {str(len(command.commands))} subcommands."
+                    f"These are:\n{strings.blockjoin([x.name for x in command.commands])}")
+            else:
+                subcommands = "This command has no subcommands."
 
-                module = "This command is not in any modules"
-                if command.cog:
-                    module = f"This command is in the ``{command.cog.qualified_name}`` module"
+            cd = getattr(command._buckets._cooldown, 'per', None)
+            cooldown = f"a {str(cd)} second" if cd else "no"
 
-                descstr = (
-                    f"Showing help for command ``{command.name.capitalize()}``.\n{module}, "
-                    f"and has {aliases}\nThis command has {cooldown} cooldown.\n{subcommands}")
+            module = "This command is not in any modules"
+            if command.cog:
+                module = f"This command is in the ``{command.cog.qualified_name}`` module"
 
-                embed = discord.Embed(title=f"Help", description=descstr, color=16202876)
-                embed.add_field(name="Details", value=command.help)
+            descstr = (
+                f"Showing help for command ``{command.name.capitalize()}``.\n{module}, "
+                f"and has {aliases}\nThis command has {cooldown} cooldown.\n{subcommands}")
 
-                return embed
+            embed = discord.Embed(title=f"Help", description=descstr, color=16202876)
+            embed.add_field(name="Details", value=command.help)
+
+            return embed
 
         return None
 
