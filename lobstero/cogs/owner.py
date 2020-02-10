@@ -212,13 +212,6 @@ Allows the specified object access to bot functionality.
     async def querydb(self, ctx, *, text):
         await ctx.send(f"{db.query_db(text)}")
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.is_owner()
-    @handlers.blueprints_or()
-    async def scapegoat(self, ctx):
-        await ctx.send(f"hi")
-
 
 def setup(bot):
     """Fuck you flake8"""
