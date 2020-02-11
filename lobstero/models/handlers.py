@@ -241,13 +241,10 @@ def blueprints_or(c=None):
             return True
 
         passed_result = await pred(ctx)
-        await ctx.send([pred, c, ctx, blueprints_passed])
         
         # if blueprints_passed is False there were no blueprints for the command
         # if it's True, the blueprint passed
         if passed_result or blueprints_passed:
             return True
-        
-        await ctx.send("we shouldn't be here")
 
     return commands.check(predicate)
