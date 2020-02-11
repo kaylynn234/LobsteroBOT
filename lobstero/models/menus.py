@@ -4,6 +4,7 @@ import asyncio
 
 import pendulum
 import discord
+import humanize
 from discord.ext import menus 
 from lobstero.models import games
 
@@ -88,11 +89,10 @@ class Infractionmenu(menus.ListPageSource):
         for item in entries:
             data = {x[0]: x[1] for x in item}
             a = pendulum.parse(data["date_raw"])
+            rn = pendulum.now("Atlantic/Reykjavik")
             res = "".join([
-                data["operation"].capitalize(),
-                " for user ",
-                r_username(data["user"]),
-                f"; {a.humanize()}"])
+                data["operation"].capitalize(), " for user ", r_username(data["user"]),
+                f"; {humanize.naturaltime(rn - a)}"])
 
             embed.add_field(
                 name="Punishment ID #" + str(data["id"]),
