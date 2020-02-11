@@ -602,7 +602,7 @@ Use <inventory to see the fish you own."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def goodnight(self, ctx, *, user: discord.User):
-        await embeds.simple_embed("User bedtime'd.", ctx.message.channel.id)
+        await embeds.simple_embed("User bedtime'd.", ctx)
         embed = discord.Embed(title="It is bed o'clock", color=16202876)
         embed.set_image(url=text.bedtime_url)
         embed.set_footer(text="You best be sleeping.")
