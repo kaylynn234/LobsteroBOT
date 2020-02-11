@@ -247,8 +247,8 @@ def blueprints_or(c=None):
 
         try:
             value = await pred(ctx)
-        except commands.CheckFailure as e:
-            raise e
+        except Exception:
+            raise
         else:
             # if blueprints_passed is False there were no blueprints for the command
             # if it's True, the blueprint passed
