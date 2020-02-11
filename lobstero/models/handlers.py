@@ -247,6 +247,7 @@ def blueprints_or(c=None):
 
         try:
             value = await pred(ctx)
+            await ctx.send(pred)
         except Exception:
             raise
         else:
