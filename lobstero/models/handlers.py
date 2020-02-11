@@ -172,7 +172,7 @@ class GreedyMention(commands.Converter):
             raise commands.BadArgument(message=f"Expected str instance, got {type(argument)}")
 
 
-def blueprint_check(ctx):
+async def blueprint_check(ctx):
     """A preliminary check that enables blueprint functionality.."""
     res = db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
     if res is None:
