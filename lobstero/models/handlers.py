@@ -131,7 +131,7 @@ class LobsterHandler():
             try:
                 raise error
             except Exception:
-                await self.format_tb_and_send(additional=str(error))
+                await self.format_tb_and_send(additional=str(error.errors))
 
             raise error  # Raise again, now that it's been logged on discord.
 
