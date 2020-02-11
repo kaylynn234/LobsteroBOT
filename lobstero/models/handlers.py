@@ -228,8 +228,7 @@ def blueprints_or(c=None):
     """A check to make blueprints work."""
 
     async def predicate(ctx):
-        blueprinted = blueprint_check().predicate
-        blueprints_passed = await blueprinted(ctx)
+        blueprints_passed = await blueprint_check(ctx)
         # this can raise an error, which will propogate if it does
 
         # test the non-blueprint check
