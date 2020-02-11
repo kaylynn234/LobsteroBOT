@@ -177,8 +177,8 @@ def blueprint_check(ctx):
     res = db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
     if res is None:
         return False
-    successful, failed = [], []
 
+    successful, failed = [], []
     for check in res:
         if check["criteria_type"] == "has_any_role":
             if bool(ctx.author.roles) is check["criteria_requires"]:
@@ -241,12 +241,14 @@ def blueprints_or(c=None):
         else:
             return True
 
-        value = await pred(ctx)
+        passed_result = await pred(ctx)
         await ctx.send(pred)
         
         # if blueprints_passed is False there were no blueprints for the command
         # if it's True, the blueprint passed
-        if (value and not blueprints_passed) or (not value and blueprints_passed):
+        if passed_result or blueprints_passed:
             return True
+        
+        await ctx.send("we shouldn't be here")
 
     return commands.check(predicate)
