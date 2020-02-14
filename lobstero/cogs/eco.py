@@ -4,6 +4,7 @@ import aiohttp
 import discord
 import asyncio
 
+from html import unescape
 from discord.ext.menus import MenuPages
 from discord.ext import commands
 from lobstero.utils import embeds, text, db
@@ -281,6 +282,7 @@ This command has no arguments.
         async with self.session.get(url) as resp:
             data = await resp.json()
 
+        data["results"][0]["question"] = unescape(data["results"][0]["question"])
         embed = discord.Embed(title="Big Brain Trivia™!", color=16202876)
         correct = data["results"][0]["correct_answer"]
         dif = data["results"][0]["difficulty"].capitalize()
