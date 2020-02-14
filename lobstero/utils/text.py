@@ -246,3 +246,24 @@ bp_none_matching = "Couldn't find an blueprint with a matching ID. Make sure to 
 bp_on_other_guild = "A blueprint with this ID exists, but belongs to another server and cannot be viewed."
 bp_member_invalid = "Couldn't find a matching member. Make sure to provide a valid member name, mention, nickname or ID when using this command."
 bp_none_assoc = "Couldn't find any blueprints associated to this command."
+bp_what_type = """What criteria should this blueprint have?
+1\N{combining enclosing keycap}: The author has/ does not have any role.
+2\N{combining enclosing keycap}: The author has/ does not have a specific role.
+3\N{combining enclosing keycap}: The author does/ does not have certain permissions in the channel the command is used in.
+4\N{combining enclosing keycap}: The author does/ does not have certain permissions in the server the command is used in.
+5\N{combining enclosing keycap}: The author is/is not a specific user.
+6\N{combining enclosing keycap}: The author is/is not the server owner.
+
+Use the reactions below to answer. You can configure the criteria further in the next step."""
+
+bp_has_any_role = """How should the chosen criteria trigger?
+✅: If the author has any role
+🚫: If the author does not have any role
+
+Use the reactions below to answer. """
+
+bp_has_role = """How should the chosen criteria trigger?
+✅: If the author has the role I specify
+🚫: If the author does not have the role I specify
+
+Use the reactions below to answer. The role can be chosen in the next step."""

@@ -405,6 +405,17 @@ Removes a blueprint by ID.
         await embeds.simple_embed("Blueprint removed.", ctx)
         db.clear_blueprint(str(ctx.guild.id), id_)
 
+    @blueprints.command(name="make", aliases=["create"], enabled=False)
+    @commands.has_permissions(manage_messages=True)
+    async def blueprints_add(self, ctx, *, command=None):
+        """Walks you through adding a blueprint to a command."""
+        command = self.bot.get_command(command)
+        if not command:
+            return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
+        embed = discord.Embed(color=16202876, title=f"Blueprints")
+        embed.description = text.bp_what_type
+        
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
