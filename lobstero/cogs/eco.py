@@ -61,7 +61,7 @@ class Cog(commands.Cog, name="Economy & Games"):
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def guess(self, ctx, arg=None):
+    async def guess(self, ctx):
         """<guess
 
 Test your luck and see if you can guess a random card for some cheese.
@@ -70,21 +70,6 @@ To see the costs and outcomes of playing, use <guess prices.
 This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
         """
         chs = "<a:cheese:533544087484366848>"
-        if str(arg).lower() == "prices":
-            embed = discord.Embed(title="Card guessing prices", color=16202876)
-            embed.add_field(
-                name="Guess the card's suit",
-                value=f"**Cost to play**: 0 {chs} **Payout**: 25 {chs}")
-            embed.add_field(
-                name="Guess the card's type",
-                value=f"**Cost to play**: 10 {chs} **Payout**: 50 {chs}")
-            embed.add_field(
-                name="Guess the number on the card",
-                value=f"**Cost to play**: 50 {chs}. **Payout**: 500 {chs}")
-            embed.add_field(
-                name="Guess the exact card",
-                value=f"**Cost to play**: 200 {chs} **Payout**: 5000 {chs}")
-            return await ctx.send(embed=embed)
 
         embed = discord.Embed(title="Guess the card!", color=16202876, description=text.guess_what)
         sentembed = await ctx.send(embed=embed)
@@ -96,14 +81,14 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
         if msg.content == "5":
             newembed = discord.Embed(
                 title="Guess the card!", color=16202876,
-                description="Well, thanks for the interest. See ya next time!")
+                description="Well, thanks for the interest. See you next time!")
             await sentembed.edit(embed=newembed)
 
         if msg.content == "1":
             await sentembed.edit(embed=discord.Embed(
                 title="Guess the card!", color=16202876,
                 description=(
-                    "Well then! What suit is the card gonna be? It can be either ``hearts``, "
+                    "What suit will the card be? It can be either ``hearts``, "
                     "``diamonds``, ``spades`` or ``clubs``. You have 10 seconds to answer. Go!")))
 
             msg2 = await self.handle_confirmation(ctx, sentembed)
@@ -121,9 +106,9 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 75)
+                db.economy_manipulate(ctx.author.id, 20)
             else:
-                res = "Aw shucks, your guess was incorrect. Better luck next time!"
+                res = "Your guess was incorrect. Better luck next time!"
 
             newembed = discord.Embed(
                 title="Guess the card!", color=16202876,
@@ -133,22 +118,17 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             await sentembed.edit(embed=newembed)
 
         if msg.content == "2":
-            if not db.economy_check(ctx.author.id) >= 10:
-                await sentembed.edit(embed=embeds.eco_broke)
-                return
-
             await sentembed.edit(embed=discord.Embed(
                 title="Guess the card!", color=16202876,
                 description=(
-                    "Alrighty! What type is the card gonna be? It can be either a ``king``, "
-                    "``queen``, ``jack``, ``ace`` or a ``number``. You have 10 seconds to answer. "
-                    "Get to it!")))
+                    "What type will the card be? It can be either a ``king``, "
+                    "``queen``, ``jack``, ``ace`` or a ``number``. You have 10 seconds to answer. ")
+                ))
 
             msg2 = await self.handle_confirmation(ctx, sentembed)
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -10)
             cardlist = (
                 ["king" for _ in range(4)] +
                 ["queen" for _ in range(4)] +
@@ -161,9 +141,9 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 150)
+                db.economy_manipulate(ctx.author.id, 20)
             else:
-                res = "Aw shucks, your guess was incorrect. Better luck next time!"
+                res = "Your guess was incorrect. Better luck next time!"
 
             newembed = discord.Embed(
                 title="Guess the card!", color=16202876,
@@ -173,28 +153,28 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             await sentembed.edit(embed=newembed)
 
         if msg.content == "3":
-            if not db.economy_check(ctx.author.id) >= 50:
+            if not db.economy_check(ctx.author.id) >= 20:
                 await sentembed.edit(embed=embeds.eco_broke)
                 return
 
             await sentembed.edit(embed=discord.Embed(
                 title="Guess the card!", color=16202876,
                 description=(
-                    "Hey, okay! What number do ya reckon is gonna be on the card? It can be "
+                    "What number will be on the card? It can be "
                     "either a number from ``2``, ``3``, ``4``, etc (up to 10), or ``none``. "
-                    "You have 10 seconds to answer. Hop to it, friend!")))
+                    "You have 10 seconds to answer.")))
 
             msg2 = await self.handle_confirmation(ctx, sentembed)
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -50)
+            db.economy_manipulate(ctx.author.id, -20)
 
             cardlist = []
-            for _ in range(12):
+            for _ in range(20):
                 cardlist.append("none")
             for _ in range(4):
-                for i in range(10):
+                for i in range(2, 10):
                     cardlist.append(str(i))
 
             random.shuffle(cardlist)
@@ -202,9 +182,9 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 5000)
+                db.economy_manipulate(ctx.author.id, 100)
             else:
-                res = "Aw shucks, your guess was incorrect. Better luck next time!"
+                res = "Your guess was incorrect. Better luck next time!"
 
             newembed = discord.Embed(
                 title="Guess the card!", color=16202876,
@@ -214,7 +194,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             await sentembed.edit(embed=newembed)
 
         if msg.content == "4":
-            if not db.economy_check(ctx.author.id) >= 200:
+            if not db.economy_check(ctx.author.id) >= 50:
                 await sentembed.edit(embed=embeds.eco_broke)
                 return
 
@@ -222,7 +202,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -200)
+            db.economy_manipulate(ctx.author.id, -50)
             cardlist = []
 
             for letter in ["H", "D", "C", "S"]:
@@ -256,16 +236,16 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
         embed = discord.Embed(title="Card guessing prices", color=16202876)
         embed.add_field(
             name="Guess the card's suit",
-            value=f"**Cost to play**: 0 {chs} **Payout**: 25 {chs}")
+            value=f"**Cost to play**: 0 {chs} **Payout**: 20 {chs}")
         embed.add_field(
             name="Guess the card's type",
-            value=f"**Cost to play**: 10 {chs} **Payout**: 50 {chs}")
+            value=f"**Cost to play**: 0 {chs} **Payout**: 20 {chs}")
         embed.add_field(
             name="Guess the number on the card",
-            value=f"**Cost to play**: 50 {chs}. **Payout**: 500 {chs}")
+            value=f"**Cost to play**: 20 {chs}. **Payout**: 100 {chs}")
         embed.add_field(
             name="Guess the exact card",
-            value=f"**Cost to play**: 200 {chs} **Payout**: 5000 {chs}")
+            value=f"**Cost to play**: 50 {chs} **Payout**: 1234 {chs}")
 
         return await ctx.send(embed=embed)
 
@@ -296,11 +276,11 @@ This command has no arguments.
         embed.set_footer(text="True or False?")
 
         if dif == "Easy":
-            timeg, payout = 6, 50
+            timeg, payout = 6, 5
         if dif == "Medium":
-            timeg, payout = 10, 100
+            timeg, payout = 10, 10
         if dif == "Hard":
-            timeg, payout = 14, 200
+            timeg, payout = 14, 20
 
         embed.add_field(name="Time to answer:", value=f"{timeg} seconds.", inline=False)
         await ctx.send(embed=embed)
