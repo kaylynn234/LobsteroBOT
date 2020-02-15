@@ -241,7 +241,7 @@ def blueprints_or(c=None):
             return True
 
         passed_result = await pred(ctx)
-        
+
         # if blueprints_passed is False there were no blueprints for the command
         # if it's True, the blueprint passed
         if passed_result or blueprints_passed:

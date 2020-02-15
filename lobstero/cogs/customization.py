@@ -421,6 +421,24 @@ Removes a blueprint by ID.
         await embeds.simple_embed("Blueprint removed.", ctx)
         db.clear_blueprint(str(ctx.guild.id), id_)
 
+    @blueprints.command(name="remove", aliases=["delete"], enabled=False)
+    @commands.has_permissions(manage_messages=True)
+    async def blueprints_wipe(self, ctx, command=None):
+        """<blueprints wipe (command)
+
+Deletes all blueprints for a command.
+        """
+        command = self.bot.get_command(command)
+        if not command:
+            return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
+
+        current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
+        if not current_blueprints:
+            return await embeds.simple_embed("There are no blueprints for this command.", ctx)
+
+        await embeds.simple_embed("Blueprint removed.", ctx)
+        db.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
+
     @blueprints.command(name="make", aliases=["create", "add"], enabled=False)
     @commands.has_permissions(manage_messages=True)
     async def blueprints_add(self, ctx, *, command=None):
