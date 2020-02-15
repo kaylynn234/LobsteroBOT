@@ -24,7 +24,6 @@ class Cog(commands.Cog, name="Miscellaneous"):
         self.bot = bot
         self.manager = None
         self.recent_commits = []
-        self.status_change.start()
         if "None" not in [lc.auth.github_username, lc.auth.github_password]:
             self.manager = Github(lc.auth.github_username, lc.auth.github_password)
 
@@ -33,34 +32,6 @@ class Cog(commands.Cog, name="Miscellaneous"):
             latest = r.get_commits()
             for c, _ in zip(latest, range(3)):
                 self.recent_commits.append(c)
-
-    def cog_unload(self):
-        self.status_change.cancel()
-
-    @tasks.loop(seconds=45)
-    async def status_change(self):
-        """A loop that changes playing status every so often"""
-
-        if not self.bot.is_closed():
-            global status_position
-            membercount = str(len(list(self.bot.get_all_members())))
-            activity1 = discord.Activity(
-                type=discord.ActivityType.watching,
-                name="all " + str(membercount) + " of you.")
-            activity2 = discord.Activity(
-                type=discord.ActivityType.playing,
-                name="mind games on " + str(len(list(self.bot.guilds))) + " servers.")
-            activity3 = discord.Activity(
-                type=discord.ActivityType.listening,
-                name=str(len(list(self.bot.get_all_channels()))) + " channels.")
-            activity4 = discord.Activity(
-                type=discord.ActivityType.streaming,
-                name='a message of hope. Have a good day!')
-
-            activity_list = [activity1, activity2, activity3, activity4]
-            await self.bot.change_presence(activity=activity_list[status_position[0]])
-
-            status_position.rotate(1)
 
     @commands.command()
     async def search(self, ctx, *, text="aaaaaaaaaaaqdqdqfdqwfqwerfgeqrfgqwr3gfqerf"):

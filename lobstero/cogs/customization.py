@@ -1,25 +1,40 @@
 import random
+import asyncio
 import sys
 import json
 import discord
 
 from discord.ext.menus import MenuPages
-from lobstero.utils import db, embeds, misc, text
+from lobstero.utils import db, embeds, misc, text, strings
 from lobstero.models import menus, handlers
 from discord.ext import commands
 
 root_directory = sys.path[0] + "/"
+valid_bp_responses = [
+    "has_any_role", "has_role", "has_permissions", "has_strict_permissions",
+    "is_specific_user", "is_guild_owner"]
 
 acceptable = [
     "respond_on_mention", "random_messages",
     "random_reactions", "welcome_messages",
     "moderation_confirmation", "indexed_reactions"]
 
+bp_numbered = {i: x for i, x in enumerate(valid_bp_responses, 1)}
 
 class Cog(commands.Cog, name="Settings and server customization"):
     """A module that provides commands for managing your server's Lobstero settings."""
     def __init__(self, bot):
         self.bot = bot
+
+    async def handle_confirmation(self, ctx):
+        try:
+            msg = await self.bot.wait_for(
+                'message', timeout=30.0,
+                check=lambda message: message.author == ctx.author)
+            return msg
+        except asyncio.futures.TimeoutError:
+            await ctx.send(embeds.bp_not_fast_enough)
+
 
     @commands.command(aliases=["valueset", "changesetting", "valset"])
     @commands.guild_only()
@@ -408,13 +423,87 @@ Removes a blueprint by ID.
     @blueprints.command(name="make", aliases=["create"], enabled=False)
     @commands.has_permissions(manage_messages=True)
     async def blueprints_add(self, ctx, *, command=None):
-        """Walks you through adding a blueprint to a command."""
+        """<blueprints add (command)
+
+Walks you through adding a blueprint to a command."""
         command = self.bot.get_command(command)
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
+
+        current_blueprints = db.blueprints_for(str(ctx.guild.id), command)
+        if current_blueprints and len(current_blueprints) >= 10:
+            return await embeds.simple_embed("Commands have a maximum of 10 blueprints.", ctx)
+
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         embed.description = text.bp_what_type
-        
+
+        # get the type of blueprint we want to add
+        m = menus.BlueprintTypeMenu()
+        await m.start(ctx, wait=True)
+        if not m.selected_b:
+            await ctx.send(embed=embeds.bp_not_fast_enough)
+
+        # edit embed for trigger cond. choice
+        embed = discord.Embed(color=16202876, title=f"Blueprints")
+        embed.description = getattr(text, f"bp_{bp_numbered[m.selected_b]}")
+        await m.message.edit(embed=embed)
+
+        # start the confirmation menu
+        m2 = menus.BlueprintConfirmationMenu()
+        m2.message = m.message
+        await m2.start(ctx, wait=True)
+        if not m2.choice:
+            await ctx.send(embed=embeds.bp_not_fast_enough)
+
+        embed = discord.Embed(color=16202876, title=f"Blueprints")
+        value = None
+        if m.selected_b not in [1, 6]:
+            if m.selected_b == 2:
+                embed.description = text.bp_role_prompt
+            if m.selected_b in [3, 4]:
+                example_perms = discord.Permissions()
+                attrs = [x for x in dir(example_perms) if x[0] != "_"][:2]
+                permstr = strings.blockjoin(attrs)
+                embed.description = text.bp_perm_prompt % permstr
+            else:
+                embed.description = text.bp_member_prompt
+
+            # now we get what the blueprint val is
+            await m.message.edit(embed=embed)
+            res = self.handle_confirmation(ctx)
+            if not res:
+                return
+
+            # conversion logic
+            if m.selected_b == 2:
+                c = commands.RoleConverter()
+                try:
+                    prelim = await c.convert(ctx, res.content)
+                    value = str(prelim.id)
+                except commands.CommandError:
+                    return await ctx.send(embed=embeds.bp_wrong_value)
+
+            if m.selected_b in [3, 4]:
+                if res.content.lower() in attrs:
+                    value = res.content.lower()
+                else:
+                    return await ctx.send(embed=embeds.bp_wrong_value)
+            else:
+                c = commands.MemberConverter()
+                try:
+                    prelim = await c.convert(ctx, res.content)
+                    value = str(prelim.id)
+                except commands.CommandError:
+                    return await ctx.send(embed=embeds.bp_wrong_value)
+
+        # add the blueprint to the database
+        db.add_blueprint(
+            str(ctx.guild.id), command.qualified_name, bp_numbered[m.selected_b], value, m2.choice)
+
+        # tell the user we didn't die in the process
+        embed = discord.Embed(color=16202876, title=f"Blueprints")
+        embed.description = "Blueprint successfully added!"
+        await ctx.send(embed=embeds.bp_wrong_value)
 
 
 def setup(bot):

@@ -3,6 +3,7 @@ This is where the subclassed bot object lies."""
 
 import logging
 import random
+import discord
 
 from typing import Any, Type
 
@@ -105,6 +106,12 @@ class LobsteroBOT(commands.AutoShardedBot):
         chn = self.get_channel(lc.config.home_channel)
         await chn.send("Bot online.")
         self.log.info("Bot online.")
+
+        activity = discord.Activity(
+            type=discord.ActivityType.watching,
+            name="you. <help | <info")
+
+        await self.change_presence(activity=activity)
 
     async def handle_blacklist(self, ctx):
         """A check that runs once before every command execution.

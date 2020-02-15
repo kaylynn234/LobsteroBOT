@@ -267,3 +267,43 @@ bp_has_role = """How should the chosen criteria trigger?
 🚫: If the author does not have the role I specify
 
 Use the reactions below to answer. The role can be chosen in the next step."""
+
+bp_has_permissions = """How should the chosen criteria trigger?
+✅: If the author has the permission I specify (in the channel the command is used in)
+🚫: If the author does not have the permission I specify (in the channel the command is used in)
+
+Use the reactions below to answer. The permission can be chosen in the next step."""
+
+bp_has_strict_permissions = """How should the chosen criteria trigger?
+✅: If the author has the permission I specify in this server
+🚫: If the author does not have the permission I specify in this server
+
+Use the reactions below to answer. The permission can be chosen in the next step."""
+
+bp_is_specific_user = """How should the chosen criteria trigger?
+✅: If the author is the member I specify
+🚫: If the author is not the member I specify
+
+Use the reactions below to answer. The member can be chosen in the next step."""
+
+bp_is_guild_owner = """How should the chosen criteria trigger?
+✅: If the author owns this server
+🚫: If the author does not own this server
+
+Use the reactions below to answer."""
+
+bp_member_prompt = """Choose which member this criteria should apply to.
+Respond to this message with either somebody's @mention, user ID, username or nickname.
+
+Make sure your capitalization and spelling are both correct!"""
+
+bp_role_prompt = """Choose which role this criteria should apply to.
+Respond to this message with either a role's @mention, role ID or role name.
+
+Make sure your capitalization and spelling are both correct!"""
+
+bp_perm_prompt = """Choose which permission this criteria should apply to.
+Respond to this message with any of the following:
+%s
+
+Make sure your capitalization and spelling are both correct!"""

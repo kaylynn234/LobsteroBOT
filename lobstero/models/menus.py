@@ -6,6 +6,7 @@ import pendulum
 import discord
 import humanize
 from discord.ext import menus 
+from lobstero.utils import text
 from lobstero.models import games
 
 
@@ -307,4 +308,67 @@ class ConfirmationMenu(menus.Menu):
         new.description = None
         await self.message.edit(embed=new.set_footer(text="This action was cancelled."))
         self.is_running = False
+        self.stop()
+
+
+class BlueprintTypeMenu(menus.Menu):
+    """Blueprints or something"""
+
+    def __init__(self):
+        """Does the things."""
+        super().__init__(timeout=45, clear_reactions_after=True)
+        self.selected_b = None
+
+    async def send_initial_message(self, ctx, channel):
+        """Sends the message that becomes the host for a maize maze game"""
+        bpbed = discord.Embed(title="Maize maze!", description=text.bp_what_type, color=16202876)
+        return await ctx.send(embed=bpbed)
+
+    @menus.button("1\N{combining enclosing keycap}")
+    async def button_1(self, _):
+        self.selected_b = 1
+        self.stop()
+
+    @menus.button("2\N{combining enclosing keycap}")
+    async def button_2(self, _):
+        self.selected_b = 2
+        self.stop()
+
+    @menus.button("3\N{combining enclosing keycap}")
+    async def button_3(self, _):
+        self.selected_b = 3
+        self.stop()
+
+    @menus.button("4\N{combining enclosing keycap}")
+    async def button_4(self, _):
+        self.selected_b = 4
+        self.stop()
+
+    @menus.button("5\N{combining enclosing keycap}")
+    async def button_5(self, _):
+        self.selected_b = 5
+        self.stop()
+
+    @menus.button("6\N{combining enclosing keycap}")
+    async def button_6(self, _):
+        self.selected_b = 6
+        self.stop()
+
+
+class BlueprintConfirmationMenu(menus.Menu):
+    """Blueprints or something"""
+
+    def __init__(self):
+        """Does the things."""
+        super().__init__(timeout=45, clear_reactions_after=True)
+        self.choice = None
+
+    @menus.button("✅")
+    async def button_yes(self, _):
+        self.choice = True
+        self.stop()
+
+    @menus.button("🚫")
+    async def button_no(self, _):
+        self.choice = False
         self.stop()

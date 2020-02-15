@@ -106,3 +106,11 @@ settings_embed.add_field(
         "For reactions with more than 1 response, enabling this will make "
         "``(reaction trigger) (number)`` send the reaction's ``(number)`` "
         "response. Can be either ``True`` or ``False``."), inline=False)
+
+bp_not_fast_enough = discord.Embed(
+    title="Blueprints", color=16202876,
+    description="Timed out. No changes were made.")
+
+bp_wrong_value = discord.Embed(
+    title="Blueprints", color=16202876,
+    description="That's not a valid response! No changes were made.")
