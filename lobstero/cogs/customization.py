@@ -356,7 +356,6 @@ Usable values:
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
-    @commands.is_owner()
     async def blueprints(self, ctx):
         """<blueprints
 
