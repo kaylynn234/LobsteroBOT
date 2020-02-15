@@ -452,14 +452,12 @@ Walks you through adding a blueprint to a command."""
         m2 = menus.BlueprintConfirmationMenu()
         m2.message = m.message
         await m2.start(ctx, wait=True)
-        await ctx.send(m2.choice)
         if m2.choice is None:
             await ctx.send(embed=embeds.bp_not_fast_enough)
 
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         value = None
         if m.selected_b not in [1, 6]:  # 1 & 6 do not need confirmation
-            await ctx.send(m.selected_b)
             if m.selected_b == 2:
                 embed.description = text.bp_role_prompt
             if m.selected_b in [3, 4]:
@@ -505,7 +503,7 @@ Walks you through adding a blueprint to a command."""
         # tell the user we didn't die in the process
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         embed.description = "Blueprint successfully added!"
-        await ctx.send(embed=embeds.bp_wrong_value)
+        await m.message.edit(embed=embed)
 
 
 def setup(bot):
