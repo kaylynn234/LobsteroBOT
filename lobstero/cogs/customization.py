@@ -428,6 +428,8 @@ Removes a blueprint by ID.
 
 Deletes all blueprints for a command.
         """
+        if command is None:
+            return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
         command = self.bot.get_command(command)
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
@@ -445,6 +447,8 @@ Deletes all blueprints for a command.
         """<blueprints add (command)
 
 Walks you through adding a blueprint to a command."""
+        if command is None:
+            return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
         command = self.bot.get_command(command)
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
