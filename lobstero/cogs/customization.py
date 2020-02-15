@@ -438,7 +438,7 @@ Deletes all blueprints for a command.
         if not current_blueprints:
             return await embeds.simple_embed("There are no blueprints for this command.", ctx)
 
-        await embeds.simple_embed("Blueprint removed.", ctx)
+        await embeds.simple_embed(f"{len(current_blueprints)} blueprint(s) removed.", ctx)
         db.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
 
     @blueprints.command(name="make", aliases=["create", "add"], enabled=False)
