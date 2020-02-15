@@ -430,7 +430,7 @@ Walks you through adding a blueprint to a command."""
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
 
-        current_blueprints = db.blueprints_for(str(ctx.guild.id), command)
+        current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
         if current_blueprints and len(current_blueprints) >= 10:
             return await embeds.simple_embed("Commands have a maximum of 10 blueprints.", ctx)
 
