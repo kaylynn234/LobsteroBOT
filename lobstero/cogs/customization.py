@@ -2,6 +2,7 @@ import random
 import asyncio
 import sys
 import json
+import inspect
 import discord
 
 from discord.ext.menus import MenuPages
@@ -486,7 +487,11 @@ Walks you through adding a blueprint to a command."""
                 embed.description = text.bp_role_prompt
             elif m.selected_b in [3, 4]:
                 example_perms = discord.Permissions()
-                attrs = [x for x in dir(example_perms) if x[0] != "_"][2:]
+                attrs = [
+                    x for x in dir(example_perms) if x[0] != "_" and
+                    not inspect.ismethod(getattr(example_perms, x)) and
+                    not inspect.isfunction(getattr(example_perms, x))][2:]
+
                 permstr = strings.blockjoin(attrs)
                 embed.description = text.bp_perm_prompt % permstr
             else:
