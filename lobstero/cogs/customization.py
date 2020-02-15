@@ -492,7 +492,7 @@ Walks you through adding a blueprint to a command."""
                     not inspect.ismethod(getattr(example_perms, x)) and
                     not inspect.isfunction(getattr(example_perms, x))][2:]
 
-                permstr = strings.blockjoin(attrs)
+                permstr = strings.bblockjoin(attrs)
                 embed.description = text.bp_perm_prompt % permstr
             else:
                 embed.description = text.bp_member_prompt
@@ -509,8 +509,7 @@ Walks you through adding a blueprint to a command."""
                 try:
                     prelim = await c.convert(ctx, res.content)
                     value = str(prelim.id)
-                except commands.CommandError as e:
-                    raise e
+                except commands.CommandError:
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
             elif m.selected_b in [3, 4]:
@@ -523,8 +522,7 @@ Walks you through adding a blueprint to a command."""
                 try:
                     prelim = await c.convert(ctx, res.content)
                     value = str(prelim.id)
-                except commands.CommandError as e:
-                    raise e
+                except commands.CommandError:
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
         # add the blueprint to the database
