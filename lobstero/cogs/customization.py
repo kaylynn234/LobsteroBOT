@@ -452,7 +452,8 @@ Walks you through adding a blueprint to a command."""
         m2 = menus.BlueprintConfirmationMenu()
         m2.message = m.message
         await m2.start(ctx, wait=True)
-        if not m2.choice:
+        await ctx.send(m2.choice)
+        if m2.choice is None:
             await ctx.send(embed=embeds.bp_not_fast_enough)
 
         embed = discord.Embed(color=16202876, title=f"Blueprints")
