@@ -401,7 +401,7 @@ Displays specific details about a blueprint based on blueprint ID.
 
         await ctx.send(embed=embed)
 
-    @blueprints.command(name="remove", aliases=["delete"], enabled=False)
+    @blueprints.command(name="remove", aliases=["delete", "destroy"], enabled=False)
     @commands.has_permissions(manage_messages=True)
     async def blueprints_remove(self, ctx, id_=None):
         """<blueprints remove (id)
@@ -421,7 +421,7 @@ Removes a blueprint by ID.
         await embeds.simple_embed("Blueprint removed.", ctx)
         db.clear_blueprint(str(ctx.guild.id), id_)
 
-    @blueprints.command(name="remove", aliases=["delete"], enabled=False)
+    @blueprints.command(name="wipe", aliases=["scrub"], enabled=False)
     @commands.has_permissions(manage_messages=True)
     async def blueprints_wipe(self, ctx, command=None):
         """<blueprints wipe (command)
