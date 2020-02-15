@@ -34,7 +34,7 @@ class Cog(commands.Cog, name="Settings and server customization"):
                 check=lambda message: message.author == ctx.author)
             return msg
         except asyncio.futures.TimeoutError:
-            await ctx.send(embeds.bp_not_fast_enough)
+            await ctx.send(embed=embeds.bp_not_fast_enough)
 
 
     @commands.command(aliases=["valueset", "changesetting", "valset"])
@@ -458,6 +458,7 @@ Walks you through adding a blueprint to a command."""
 
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         value = None
+        await ctx.send(m.selected_b)
         if m.selected_b not in [1, 6]:  # 1 & 6 do not need confirmation
             if m.selected_b == 2:
                 embed.description = text.bp_role_prompt
