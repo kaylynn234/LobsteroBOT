@@ -320,8 +320,8 @@ class BlueprintTypeMenu(menus.Menu):
         self.selected_b = None
 
     async def send_initial_message(self, ctx, channel):
-        """Sends the message that becomes the host for a maize maze game"""
-        bpbed = discord.Embed(title="Maize maze!", description=text.bp_what_type, color=16202876)
+        """Blueprints or something"""
+        bpbed = discord.Embed(title="Blueprints", description=text.bp_what_type, color=16202876)
         return await ctx.send(embed=bpbed)
 
     @menus.button("1\N{combining enclosing keycap}")

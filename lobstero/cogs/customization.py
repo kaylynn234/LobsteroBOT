@@ -21,6 +21,7 @@ acceptable = [
 
 bp_numbered = {i: x for i, x in enumerate(valid_bp_responses, 1)}
 
+
 class Cog(commands.Cog, name="Settings and server customization"):
     """A module that provides commands for managing your server's Lobstero settings."""
     def __init__(self, bot):
@@ -432,7 +433,7 @@ Walks you through adding a blueprint to a command."""
 
         current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
         if current_blueprints and len(current_blueprints) >= 10:
-            return await embeds.simple_embed("Commands have a maximum of 10 blueprints.", ctx)
+            return await embeds.simple_embed("There's a maximum of 10 blueprints per command.", ctx)
 
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         embed.description = text.bp_what_type
@@ -460,7 +461,7 @@ Walks you through adding a blueprint to a command."""
         if m.selected_b not in [1, 6]:  # 1 & 6 do not need confirmation
             if m.selected_b == 2:
                 embed.description = text.bp_role_prompt
-            if m.selected_b in [3, 4]:
+            elif m.selected_b in [3, 4]:
                 example_perms = discord.Permissions()
                 attrs = [x for x in dir(example_perms) if x[0] != "_"][:2]
                 permstr = strings.blockjoin(attrs)
@@ -480,10 +481,11 @@ Walks you through adding a blueprint to a command."""
                 try:
                     prelim = await c.convert(ctx, res.content)
                     value = str(prelim.id)
-                except commands.CommandError:
+                except commands.CommandError as e:
+                    raise e
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
-            if m.selected_b in [3, 4]:
+            elif m.selected_b in [3, 4]:
                 if res.content.lower() in attrs:
                     value = res.content.lower()
                 else:
@@ -493,7 +495,8 @@ Walks you through adding a blueprint to a command."""
                 try:
                     prelim = await c.convert(ctx, res.content)
                     value = str(prelim.id)
-                except commands.CommandError:
+                except commands.CommandError as e:
+                    raise e
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
         # add the blueprint to the database
