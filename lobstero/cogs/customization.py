@@ -457,7 +457,8 @@ Walks you through adding a blueprint to a command."""
 
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         value = None
-        if m.selected_b not in [1, 6]:
+        if m.selected_b not in [1, 6]:  # 1 & 6 do not need confirmation
+            await ctx.send(m.selected_b)
             if m.selected_b == 2:
                 embed.description = text.bp_role_prompt
             if m.selected_b in [3, 4]:
@@ -470,7 +471,7 @@ Walks you through adding a blueprint to a command."""
 
             # now we get what the blueprint val is
             await m.message.edit(embed=embed)
-            res = self.handle_confirmation(ctx)
+            res = await self.handle_confirmation(ctx)
             if not res:
                 return
 
