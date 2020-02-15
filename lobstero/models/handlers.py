@@ -219,7 +219,7 @@ async def blueprint_check(ctx):
                 failed.append(check)
 
     if failed:
-        raise BlueprintFailure(ctx.bot, successful, failed)
+        raise BlueprintFailure(ctx, successful, failed)
     else:
         return True
 

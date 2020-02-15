@@ -6,7 +6,7 @@ from discord.ext import commands
 class BlueprintFailure(commands.CheckFailure):
     """Raised when a check on a blueprint fails. Yes I know it's ugly."""
 
-    def __init__(self, bot, s, f):
+    def __init__(self, ctx, s, f):
         why = [
             "The administrators of this server have changed what is required to use it.\n"]
         for check in s:
@@ -17,7 +17,7 @@ class BlueprintFailure(commands.CheckFailure):
                     why.append("✅ **|** You have no roles.")
 
             elif check["criteria_type"] == "has_role":
-                r = bot.get_role(int(check["criteria_value"]))
+                r = ctx.guild.get_role(int(check["criteria_value"]))
                 if check["criteria_requires"]:
                     why.append(f"✅ **|** You have the required role ``{r.name}``.")
                 else:
@@ -61,7 +61,7 @@ class BlueprintFailure(commands.CheckFailure):
                     why.append("🚫 **|** You have no roles.")
 
             elif check["criteria_type"] == "has_role":
-                r = bot.get_role(int(check["criteria_value"]))
+                r = ctx.guild.get_role(int(check["criteria_value"]))
                 if not check["criteria_requires"]:
                     why.append(f"🚫 **|** You have the blocked role ``{r.name}``.")
                 else:
