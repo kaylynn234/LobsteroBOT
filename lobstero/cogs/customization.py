@@ -420,7 +420,7 @@ Removes a blueprint by ID.
         await embeds.simple_embed("Blueprint removed.", ctx)
         db.clear_blueprint(str(ctx.guild.id), id_)
 
-    @blueprints.command(name="make", aliases=["create"], enabled=False)
+    @blueprints.command(name="make", aliases=["create", "add"], enabled=False)
     @commands.has_permissions(manage_messages=True)
     async def blueprints_add(self, ctx, *, command=None):
         """<blueprints add (command)
