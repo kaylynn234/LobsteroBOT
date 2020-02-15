@@ -207,13 +207,13 @@ async def blueprint_check(ctx):
                 failed.append(check)
         elif check["criteria_type"] == "is_specific_user":
             can_run = str(ctx.author.id) == check["criteria_value"]
-            if can_run == check["criteria_requires"]:
+            if can_run is check["criteria_requires"]:
                 successful.append(check)
             else:
                 failed.append(check)
         elif check["criteria_type"] == "is_guild_owner":
             can_run = str(ctx.author.id) == str(ctx.guild.owner.id)
-            if str(ctx.author.id) == check["criteria_requires"]:
+            if can_run is check["criteria_requires"]:
                 successful.append(check)
             else:
                 failed.append(check)
