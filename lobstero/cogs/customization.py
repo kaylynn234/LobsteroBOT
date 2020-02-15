@@ -354,7 +354,7 @@ Usable values:
 
             await channel.send(welcmessage)
 
-    @commands.group(invoke_without_command=True, ignore_extra=False, enabled=False)
+    @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
     @commands.is_owner()
     async def blueprints(self, ctx):
@@ -377,7 +377,7 @@ No parameters are required. Displays a list of all blueprints if a subcommand is
         m = MenuPages(source=pages, clear_reactions_after=True)
         await m.start(ctx)
 
-    @blueprints.command(name="id", enabled=False)
+    @blueprints.command(name="id")
     async def blueprints_id(self, ctx, id_=None):
         """<blueprints id
 
@@ -402,7 +402,7 @@ Displays specific details about a blueprint based on blueprint ID.
 
         await ctx.send(embed=embed)
 
-    @blueprints.command(name="remove", aliases=["delete", "destroy"], enabled=False)
+    @blueprints.command(name="remove", aliases=["delete", "destroy"])
     @commands.has_permissions(manage_messages=True)
     async def blueprints_remove(self, ctx, id_=None):
         """<blueprints remove (id)
@@ -422,7 +422,7 @@ Removes a blueprint by ID.
         await embeds.simple_embed("Blueprint removed.", ctx)
         db.clear_blueprint(str(ctx.guild.id), id_)
 
-    @blueprints.command(name="wipe", aliases=["scrub"], enabled=False)
+    @blueprints.command(name="wipe", aliases=["scrub"])
     @commands.has_permissions(manage_messages=True)
     async def blueprints_wipe(self, ctx, command=None):
         """<blueprints wipe (command)
@@ -442,7 +442,7 @@ Deletes all blueprints for a command.
         await embeds.simple_embed(f"{len(current_blueprints)} blueprint(s) removed.", ctx)
         db.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
 
-    @blueprints.command(name="make", aliases=["create", "add"], enabled=False)
+    @blueprints.command(name="make", aliases=["create", "add"])
     @commands.has_permissions(manage_messages=True)
     async def blueprints_add(self, ctx, *, command=None):
         """<blueprints add (command)
@@ -481,7 +481,6 @@ Walks you through adding a blueprint to a command."""
 
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         value = None
-        await ctx.send(m.selected_b)
         if m.selected_b not in [1, 6]:  # 1 & 6 do not need confirmation
             if m.selected_b == 2:
                 embed.description = text.bp_role_prompt
