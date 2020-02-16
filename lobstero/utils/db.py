@@ -689,7 +689,7 @@ def clear_blueprint(guildid: str, _id: str):
     table.delete(**data)
 
 
-aio = Mock()
+aio = mock.Mock()
 this_module = sys.modules[__name__]
 for name in dir():
     this_item = getattr(this_module, name, None)
