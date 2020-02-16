@@ -9,6 +9,7 @@ from typing import Optional, Type, Mapping, Sequence
 
 import pendulum
 import dataset
+from mock import Mock
 from aioify import aioify
 from dataset.util import ResultIter
 from lobstero.utils import misc
@@ -18,7 +19,6 @@ root_directory = sys.path[0] + "/"
 db = dataset.connect('sqlite:///' + root_directory + 'data.db')
 
 
-@aioify
 def economy_manipulate(user_id, amount) -> None:
     """Changes how rich someone is or isn't"""
     table = db['ecodata']
@@ -689,10 +689,10 @@ def clear_blueprint(guildid: str, _id: str):
     table.delete(**data)
 
 
+aio = Mock()
 this_module = sys.modules[__name__]
 for name in dir():
     this_item = getattr(this_module, name, None)
     m = getattr(this_item, "__module__", None)
     if m == "__main__":
-        new_name = f"aio_{name}"
-        globals()[new_name] = aioify(obj=this_item, name=new_name)
+        setattr(aio, name, aioify(obj=this_item, name=name))
