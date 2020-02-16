@@ -45,7 +45,7 @@ class Cog(commands.Cog, name="Economy & Games"):
         else:
             user = ctx.message.author
 
-        bal = db.economy_check(user.id)
+        bal = await db.aio.economy_check(user.id)
         if bal == 0:
             await embeds.simple_embed("Looks like this person doesn't have any cheese. ", ctx)
         else:
@@ -106,7 +106,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 20)
+                await db.aio.economy_manipulate(ctx.author.id, 20)
             else:
                 res = "Your guess was incorrect. Better luck next time!"
 
@@ -141,7 +141,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 20)
+                await db.aio.economy_manipulate(ctx.author.id, 20)
             else:
                 res = "Your guess was incorrect. Better luck next time!"
 
@@ -153,7 +153,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             await sentembed.edit(embed=newembed)
 
         if msg.content == "3":
-            if not db.economy_check(ctx.author.id) >= 20:
+            if not await db.aio.economy_check(ctx.author.id) >= 20:
                 await sentembed.edit(embed=embeds.eco_broke)
                 return
 
@@ -168,7 +168,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -20)
+            await db.aio.economy_manipulate(ctx.author.id, -20)
 
             cardlist = []
             for _ in range(20):
@@ -182,7 +182,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 100)
+                await db.aio.economy_manipulate(ctx.author.id, 100)
             else:
                 res = "Your guess was incorrect. Better luck next time!"
 
@@ -194,7 +194,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             await sentembed.edit(embed=newembed)
 
         if msg.content == "4":
-            if not db.economy_check(ctx.author.id) >= 50:
+            if not await db.aio.economy_check(ctx.author.id) >= 50:
                 await sentembed.edit(embed=embeds.eco_broke)
                 return
 
@@ -202,7 +202,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -50)
+            await db.aio.economy_manipulate(ctx.author.id, -50)
             cardlist = []
 
             for letter in ["H", "D", "C", "S"]:
@@ -218,7 +218,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
 
             if cardlist[item].lower() == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 5000)
+                await db.aio.economy_manipulate(ctx.author.id, 5000)
             else:
                 res = "Aw shucks, your guess was incorrect. Better luck next time!"
 
@@ -293,7 +293,7 @@ This command has no arguments.
                 f"You didn't answer in time! The correct answer was {correct}.", ctx)
 
         if msg.content.lower() == correct.lower():
-            db.economy_manipulate(ctx.message.author.id, payout)
+            await db.aio.economy_manipulate(ctx.message.author.id, payout)
             await embeds.simple_embed(
                 f"Your answer is correct! You earned {payout} cheese for winning.", ctx)
         else:
@@ -327,7 +327,7 @@ Flip a coin and test your luck. No arguments are required."""
 Shows a leaderboard for cheese values. No arguments are required.
 Who's the richest of them all?
         """
-        richlist = db.return_all_balances()
+        richlist = await db.aio.return_all_balances()
         userlist, i = [], 0
         while len(userlist) != 7:
             user = self.bot.get_user(int(richlist[i][1]))
@@ -354,7 +354,7 @@ Who's the richest of them all?
 Views the lobstero inventory of yourself or a given user.
         """
         user = ctx.author if user is None else user
-        inv = db.find_inventory(user.id)
+        inv = await db.aio.find_inventory(user.id)
         strpairs = [f"**{list(x.keys())[0]}**: {list(x.values())[0]}" for x in inv]
         if not strpairs:
             embed = discord.Embed(
@@ -381,7 +381,7 @@ User should be a user ID, user mention, user nickname or username. Amount should
         split = sobject.split(" ")
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
-        db.grant_item(user.id, thing, amount)
+        await db.aio.grant_item(user.id, thing, amount)
         await embeds.simple_embed("Item granted!", ctx)
 
     @commands.command(aliases=["take"])
@@ -398,7 +398,7 @@ User should be a user ID, user mention, user nickname or username. Amount should
         split = sobject.split(" ")
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
-        res = db.remove_item(user.id, thing, amount)
+        res = await db.aio.remove_item(user.id, thing, amount)
         await embeds.simple_embed(
             "Item rescinded." if res else "Not enough of that item to do that.", ctx)
 
@@ -416,9 +416,9 @@ User should be a user ID, user mention, user nickname or username. Amount should
         split = sobject.split(" ")
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
-        res = db.remove_item(ctx.author.id, thing, amount)
+        res = await db.aio.remove_item(ctx.author.id, thing, amount)
         if res:
-            db.grant_item(user.id, thing, amount)
+            await db.aio.grant_item(user.id, thing, amount)
         await embeds.simple_embed(
             "Payment successful!" if res else "You don't have enough of that item to do that!", ctx)
 

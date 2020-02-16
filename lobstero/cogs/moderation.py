@@ -60,7 +60,7 @@ Displays a list of all infractions on this server.
 Multiple subcommands exist for more fine-grained viewing.
 No parameters are required.
         """
-        results = db.find_all_infractions(ctx.guild.id)
+        results = await db.aio.find_all_infractions(ctx.guild.id)
         data = [list(item.items()) for item in list(results)]
         desc = (
             "Displaying all recorded infractions on this server - use the reactions below "
@@ -81,7 +81,7 @@ Displays specific details about an infraction based on case ID.
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.mod_not_number, ctx)
-        res = db.find_specific_infraction(id_)
+        res = await db.aio.find_specific_infraction(id_)
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
@@ -113,7 +113,7 @@ Displays all infractions committed by a specific member.
 
         if not user:
             return await embeds.simple_embed(text.mod_member_invalid, ctx)
-        results = db.find_all_member_infractions(ctx.guild.id, user.id)
+        results = await db.aio.find_all_member_infractions(ctx.guild.id, user.id)
         if not results:
             return await embeds.simple_embed(text.mod_none_assoc, ctx)
 
@@ -142,7 +142,7 @@ Striked infractions are not counted. All parameters are required.
 
         if not user:
             return await embeds.simple_embed(text.mod_member_invalid, ctx)
-        results = db.find_all_member_infractions(ctx.guild.id, user.id)
+        results = await db.aio.find_all_member_infractions(ctx.guild.id, user.id)
         if not results:
             return await embeds.simple_embed(text.mod_none_assoc, ctx)
 
@@ -170,7 +170,7 @@ Strikes a record. This causes it to not be counted in member summaries, and will
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.mod_not_number, ctx)
-        res = db.find_specific_infraction(id_)
+        res = await db.aio.find_specific_infraction(id_)
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
@@ -178,10 +178,10 @@ Strikes a record. This causes it to not be counted in member summaries, and will
 
         if res["redacted"] == "True":
             await embeds.simple_embed("Record unstriked.", ctx)
-            db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "False")
+            await db.aio.strike_infraction(res["operation"], res["guild"], res["user"], id_, "False")
         else:
             await embeds.simple_embed("Record striked.", ctx)
-            db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "True")
+            await db.aio.strike_infraction(res["operation"], res["guild"], res["user"], id_, "True")
 
     @records.command(name="close")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
@@ -195,7 +195,7 @@ Closing a record stops it from expiring.
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.mod_not_number, ctx)
-        res = db.find_specific_infraction(id_)
+        res = await db.aio.find_specific_infraction(id_)
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
@@ -203,7 +203,7 @@ Closing a record stops it from expiring.
 
         if res["expiry"] != "False":
             await embeds.simple_embed("Record closed.", ctx)
-            db.close_infraction(id_)
+            await db.aio.close_infraction(id_)
         else:
             await embeds.simple_embed("Record is already closed.", ctx)
 
@@ -248,7 +248,7 @@ The specific pairs that you pass are optional, but the command requires at least
                 "Make sure to provide pairs of arguments when filtering records. "
                 "Use <records filter to see a list of valid arguments."), ctx)
 
-        results = db.find_all_infractions(ctx.guild.id)
+        results = await db.aio.find_all_infractions(ctx.guild.id)
         filtered = await self.fits_record_criteria(ctx, chunked, results)
         data = [list(item.items()) for item in list(filtered)]
         desc = (
@@ -320,7 +320,7 @@ Warns a user (or users) and logs it to the channel (or channels) specified using
             "Users warned")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("warn", ctx.guild.id, user.id, ctx.author.id, r[2])
+                await db.aio.log_infraction("warn", ctx.guild.id, user.id, ctx.author.id, r[2])
 
     @m.command(name="mute")
     @commands.guild_only()
@@ -340,7 +340,7 @@ A mute role is created and set up if it does not already exist.
             "Users muted")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("mute", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.aio.log_infraction("mute", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_mute(ctx, user)
 
     @m.command(name="deafen")
@@ -359,7 +359,7 @@ A deafen role is created and set up if it does not already exist.
             ctx, arg, text.action_deafen, "User deafened", "Users deafened")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("deafen", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.aio.log_infraction("deafen", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_deafen(ctx, user)
 
     @m.command(name="kick")
@@ -377,7 +377,7 @@ Kicks a user (or users) and logs it to the channel (or channels) specified using
             ctx, arg, text.action_kick, "User kicked", "Users kicked")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("kick", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.aio.log_infraction("kick", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_kick(ctx, user)
 
     @m.command(name="ban")
@@ -395,7 +395,7 @@ Bans a user (or users) and logs it to the channel (or channels) specified using 
             ctx, arg, text.action_ban, "User banned", "Users banned")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("ban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.aio.log_infraction("ban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_ban(ctx, user)
 
     @m.command(name="softban")
@@ -413,7 +413,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
             ctx, arg, text.action_softban, "User softbanned", "Users softbanned")
         if r[0]:
             for user in r[1]:
-                db.log_infraction(
+                await db.aio.log_infraction(
                     "softban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_softban(ctx, user)
 
@@ -421,7 +421,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
         users, reason = arg
         if not users:
             return False
-        table = db.give_table()
+        table = await db.aio.give_table()
         m = None
 
         if int(ctx.guild.id) not in list(table.keys()):
@@ -449,7 +449,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
         completed.description = f"Punishment submitted."
         completed.add_field(name="Affected members", value=warned, inline=False)
         completed.add_field(name="Reason", value=reason, inline=False)
-        if db.is_logging_enabled(ctx.guild.id)[0] is False:
+        if await db.aio.is_logging_enabled(ctx.guild.id)[0] is False:
             completed.set_footer(
                 text="You can configure a logging channel using the <channels command")
 
@@ -458,7 +458,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
         else:
             await ctx.send(embed=completed)
 
-        logging = db.is_logging_enabled(ctx.guild.id)
+        logging = await db.aio.is_logging_enabled(ctx.guild.id)
         if logging[0]:
             for channel_id in logging[1]:
                 logging = discord.Embed(
@@ -478,7 +478,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
         users, reason = arg
         if not users:
             return False
-        table = db.give_table()
+        table = await db.aio.give_table()
         m = None
 
         if int(ctx.guild.id) not in list(table.keys()):
@@ -540,7 +540,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
         completed.description = f"Punishment submitted."
         completed.add_field(name="Affected members", value=warned, inline=False)
         completed.add_field(name="Reason", value=reason, inline=False)
-        if db.is_logging_enabled(ctx.guild.id)[0] is False:
+        if await db.aio.is_logging_enabled(ctx.guild.id)[0] is False:
             completed.set_footer(text="You can configure a logging channel using the <channels command")
 
         if m:
@@ -548,7 +548,7 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
         else:
             await ctx.send(embed=completed)
 
-        logging = db.is_logging_enabled(ctx.guild.id)
+        logging = await db.aio.is_logging_enabled(ctx.guild.id)
         if logging[0]:
             for channel_id in logging[1]:
                 logging = discord.Embed(
@@ -738,7 +738,7 @@ The above will delete the most recent 25 messages in this channel with images, e
 Archives pins for the current channel. No parameters are required.
         """
 
-        table = db.give_table()
+        table = await db.aio.give_table()
         if ctx.guild.id not in table:
             return await embeds.simple_embed("There is no archive channel set on this server!", ctx)
         if "archivechannel" not in table[ctx.guild.id]:

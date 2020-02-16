@@ -57,7 +57,7 @@ Denies the specified object access to bot functionality.
             print("I'm not sure how we got here")
             return
 
-        db.blacklist_add(str(who.id), blocktype)
+        await db.aio.blacklist_add(str(who.id), blocktype)
         await embeds.simple_embed("User blacklisted", ctx)
 
     @commands.command()
@@ -78,7 +78,7 @@ Allows the specified object access to bot functionality.
             print("I'm not sure how we got here")
             return
 
-        db.blacklist_remove(str(who.id), blocktype)
+        await db.aio.blacklist_remove(str(who.id), blocktype)
         await embeds.simple_embed("User removed from blacklist", ctx)
 
     def file_len(self, fname) -> int:
@@ -210,7 +210,7 @@ Allows the specified object access to bot functionality.
     @commands.guild_only()
     @commands.is_owner()
     async def querydb(self, ctx, *, text):
-        await ctx.send(f"{db.query_db(text)}")
+        await ctx.send(f"{await db.aio.query_db(text)}")
 
 
 def setup(bot):
