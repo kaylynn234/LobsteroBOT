@@ -694,5 +694,5 @@ this_module = sys.modules[__name__]
 for name in dir():
     this_item = getattr(this_module, name, None)
     m = getattr(this_item, "__module__", None)
-    if m == "lobstero.utils.db":
+    if m == "lobstero.utils.db":  # could probably replace this with __name__, lazy
         setattr(aio, name, aioify(obj=this_item, name=name))
