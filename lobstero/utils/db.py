@@ -696,4 +696,4 @@ for name in dir():
     if m == "__main__":
         new_name = f"aio_{name}"
         new_func = aioify(obj=this_item, name=new_name)
-        setattr(this_module, new_name, new_func)
+        globals()[new_name] = new_func
