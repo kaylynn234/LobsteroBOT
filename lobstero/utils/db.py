@@ -4,12 +4,12 @@ Entirely useless for anything else."""
 import sys
 import json
 import calendar
+from unittest import mock
 from collections import OrderedDict
 from typing import Optional, Type, Mapping, Sequence
 
 import pendulum
 import dataset
-from mock import Mock
 from aioify import aioify
 from dataset.util import ResultIter
 from lobstero.utils import misc
