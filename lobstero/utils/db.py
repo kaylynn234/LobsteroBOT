@@ -4,13 +4,12 @@ Entirely useless for anything else."""
 import sys
 import json
 import calendar
-
 from collections import OrderedDict
 from typing import Optional, Type, Mapping, Sequence
 
 import pendulum
 import dataset
-
+from aioify import aioify
 from dataset.util import ResultIter
 from lobstero.utils import misc
 
@@ -19,6 +18,7 @@ root_directory = sys.path[0] + "/"
 db = dataset.connect('sqlite:///' + root_directory + 'data.db')
 
 
+@aioify
 def economy_manipulate(user_id, amount) -> None:
     """Changes how rich someone is or isn't"""
     table = db['ecodata']
@@ -687,3 +687,13 @@ def clear_blueprint(guildid: str, _id: str):
     table = db['blueprints']
     data = {"guildid": guildid, "id": _id}
     table.delete(**data)
+
+
+this_module = sys.modules[__name__]
+for name in dir():
+    this_item = getattr(this_module, name, None)
+    m = getattr(this_item, "__module__", None)
+    if m == "__main__":
+        new_name = f"aio_{name}"
+        new_func = aioify(obj=this_item, name=new_name)
+        setattr(this_module, new_name, new_func)
