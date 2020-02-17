@@ -52,7 +52,7 @@ Valid usage would be something along the lines of ``<settings respond_on_mention
         if value and changeto:
             if value.lower() in acceptable and str(changeto).lower() in ["true", "false"]:
                 newval = True if changeto.lower() == "true" else False
-                await db.aio.edit_settings_value(ctx.guild.id, value.lower(), newval)
+                db.edit_settings_value(ctx.guild.id, value.lower(), newval)
                 await embeds.simple_embed("Value updated.", ctx)
             else:
                 await embeds.simple_embed("That value is not valid!", ctx)
@@ -83,8 +83,8 @@ Example usage is ``<wm add this is a cool welcome message! hi %u!``
 Emoji, mentions of specific users, specific channels, and specific roles will function normally.
         """
         if message is not None:
-            await db.aio.edit_settings_value(ctx.guild.id, "welcome_messages", True)
-            await db.aio.add_welcome_message(str(ctx.guild.id), message)
+            db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
+            db.add_welcome_message(str(ctx.guild.id), message)
             await embeds.simple_embed("Welcome message added!", ctx.message.channel.id)
         else:
             await embeds.simple_embed(
@@ -99,7 +99,7 @@ Provides tools to set the channels that Lobstero uses to function.
 Use ``<channels`` alone to display currently set values.
 ``<channels set`` is probably the subcommand you want to use.
 """
-        current = await db.aio.settings_value_for_guild(ctx.guild.id)
+        current = db.settings_value_for_guild(ctx.guild.id)
         wm, pa, ml = "None", "None", "None"
         if "wmessagechannel" in current:
             if str(current["wmessagechannel"]) != "None":
@@ -141,20 +141,20 @@ Usable values:
             await embeds.simple_embed("No value was chosen to set!", ctx)
 
         if name.lower() == "welcome_messages":
-            await db.aio.edit_settings_value(ctx.guild.id, "wmessagechannel", ctx.channel.id)
+            db.edit_settings_value(ctx.guild.id, "wmessagechannel", ctx.channel.id)
             await embeds.simple_embed("Welcome message channel set successfully!", ctx)
         if name.lower() == "archives":
-            await db.aio.edit_settings_value(ctx.guild.id, "archivechannel", ctx.channel.id)
+            db.edit_settings_value(ctx.guild.id, "archivechannel", ctx.channel.id)
             await embeds.simple_embed("Pin archive channel set successfully!", ctx)
         if name.lower() == "moderation":
-            current = await db.aio.settings_value_for_guild(ctx.guild.id)
+            current = db.settings_value_for_guild(ctx.guild.id)
             if not current:
-                await db.aio.edit_settings_value(
+                db.edit_settings_value(
                     ctx.guild.id, "moderationlogs", json.dumps([ctx.channel.id]))
                 await embeds.simple_embed("Moderation logging channel set successfully!", ctx)
 
             elif current and "moderationlogs" not in current:
-                await db.aio.edit_settings_value(
+                db.edit_settings_value(
                     ctx.guild.id, "moderationlogs", json.dumps([ctx.channel.id]))
                 await embeds.simple_embed("Moderation logging channel set successfully!", ctx)
 
@@ -166,12 +166,12 @@ Usable values:
 
                 if len(loaded) == 1:
                     if int(loaded[0]) == ctx.channel.id:
-                        await db.aio.edit_settings_value(ctx.guild.id, "moderationlogs", None)
+                        db.edit_settings_value(ctx.guild.id, "moderationlogs", None)
                         await embeds.simple_embed(
                             "Moderation logging channel successfully removed!", ctx)
                     else:
                         loaded.append(ctx.channel.id)
-                        await db.aio.edit_settings_value(
+                        db.edit_settings_value(
                             ctx.guild.id, "moderationlogs", json.dumps(loaded))
                         await embeds.simple_embed(
                             "Moderation logging channel added successfully!", ctx)
@@ -185,14 +185,14 @@ Usable values:
                         await embeds.simple_embed(
                             "Moderation logging channel added successfully!", ctx)
 
-                    await db.aio.edit_settings_value(ctx.guild.id, "moderationlogs", json.dumps(loaded))
+                    db.edit_settings_value(ctx.guild.id, "moderationlogs", json.dumps(loaded))
 
     @wm.command(name="delete", aliases=["remove"])
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def wm_del(self, ctx, *, message):
         """Removes a welcome message from this server by index. """
-        res = await db.aio.remove_welcome_message(str(ctx.guild.id), message)
+        res = db.remove_welcome_message(str(ctx.guild.id), message)
         if res:
             await embeds.simple_embed("Matching welcome messages deleted.", ctx)
         else:
@@ -203,7 +203,7 @@ Usable values:
     @handlers.blueprints_or()
     async def wm_list(self, ctx):
         """Lists all welcome messages on this server. """
-        data = await db.aio.all_welcome_messages_for_guild(str(ctx.guild.id))
+        data = db.all_welcome_messages_for_guild(str(ctx.guild.id))
         messages = [x["message"] for x in data]
         source = menus.ListEmbedMenu(messages, "Welcome messages for this server", 10, True)
         menu = MenuPages(source, timeout=30, clear_reactions_after=True)
@@ -227,7 +227,7 @@ Usable values:
                     role = x
 
         if role is not None:
-            roles = await db.aio.assignables_check(ctx.guild.id)
+            roles = db.assignables_check(ctx.guild.id)
             roles = [int(x) for x in roles]
             if role.id in roles:
                 await ctx.author.add_roles(role)
@@ -255,7 +255,7 @@ Usable values:
                     role = x
 
         if role is not None:
-            roles = await db.aio.assignables_check(ctx.guild.id)
+            roles = db.assignables_check(ctx.guild.id)
             roles = [int(x) for x in roles]
             if role.id in roles:
                 await ctx.author.remove_roles(role)
@@ -282,7 +282,7 @@ Usable values:
                     role = x
 
         if role is not None:
-            await db.aio.assignables_add(ctx.guild.id, role.id)
+            db.assignables_add(ctx.guild.id, role.id)
             await embeds.simple_embed("Successfully made this role self-assignable!", ctx)
         else:
             await embeds.simple_embed((
@@ -304,7 +304,7 @@ Usable values:
                     role = x
 
         if role is not None:
-            await db.aio.assignables_remove(ctx.guild.id, role.id)
+            db.assignables_remove(ctx.guild.id, role.id)
             await embeds.simple_embed("Successfully removed this self-assignable role!", ctx)
         else:
             await embeds.simple_embed(
@@ -315,7 +315,7 @@ Usable values:
     @handlers.blueprints_or()
     async def listassignables(self, ctx, page: int = 1):
         """Lists all self-assignable roles on this server."""
-        roles = await db.aio.assignables_check(ctx.guild.id)
+        roles = db.assignables_check(ctx.guild.id)
         data = [str(ctx.guild.get_role(int(x))) for x in roles]
         source = menus.ListEmbedMenu(data, "Self-assignable roles for this server", 10, True)
         menu = MenuPages(source, timeout=30, clear_reactions_after=True)
@@ -326,13 +326,13 @@ Usable values:
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(administrator=True))
     async def changeprefix(self, ctx, *, new):
-        await db.aio.add_prefix(ctx.guild.id, new)
+        db.add_prefix(ctx.guild.id, new)
         await embeds.simple_embed("Prefix updated!", ctx)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
 
-        table = await db.aio.give_table()
+        table = db.give_table()
         if member.guild.id not in table:
             th = misc.populate({})
         else:
@@ -344,7 +344,7 @@ Usable values:
             except KeyError:
                 return
 
-            welcomemessagelist = await db.aio.all_welcome_messages_for_guild(str(member.guild.id))
+            welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
             welcmessage = random.choice([x["message"] for x in welcomemessagelist])
 
             welcmessage = str(welcmessage).replace(r"%u", member.name)
@@ -363,7 +363,7 @@ The base command for all blueprints-related commands.
 Blueprints are used to configure who can use what command.
 No parameters are required. Displays a list of all blueprints if a subcommand is not used.
         """
-        dbresults = sorted(await db.aio.blueprints_for_guild(ctx.guild.id), key=lambda x: x["command"])
+        dbresults = sorted(db.blueprints_for_guild(ctx.guild.id), key=lambda x: x["command"])
         results = [
             f"Blueprint ID {x['id']}: **``{x['criteria_type']}``** for **``<{x['command']}``**"
             for x in dbresults]
@@ -386,7 +386,7 @@ Displays specific details about a blueprint based on blueprint ID.
             return await embeds.simple_embed(text.bp_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.bp_not_number, ctx)
-        res = await db.aio.blueprint_by_id(id_)
+        res = db.blueprint_by_id(id_)
         if not res:
             return await embeds.simple_embed(text.bp_none_matching, ctx)
         if str(res["guildid"]) != str(ctx.guild.id):
@@ -412,14 +412,14 @@ Removes a blueprint by ID.
             return await embeds.simple_embed(text.bp_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.bp_not_number, ctx)
-        res = await db.aio.blueprint_by_id(id_)
+        res = db.blueprint_by_id(id_)
         if not res:
             return await embeds.simple_embed(text.bp_none_matching, ctx)
         if str(res["guildid"]) != str(ctx.guild.id):
             return await embeds.simple_embed(text.bp_on_other_guild, ctx)
 
         await embeds.simple_embed("Blueprint removed.", ctx)
-        await db.aio.clear_blueprint(str(ctx.guild.id), id_)
+        db.clear_blueprint(str(ctx.guild.id), id_)
 
     @blueprints.command(name="wipe", aliases=["scrub"])
     @commands.has_permissions(manage_messages=True)
@@ -434,12 +434,12 @@ Deletes all blueprints for a command.
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
 
-        current_blueprints = await db.aio.blueprints_for(str(ctx.guild.id), command.qualified_name)
+        current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
         if not current_blueprints:
             return await embeds.simple_embed("There are no blueprints for this command.", ctx)
 
         await embeds.simple_embed(f"{len(current_blueprints)} blueprint(s) removed.", ctx)
-        await db.aio.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
+        db.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
 
     @blueprints.command(name="make", aliases=["create", "add"])
     @commands.has_permissions(manage_messages=True)
@@ -453,7 +453,7 @@ Walks you through adding a blueprint to a command."""
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
 
-        current_blueprints = await db.aio.blueprints_for(str(ctx.guild.id), command.qualified_name)
+        current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
         if current_blueprints and len(current_blueprints) >= 10:
             return await embeds.simple_embed("There's a maximum of 10 blueprints per command.", ctx)
 
@@ -524,7 +524,7 @@ Walks you through adding a blueprint to a command."""
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
         # add the blueprint to the database
-        await db.aio.add_blueprint(
+        db.add_blueprint(
             str(ctx.guild.id), command.qualified_name, bp_numbered[m.selected_b], value, m2.choice)
 
         # tell the user we didn't die in the process

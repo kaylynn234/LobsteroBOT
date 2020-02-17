@@ -174,7 +174,7 @@ class GreedyMention(commands.Converter):
 
 async def blueprint_check(ctx):
     """A preliminary check that enables blueprint functionality.."""
-    res = await db.aio.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
+    res = db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
     if res is None:
         return False
 

@@ -99,14 +99,14 @@ Use the command without an argument to reset it.
 Usage: <afkmessage your text here"""
         if message == "Welcome back. I removed your afk.":
             await embeds.simple_embed("AFK message reset.", ctx)
-            await db.aio.afk_message_set(ctx.author.id, message)
+            db.afk_message_set(ctx.author.id, message)
         else:
             if len(message) > 160:
                 await embeds.simple_embed((
                     "AFK messages have a maximum character limit of 160."
                     f"You provided {len(message)} charcters."), ctx)
             else:
-                await db.aio.afk_message_set(ctx.author.id, message)
+                db.afk_message_set(ctx.author.id, message)
                 await embeds.simple_embed("AFK message changed!", ctx)
 
     @commands.command(aliases=["p", "pong"])
@@ -216,7 +216,7 @@ Person can be an ID, mention, or name"""
 
         for member in self.bot.afks:
             if member.user == message.author:
-                result = await db.aio.return_afk_message(message.author.id)
+                result = db.return_afk_message(message.author.id)
                 readable = date.delta(
                     pendulum.now("Atlantic/Reykjavik"), member.time, justnow=timedelta(seconds=0))[0]
                 elapsed = f"\n(*Away for {readable}*)"
@@ -253,7 +253,7 @@ Gives you some simple information about a user."""
 Finds details about the provided tag."""
         if tagname is None:
             return await embeds.simple_embed("Please specify a tag to find the value of.", ctx)
-        value = await db.aio.return_tag(ctx.guild.id, tagname.lower())
+        value = db.return_tag(ctx.guild.id, tagname.lower())
         if value is None:
             return await embeds.simple_embed("There is no tag for that value.", ctx)
         embed = discord.Embed(
@@ -271,7 +271,7 @@ Finds details about the provided tag."""
 Adds a tag for this server. Make sure you quote arguments that are multiple words."""
         if tagvalue is None:
             return await embeds.simple_embed("Please specify a tag name and a tag value.", ctx)
-        await db.aio.set_tag(ctx.guild.id, tagname, tagvalue)
+        db.set_tag(ctx.guild.id, tagname, tagvalue)
         await embeds.simple_embed("Tag added!", ctx)
 
     @tag.command(name="remove")
@@ -283,7 +283,7 @@ Adds a tag for this server. Make sure you quote arguments that are multiple word
 Removes a tag from this server by name. Make sure you quote arguments that are multiple words."""
         if tagname is None:
             return await embeds.simple_embed("Please specify a tag name.", ctx.guild.id)
-        await db.aio.delete_tag(ctx.guild.id, tagname)
+        db.delete_tag(ctx.guild.id, tagname)
         await embeds.simple_embed("Tag removed.", ctx.channel.id)
 
     @tag.command(name="list")
@@ -293,7 +293,7 @@ Removes a tag from this server by name. Make sure you quote arguments that are m
         """<tag list
 
 Lists all tags on this server."""
-        results = await db.aio.return_all_tags(ctx.guild.id)
+        results = db.return_all_tags(ctx.guild.id)
         if not results:
             return await embeds.simple_embed("There are no tags on this server!", ctx.channel.id)
         source = menus.ListEmbedMenu(results, "Showing all tags for this server", 5, True)
@@ -345,7 +345,7 @@ Valid usage can also include the following:
                 decoded = dateparser.parse(date, settings={'TIMEZONE': 'UTC'})
                 if decoded:
                     passed = pendulum.parse(str(decoded))
-                    await db.aio.add_reminder(
+                    db.add_reminder(
                         ctx.author.id, reason, passed,
                         str(pendulum.now("Atlantic/Reykjavik")))  # utc + 0
 
@@ -378,7 +378,7 @@ Valid usage can also include the following:
                         await user.send(embed=embed)
                     except discord.errors.Forbidden:
                         pass
-                await db.aio.negate_reminder(item["id"])
+                db.negate_reminder(item["id"])
 
 
 def setup(bot):

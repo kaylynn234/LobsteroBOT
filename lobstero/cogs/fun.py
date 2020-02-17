@@ -237,7 +237,7 @@ Usage: <gnome @mention"""
 
             return await ctx.send(embed=embed)
 
-        gnomecount = await db.aio.add_gnome(ctx.message.mentions[0].id, 1)
+        gnomecount = db.add_gnome(ctx.message.mentions[0].id, 1)
         gnome_filenames = [x for x in os.listdir(root_directory + "lobstero/data/static/gnomes/")]
         gnome_index = random.randint(1, len(gnome_filenames))
         gnomefile = discord.File(
@@ -282,9 +282,9 @@ Up to 6 people can be hugged at once.
             embed.description = "".join(outstr)
             await ctx.send(embed=embed)
 
-            await db.aio.grant_item(str(ctx.author.id), "Token of love & friendship", len(mentionlist))
+            db.grant_item(str(ctx.author.id), "Token of love & friendship", len(mentionlist))
             for member in mentionlist:
-                await db.aio.grant_item(str(member.id), "Token of love & friendship", 1)
+                db.grant_item(str(member.id), "Token of love & friendship", 1)
         else:
             embed.description = f"{ctx.author.mention} hugs ``ṫ̫̼h̉̃ͤe̵̡̊ v̴̹̅o̢͙̎iͭ͢͡d̬̽̕``"
             ctx.command.reset_cooldown(ctx)
@@ -310,8 +310,8 @@ You can only hug one person this tightly.
             embed.description = (
                 f"{ctx.message.author.mention} hugs {mentionlist[0].mention} "
                 "four times more tightly than usual")
-            await db.aio.grant_item(ctx.author.id, "Token of love & friendship", 4)
-            await db.aio.grant_item(mentionlist[0].id, "Token of love & friendship", 1)
+            db.grant_item(ctx.author.id, "Token of love & friendship", 4)
+            db.grant_item(mentionlist[0].id, "Token of love & friendship", 1)
         elif len(mentionlist) > 1:
             embed.description = "You can't hug more than one person that tightly!"
             ctx.command.reset_cooldown(ctx)
@@ -481,7 +481,7 @@ Usage: <activitygraph"""
         if message.guild.id == 177192169516302336:
             should_continue = 0
 
-        table = await db.aio.give_table()
+        table = db.give_table()
         if message.guild.id not in table:
             th = misc.populate({})
         else:
@@ -566,8 +566,8 @@ Use <inventory to see the fish you own."""
 
         result = random.choice(fishchances)
 
-        await db.aio.economy_manipulate(ctx.author.id, -10)
-        await db.aio.grant_item(ctx.author.id, text.fish_names[result], 1)
+        db.economy_manipulate(ctx.author.id, -10)
+        db.grant_item(ctx.author.id, text.fish_names[result], 1)
 
         embedtext = [
             f"You found a {text.fishdict[result]}!\n\n"

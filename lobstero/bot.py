@@ -66,7 +66,7 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def get_prefix(self, message) -> str:
         """Gets the prefix that should be used based on context."""
 
-        prefix_l = await db.aio.prefix_list()
+        prefix_l = db.prefix_list()
         if str(message.guild.id) not in prefix_l:
             return lc.config.prefixes
         else:
@@ -120,9 +120,9 @@ class LobsteroBOT(commands.AutoShardedBot):
         """
 
         blacklisted = True in [
-            await db.aio.is_not_blacklisted(str(ctx.author.id), "user"),
-            await db.aio.is_not_blacklisted(str(ctx.guild.id), "guild"),
-            await db.aio.is_not_blacklisted(str(ctx.channel.id), "channel")]
+            db.is_not_blacklisted(str(ctx.author.id), "user"),
+            db.is_not_blacklisted(str(ctx.guild.id), "guild"),
+            db.is_not_blacklisted(str(ctx.channel.id), "channel")]
 
         if blacklisted is False:
             misc.utclog(ctx, f"{ctx.author} cannot use command {ctx.command.name}.")
@@ -152,7 +152,7 @@ class LobsteroBOT(commands.AutoShardedBot):
             return
 
         if message.guild:
-            table = await db.aio.give_table()
+            table = db.give_table()
             if message.guild.id not in table:
                 th = misc.populate({})
             else:
@@ -163,8 +163,8 @@ class LobsteroBOT(commands.AutoShardedBot):
             return await misc.handle_dm(owners, message)
 
         blacklists = (
-            await db.aio.is_not_blacklisted(str(message.channel.id), "channel"),
-            await db.aio.is_not_blacklisted(str(message.guild.id), "guild"))
+            db.is_not_blacklisted(str(message.channel.id), "channel"),
+            db.is_not_blacklisted(str(message.guild.id), "guild"))
 
         if False not in blacklists:
             if random.randint(1, 2000) == 2000 and th["random_reactions"]:

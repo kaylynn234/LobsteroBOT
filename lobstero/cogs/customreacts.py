@@ -24,7 +24,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cradd(self, ctx, trigger, *, response):
         """Add a custom reaction."""
-        if await db.aio.find_matching_response(str(ctx.guild.id), trigger):
+        if db.find_matching_response(str(ctx.guild.id), trigger):
             base = await ctx.send(embed=embeds.cr_confirmation)
             try:
                 msg = await self.bot.wait_for(
@@ -51,8 +51,8 @@ class Cog(commands.Cog, name="Custom Reactions"):
                     return await base.edit(embed=embeds.cr_timeout)
 
                 if msg2.content.lower() in ["full", "partial"]:
-                    await db.aio.remove_reaction(str(ctx.guild.id), trigger)
-                    await db.aio.add_reaction(
+                    db.remove_reaction(str(ctx.guild.id), trigger)
+                    db.add_reaction(
                         str(ctx.guild.id),
                         trigger,
                         response,
@@ -63,7 +63,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
                 else:
                     return await base.edit(embed=embeds.cr_formatted_incorrectly)
             else:
-                await db.aio.add_reaction(str(ctx.guild.id), trigger, response, )
+                db.add_reaction(str(ctx.guild.id), trigger, response, )
                 embed = discord.Embed(title="Reaction added!", color=16202876)
                 return await base.edit(embed=embed)
 
@@ -80,7 +80,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
                 return await base.edit(embed=embeds.cr_timeout)
 
             if msg2.content.lower() in ["full", "partial"]:
-                await db.aio.add_reaction(
+                db.add_reaction(
                     str(ctx.guild.id),
                     trigger,
                     response,
@@ -96,8 +96,8 @@ class Cog(commands.Cog, name="Custom Reactions"):
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crdel(self, ctx, *, trigger):
         """Delete a custom reaction."""
-        if await db.aio.find_matching_response(str(ctx.guild.id), trigger):
-            await db.aio.remove_reaction(str(ctx.guild.id), trigger)
+        if db.find_matching_response(str(ctx.guild.id), trigger):
+            db.remove_reaction(str(ctx.guild.id), trigger)
             embed = discord.Embed(title="Reaction removed.", color=16202876)
         else:
             embed = discord.Embed(
@@ -111,8 +111,8 @@ class Cog(commands.Cog, name="Custom Reactions"):
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crdeny(self, ctx):
         """Deny the current channel access to custom reactions."""
-        if not await db.aio.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
-            await db.aio.add_new_deny_channel(ctx.guild.id, str(ctx.channel.id))
+        if not db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
+            db.add_new_deny_channel(ctx.guild.id, str(ctx.channel.id))
             embed = discord.Embed(
                 title="Custom reactions are now denied in this channel.",
                 color=16202876)
@@ -129,8 +129,8 @@ class Cog(commands.Cog, name="Custom Reactions"):
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crallow(self, ctx):
         """Allow the current channel access to custom reactions."""
-        if await db.aio.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
-            await db.aio.remove_deny_channel(ctx.guild.id, str(ctx.channel.id))
+        if db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
+            db.remove_deny_channel(ctx.guild.id, str(ctx.channel.id))
             embed = discord.Embed(
                 title="Custom reactions are now allowed in this channel.",
                 color=16202876)
@@ -147,7 +147,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crlist(self, ctx):
         """List all custom reactions on this server."""
-        reactions = await db.aio.return_server_reacts_list(str(ctx.guild.id))
+        reactions = db.return_server_reacts_list(str(ctx.guild.id))
 
         if not reactions:
             return await ctx.send(embed=embeds.cr_none_present)
@@ -172,14 +172,14 @@ class Cog(commands.Cog, name="Custom Reactions"):
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def crinfo(self, ctx, *, trigger):
         """Vuew info on a custom reaction with the provided trigger."""
-        reactions = await db.aio.return_server_reacts_list(str(ctx.guild.id))
+        reactions = db.return_server_reacts_list(str(ctx.guild.id))
         if not reactions:
             return await ctx.send(embed=embeds.cr_none_present)
 
-        if not await db.aio.find_matching_response(str(ctx.guild.id), trigger):
+        if not db.find_matching_response(str(ctx.guild.id), trigger):
             return await ctx.send(embed=embeds.cr_no_trigger)
 
-        reaction = await db.aio.raw_find_matching_response(str(ctx.guild.id), trigger)
+        reaction = db.raw_find_matching_response(str(ctx.guild.id), trigger)
         responses = json.loads(reaction["response"])
         mtype = reaction["type"]
         desc = f"**Trigger type**: {mtype}\n**Total responses**: {str(len(responses))}"
@@ -199,7 +199,7 @@ class Cog(commands.Cog, name="Custom Reactions"):
     async def crsearch(self, ctx, *, query=None):
         """Search for a custom reaction based on a query."""
         fetched = []
-        reactions = await db.aio.return_server_reacts_list(str(ctx.guild.id))
+        reactions = db.return_server_reacts_list(str(ctx.guild.id))
         if not reactions:
             return await ctx.send(embed=embeds.cr_none_present)
 
@@ -225,13 +225,13 @@ class Cog(commands.Cog, name="Custom Reactions"):
         """Called every message. Handles reactions."""
         if message.author.bot is False and message.guild:
 
-            if await db.aio.is_denied(str(message.guild.id), str(message.channel.id)):
+            if db.is_denied(str(message.guild.id), str(message.channel.id)):
                 return
 
             if message.content is None or message.content == "":
                 return
 
-            reacts = await db.aio.return_server_reacts_list(message.guild.id)
+            reacts = db.return_server_reacts_list(message.guild.id)
             for reaction in reacts:
                 is_partial = (
                     reaction["type"] == "partial" and

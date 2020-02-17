@@ -17,7 +17,7 @@ async def return_mute_role(ctx):
         setattr(n_ctx, "guild", ctx)
         ctx = n_ctx
 
-    r_n = await db.aio.settings_value_for_guild(ctx.guild.id)
+    r_n = db.settings_value_for_guild(ctx.guild.id)
     if r_n:
         if "mute_role_id" in list(r_n.keys()):
             mute_role_name = r_n["mute_role"]
@@ -55,7 +55,7 @@ async def return_deafen_role(ctx):
         setattr(n_ctx, "guild", ctx)
         ctx = n_ctx
 
-    r_n = await db.aio.settings_value_for_guild(ctx.guild.id)
+    r_n = db.settings_value_for_guild(ctx.guild.id)
     if r_n:
         if "deafen_role_id" in list(r_n.keys()):
             deafen_role_name = r_n["deafen_role"]
