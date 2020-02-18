@@ -59,7 +59,7 @@ class LobsterContext(commands.Context):
                 nonce=nonce)
 
         except discord.errors.Forbidden:
-            perms = self.bot.user.permissions_in(self.channel)
+            perms = self.guild.me.permissions_in(self.channel)
             if perms.send_messages:
                 await super().send((
                     "⚠️ **|** I tried to send an embed or image in this channel, "
