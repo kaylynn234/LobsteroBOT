@@ -3,7 +3,6 @@ import random
 import sys
 import glob
 import io
-import halftone
 import discord
 import PIL
 import aiohttp
@@ -12,7 +11,7 @@ from unittest import mock
 from io import BytesIO
 from lobstero import lobstero_config
 from lobstero.utils import strings
-from lobstero.external import asciify, kromo
+from lobstero.external import asciify, kromo, halftone
 from urllib.parse import urlsplit
 from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance
 from discord.ext import commands
