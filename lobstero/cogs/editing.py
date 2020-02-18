@@ -103,8 +103,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 return None
         else:
             try:
-                with open(file_loc, "rb") as b:
-                    f.write(b.read())
+                b = open(file_loc, "rb")
+                f.write(b.read())
             except (OSError, ValueError):
                 return None
 
