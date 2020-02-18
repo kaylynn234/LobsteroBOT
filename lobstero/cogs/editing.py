@@ -489,10 +489,11 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         if result is None:
             return
 
-        markov = await self.markov_generator.generate()
+        markov = await self.bot.markov_generator.generate()
         meme = self.make_meme(markov, markov, result.data)
 
         await self.save_and_send(ctx, meme, "shitpost.png")
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
