@@ -116,7 +116,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     async def processfile(self, p_ctx, url):
         constructed = None
-        if url is not None:
+        if url:
             value = None
             c = commands.MemberConverter()
             try:
@@ -128,20 +128,19 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                     constructed = await self.package(
                         f"{root_directory}data/static/emojis/{escape}.png", False)
 
-                elif url.startswith("<") and url.endswith(">"):
-                    emo_id = url.split(":")[2].split(">")[0]
-                    if url.startswith("<a:"):
-                        emourl = f"https:/cdn.discordapp.com/emojis/{emo_id}.gif?v=1"
-                    else:
-                        emourl = f"https:/cdn.discordapp.com/emojis/{emo_id}.png?v=1"
-                    constructed = await self.package(emourl)
-                else:  # Assume it's a normal URL and hope for the best
+                c = commands.PartialEmojiConverter()
+                try:
+                    e = c.convert(p_ctx, url)
+                except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
                     constructed = await self.package(url)
-            else:  # Conversion was a success, get an avatar url and download it
+                else:  # Emoji lookup was a success
+                    constructed = await self.package(str(e.url))
+
+            else:  # Member conversion was a success, get an avatar url and download it
                 value = m.avatar_url_as(static_format="png", size=2048)
                 constructed = await self.package(str(value))
 
-        else:
+        elif url is None:
             if p_ctx.message.attachments:
                 constructed = await self.package(p_ctx.message.attachments[0].url)
 
@@ -270,7 +269,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         if result is None:
             return
 
-        opened = Image.open(result.data)
+        opened = Image.open(result.data).convert("RGBA")
         colorlist = [
             "blue", "green", "red", "orange", "greenyellow", "lawngreen", "hotpink",
             "mediumturquoise", "mistyrose", "orangered"]
