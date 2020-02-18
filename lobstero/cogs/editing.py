@@ -130,7 +130,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
                 c = commands.PartialEmojiConverter()
                 try:
-                    e = c.convert(p_ctx, url)
+                    e = await c.convert(p_ctx, url)
                 except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
                     constructed = await self.package(url)
                 else:  # Emoji lookup was a success
