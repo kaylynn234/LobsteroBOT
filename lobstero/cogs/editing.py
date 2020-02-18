@@ -103,14 +103,14 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 return None
         else:
             try:
-                b = open(file_loc, "rb")
-                f.write(b.read())
+                with open(file_loc, "rb") as b:
+                    f.write(b.read())
             except (OSError, ValueError):
                 return None
 
         # This should (hopefully) never fail
         f_obj = mock.Mock()
-        f_obj.data, f_obj.name, f_obj.ext = f, file_name, file_ext
+        f_obj.data, f_obj.name, f_obj.ext = open(f, "rb"), file_name, file_ext
 
         return f_obj
 
