@@ -62,9 +62,11 @@ class LobsterContext(commands.Context):
             if self.guild:
                 perms = self.guild.me.permissions_in(self.channel)
                 if perms.send_messages:
-                    await super().send((
+                    return await super().send((
                         "⚠️ **|** I tried to send an embed or image in this channel, "
                         "but was unable to due to a lack of permissions."), delete_after=5)
+
+            raise
 
 
 class LobsteroBOT(commands.AutoShardedBot):
