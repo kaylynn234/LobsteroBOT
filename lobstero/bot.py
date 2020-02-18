@@ -81,6 +81,9 @@ class LobsteroBOT(commands.AutoShardedBot):
         super().__init__(command_prefix, **kwargs)
 
         self.load_extension("jishaku")
+        self.restricted_channels = {  # will implement this in a db later, for now this'll work
+            177192169516302336: (487287141047599106, 487288080764502016)
+        }
 
     async def get_prefix(self, message) -> str:
         """Gets the prefix that should be used based on context."""
@@ -166,6 +169,11 @@ class LobsteroBOT(commands.AutoShardedBot):
         """Called every message. Processes commands."""
 
         should_continue = False
+
+        for server, channels in self.restricted_channels:
+            if message.guild is not None and message.guild.id == server:
+                if message.channel.id not in channels:
+                    return
 
         if message.author.bot:
             return
