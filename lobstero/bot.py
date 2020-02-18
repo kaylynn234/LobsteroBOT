@@ -170,7 +170,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         should_continue = False
 
-        for server, channels in self.restricted_channels:
+        for server, channels in self.restricted_channels.items():
             if message.guild is not None and message.guild.id == server:
                 if message.channel.id not in channels:
                     return
