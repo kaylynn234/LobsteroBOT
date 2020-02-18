@@ -1,4 +1,5 @@
 import os
+import functools
 import random
 import sys
 import glob
@@ -329,7 +330,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         if (d_im.size[1] % 2 == 0):
             d_im = d_im.crop((0, 0, d_im.size[0], d_im.size[1] - 1))
             d_im.load()
-        final_im = kromo.add_chromatic(d_im, strength=4, no_blur=False)
+
+        to_run = functools.partial(kromo.add_chromatic, d_im, strength=2, no_blur=True)
+        final_im = await self.bot.loop.run_in_executor(None, to_run)
 
         await self.save_and_send(ctx, final_im, "chromatic.png")
 
