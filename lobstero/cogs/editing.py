@@ -2,16 +2,17 @@ import os
 import random
 import sys
 import glob
+import io
 import halftone
 import discord
-import kromo
 import PIL
-import asciify as acfy
 import aiohttp
 
+from unittest import mock
 from io import BytesIO
 from lobstero import lobstero_config
 from lobstero.utils import strings
+from lobstero.external import asciify, kromo
 from urllib.parse import urlsplit
 from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance
 from discord.ext import commands
@@ -79,249 +80,250 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     def is_image(self, url):
         finalurl = None
-        if str(url).lower().endswith(".png"):
+        if str(url).lower().endswith(".png") or str(url).lower().endswith(".jpg"):
             finalurl = url.lower()
-        if str(url).lower().endswith(".jpg"):
-            finalurl = url.lower()
-        if str(url).lower().endswith(".jpeg"):
+        elif str(url).lower().endswith(".jpeg"):
             finalurl = f"{url[:-4]}jpg"
         return finalurl
 
-    async def imgdownload(self, file_url):
-        file_name = urlsplit(file_url)[2].split('/')[-1]
-        file_ext = file_name.split(".", 1)[1]
+    async def package(self, file_loc, download=True):
+        """Packages a local or downloaded file into an object."""
+        try:
+            file_name = urlsplit(file_loc)[2].split('/')[-1]
+            file_ext = file_name.split(".", 1)[1]
+        except KeyError:
+            return None  # Not a well-formed url
+        f = io.BytesIO()
 
-        async with self.session.get(file_url) as resp:
-            with open(f"{root_directory}data/downloaded/{file_name}", 'wb+') as f:
-                f.write(await resp.read())
+        if download:
+            try:
+                async with self.session.get(file_loc) as resp:
+                    with io.BytesIO() as f:
+                        f.write(await resp.read())
+            except (OSError, ValueError):
+                return None
+        else:
+            try:
+                with open(file_loc, "rb") as b:
+                    f.write(b.read())
+            except (OSError, ValueError):
+                return None
 
-        return [f"{root_directory}data/downloaded/{file_name}", file_ext]
+        # This should (hopefully) never fail
+        f_obj = mock.Mock()
+        f_obj.data, f_obj.name, f_obj.ext = f, file_name, file_ext
+
+        return f_obj
 
     async def processfile(self, p_ctx, url):
-        filename = None
+        constructed = None
         if url is not None:
-            if p_ctx.message.mentions:
-                filename = await self.imgdownload(str(p_ctx.message.mentions[0].avatar_url))
-
-            else:
+            value = None
+            c = commands.converters.MemberConverter()
+            try:
+                m = await c.convert(p_ctx, url)
+            except commands.BadArgument:  # Member lookup failed, assume emoji
                 em = strings.split_count(url)
                 if em:
                     escape = f"{ord(em[0]):X}"
-                    filename = f"{root_directory}data/static/emojis/{escape}.png"
+                    constructed = await self.package(
+                        f"{root_directory}data/static/emojis/{escape}.png", False)
 
                 elif url.startswith("<") and url.endswith(">"):
                     emo_id = url.split(":")[2].split(">")[0]
-                    if not url.startswith("<a:"):
-                        emourl = f"https:/cdn.discordapp.com/emojis/{emo_id}.png?v=1"
-                    else:
+                    if url.startswith("<a:"):
                         emourl = f"https:/cdn.discordapp.com/emojis/{emo_id}.gif?v=1"
-                    filename = await self.imgdownload(emourl)
+                    else:
+                        emourl = f"https:/cdn.discordapp.com/emojis/{emo_id}.png?v=1"
+                    constructed = await self.package(emourl)
+                else:  # Assume it's a normal URL and hope for the best
+                    constructed = await self.package(url)
+            else:  # Conversion was a success, get an avatar url and download it
+                value = m.avatar_url_as(static_format="png", size=2048)
+                constructed = await self.package(str(value))
 
-                else:
-                    filename = await self.imgdownload(url)
-
-        elif url is None:
-            if p_ctx.message.attachments:
-                for x in p_ctx.message.attachments:
-                    filename = await self.imgdownload(x.url)
-        attachlist = []
-        if filename is None:
-            for message in await p_ctx.channel.history(limit=25).flatten():
-                if message.embeds:
-                    if not attachlist:
-                        if message.embeds[0].image.url:
-                            attachlist.append(message.embeds[0].image.url)
-                if message.attachments:
-                    if not attachlist:
-                        attachlist.append(message.attachments[0].url)
-
-        if attachlist:
-            filename = await self.imgdownload(str(attachlist[0]))
-
-        if filename is None:
-            await p_ctx.send(embed=discord.Embed(title="No images were found.", color=16202876))
-            return None
         else:
-            return filename
+            if p_ctx.message.attachments:
+                constructed = await self.package(p_ctx.message.attachments[0].url)
+
+        if constructed is None:
+            for message in await p_ctx.channel.history(limit=25).flatten():
+                if not constructed:
+                    if message.embeds and message.embeds[0].image:
+                        constructed = await self.package(message.embeds[0].image.url)
+                    if message.attachments:
+                        await self.package(message.attachments[0].url)
+                else:
+                    break
+
+        if constructed is None:  # No luck despite all this.
+            embed = discord.Embed(title="No images were found.", color=16202876)
+            await p_ctx.send(embed=embed)
+            return None
+
+        constructed.data.seek(0)  # just to be safe
+        return constructed
+
+    async def save_and_send(self, p_ctx, output, name, *args, **kwargs):
+        # Saves an Image into a BytesIO buffer and sends it.
+        # Extra args/ kwargs are passed to send.
+        file_f = name.split('.')[1]
+        buffer = BytesIO()        
+        output.save(buffer, file_f, *args, **kwargs)
+        buffer.seek(0)
+
+        constructed_file = discord.File(fp=buffer, filename=name)
+        embed = discord.Embed(color=16202876)
+        embed.set_image(url=f"attachment://{name}")
+
+        await p_ctx.send(file=constructed_file, embed=embed)
 
     @commands.command()
-    async def blur(self, ctx, url=None, amount=10):
+    async def blur(self, ctx, url=None):
         """Blur an image. Everyone has to start somewhwere."""
-
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        myimage = Image.open(str(result))
+        myimage = Image.open(result.data)
         im = myimage.convert("RGBA")
-        output = im.filter(ImageFilter.GaussianBlur(int(amount)))
-        output.save(f"{root_directory}data/downloaded/" + "blur_editoutput.png")
+        output = im.filter(ImageFilter.GaussianBlur(10))
 
-        buffer = BytesIO()
-        output.save(buffer, "png")  # 'save' function for PIL, adapt as necessary
-        buffer.seek(0)
+        await self.save_and_send(ctx, output, "blur.png")
 
-        imgurl = await chn.send(file= discord.File(f"{root_directory}data/downloaded/" + "blur_editoutput.png"))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
     @commands.command()
-    async def gay(self, ctx, url = None):
+    async def gay(self, ctx, url=None):
         """Unleash the powers of homosexuality on any image."""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        gimage = Image.open(root_directory + "data/images/gay.jpg")
-        simage = Image.open(str(result))
-        gim = gimage.convert("RGBA")
+        gimage = await self.package(f"{root_directory}lobstero/data/static/gay.jpg", False)
+        simage = Image.open(result.data)
+        gim = Image.open(gimage.data).convert("RGBA")
         im = simage.convert("RGBA")
+
         width, height = im.size
         gim_p = gim.resize((width, height), Image.NEAREST)
-        result = Image.blend(im, gim_p, 0.5)
-        result.save(f"{root_directory}data/downloaded/" + "gay_editoutput.png")
-        imgurl = await chn.send(file= discord.File(f"{root_directory}data/downloaded/" + "gay_editoutput.png"))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
+        output = Image.blend(im, gim_p, 0.5)
+
+        await self.save_and_send(ctx, output, "gay.png")
+
     @commands.command()
-    async def fry(self, ctx, url = None):
-        """Deepfrying, except not really, and we forgot the oil. Mainly because it's not easily available in a python program. Heck."""
+    async def fry(self, ctx, url=None):
+        """Deepfrying, except not really."""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        simage = Image.open(str(result))
+        simage = Image.open(result.data)
         im = simage.convert("RGBA")
-        result = im.filter(ImageFilter.UnsharpMask(radius = 10, percent = 450, threshold = 2))
-        result.save(f"{root_directory}data/downloaded/" + "fry_editoutput.png")
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
+        output = im.filter(ImageFilter.UnsharpMask(radius=10, percent=450, threshold=2))
+
+        await self.save_and_send(ctx, output, "gay.png")
+
     @commands.command()
-    async def nom(self, ctx, url = None):
+    async def nom(self, ctx, url=None):
         """Eating is a fun and enjoyable activity."""
-        prog = await ctx.send(embed=discord.Embed(title="Finding image... (1/4)", color=16202876))
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        size = 420, 420
-        d_im = Image.open(str(result))
-        pd_im = d_im.convert("RGBA")
-        mywidth = 420
-        wpercent = (mywidth/float(pd_im.size[0]))
-        hsize = int((float(pd_im.size[1])*float(wpercent)))
-        pd_im = pd_im.resize((mywidth,hsize), PIL.Image.ANTIALIAS)
-        owobase = Image.open(root_directory + "data/images/blobowo.png")
-        c_owobase = owobase.convert("RGBA")
-        owotop = Image.open(root_directory + "data/images/owoverlay.png")
-        c_owotop = owotop.convert("RGBA")
+        d_im = Image.open(result.data).convert("RGBA")
+        owobase = await self.package(f"{root_directory}lobstero/data/static/blobowo.png", False)
+        owotop = await self.package(f"{root_directory}lobstero/data/static/owoverlay.png", False)
+        c_owobase = Image.open(owobase.data).convert("RGBA")
+        c_owotop = Image.open(owotop.data).convert("RGBA")
+
+        wpercent = (420 / float(d_im.size[0]))
+        hsize = int((float(d_im.size[1]) * float(wpercent)))
+        pd_im = d_im.resize((420, hsize), Image.ANTIALIAS)
+
         width, height = pd_im.size
         offset = (216, 528, 216 + int(width), 528 + int(height))
         offset2 = (0, 0, 1024, 1024)
+
         c_owobase.paste(pd_im, offset, pd_im)
         c_owobase.paste(c_owotop, offset2, c_owotop)
-        c_owobase.save(f"{root_directory}data/downloaded/" + "nom_editoutput.png")
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
+
+        await self.save_and_send(ctx, c_owobase, "nom.png")
 
     @commands.command()
-    async def bless(self, ctx, url = None):
+    async def bless(self, ctx, url=None):
         """🛐🛐🛐"""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        im = Image.open(result)
-        c_im = im.convert("RGBA")
-        c_im = c_im.resize((1024,1024), PIL.Image.ANTIALIAS)
-        blesstop = Image.open(root_directory + "data/images/bless.png")
-        c_blesstop = blesstop.convert("RGBA")
+        blesstop = await self.package(f"{root_directory}lobstero/data/static/bless.png", False)
+        im = Image.open(result.data).convert("RGBA")
+        c_im = im.resize((1024, 1024), PIL.Image.ANTIALIAS)
+        c_blesstop = Image.open(blesstop.data).convert("RGBA")
+
         c_im.paste(c_blesstop, (0, 0, 1024, 1024), c_blesstop)
-        c_im.save(f"{root_directory}data/downloaded/" + "bless_editoutput.png")
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
-    @commands.command()
-    async def asciify(self, ctx, url = None):
+
+        await self.save_and_send(ctx, c_im, "bless.png")
+
+    @commands.command(name="asciify")
+    async def asciify_command(self, ctx, url=None):
         """Turn an image into some spicy dots."""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        colorlist = ["blue", "green", "red", "orange", "greenyellow", "lawngreen", "hotpink", "mediumturquoise", "mistyrose", "orangered"]
+        opened = Image.open(result.data)
+        colorlist = [
+            "blue", "green", "red", "orange", "greenyellow", "lawngreen", "hotpink",
+            "mediumturquoise", "mistyrose", "orangered"]
+
         bglist = ["black", "black"]
-        acfy.asciiart(result, 0.2, 1.5, f"{root_directory}data/downloaded/" + "ascii_editoutput.png", str(random.choice(colorlist)), str(random.choice(colorlist)), str(random.choice(bglist)))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
+        asciified = asciify.asciiart(
+            opened, 0.2, 1.5, ..., str(random.choice(colorlist)), 
+            str(random.choice(colorlist)), str(random.choice(bglist)))
+
+        await self.save_and_send(ctx, asciified, "ascii.png")
 
     @commands.command()
-    async def goblin(self, ctx, url = None):
-        """Pull him out and BEAT HIM"""
-        prog = await ctx.send(embed=discord.Embed(title="Finding image... (1/4)", color=16202876))
-        result = await self.processfile(ctx, url)
-        if result is None:
-            return
-
-        im = Image.open(result)
-        c_im = im.convert("RGBA")
-        c_im = c_im.resize((1024,1024), PIL.Image.ANTIALIAS)
-        goblintop = Image.open(root_directory + "data/images/goblin.png")
-        c_goblintop = goblintop.convert("RGBA")
-        c_im.paste(c_goblintop, (0, 0, 1024, 1024), c_goblintop)
-        c_im.save(f"{root_directory}data/downloaded/" + "goblin_editoutput.png")
-        await prog.edit(embed=discord.Embed(title="Uploading... (3/4)", color=16202876))
-        imgurl = await chn.send(file= discord.File(f"{root_directory}data/downloaded/" + "goblin_editoutput.png"))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-        await prog.edit(embed=finalembed)
-    
-    @commands.command()
-    async def xokify(self, ctx, url = None):
+    async def xokify(self, ctx, url=None):
         """xok"""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        im = Image.open(result)
-        c_im = im.convert("RGBA")
-        c_im = c_im.resize((1024,1024), PIL.Image.ANTIALIAS)
+        im = Image.open(result.data).convert("RGBA")
+        c_im = im.resize((1024, 1024), PIL.Image.ANTIALIAS)
         converter = ImageEnhance.Color(c_im)
-        img4455 = converter.enhance(1.75)
-        mask = Image.open(root_directory + "data/images/xok_mask.png")
-        c_mask = mask.convert("RGBA")
-        xok = Image.open(root_directory + "data/images/xok.png")
-        xok = xok.convert("RGBA")
-        result = Image.blend(xok, img4455, 0.3)
-        fuckpillow = Image.new('RGBA', (1024, 1024))
-        fuckpillow.paste(result, (0, 0, 1024, 1024), c_mask)
-        fuckpillow.save(root_directory + "image_downloads/xokify_editoutput.png")
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
+        mask = await self.package(f"{root_directory}lobstero/data/static/xok_mask.png", False)
+        xok = await self.package(f"{root_directory}lobstero/data/static/xok.png", False)
+        c_mask = Image.open(mask.data).convert("RGBA")
+        c_xok = Image.open(xok.data).convert("RGBA")
+
+        converted = converter.enhance(1.75)
+        blended = Image.blend(c_xok, converted, 0.3)
+        masked = Image.new('RGBA', (1024, 1024))
+        masked.paste(blended, (0, 0, 1024, 1024), c_mask)
+
+        await self.save_and_send(ctx, masked, "xokify.png")
 
     @commands.command()
-    async def jpeg(self, ctx, url = None):
+    async def jpeg(self, ctx, url=None):
         """Ever wanted to make an image look terrible?"""
-        prog = await ctx.send(embed=discord.Embed(title="Finding image... (1/4)", color=16202876))
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        d_im = Image.open(str(result)).convert("CMYK")
+        d_im = Image.open(result.data).convert("CMYK")
         d_im.thumbnail((200, 200))
-        d_im.save(root_directory + "image_downloads/jpeg_editoutput.jpg", format='JPEG', quality=1)
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
+        await self.save_and_send(ctx, d_im, "xokify.png", format='JPEG', quality=1)
+
     @commands.command()
-    async def chromatic(self, ctx, url = None):
+    async def chromatic(self, ctx, url=None):
         """Fancy lens things!"""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        d_im = Image.open(str(result)).convert("RGB")
+        d_im = Image.open(result.data).convert("RGB")
         d_im.thumbnail((1024, 1024))
         if (d_im.size[0] % 2 == 0):
             d_im = d_im.crop((0, 0, d_im.size[0] - 1, d_im.size[1]))
@@ -330,32 +332,29 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             d_im = d_im.crop((0, 0, d_im.size[0], d_im.size[1] - 1))
             d_im.load()
         final_im = kromo.add_chromatic(d_im, strength=4, no_blur=False)
-        final_im.save(root_directory + "image_downloads/chromatic_editoutput.png")
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
+
+        await self.save_and_send(ctx, final_im, "chromatic.png")
+
     @commands.command()
-    async def halftone(self, ctx, url = None):
+    async def halftone(self, ctx, url=None):
         """Fancy depressive dots."""
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        h = halftone.Halftone(result)
-        h.make(style='grayscale', angles= [45], sample = 16)
-        imgurl = await chn.send(file= discord.File(result.split(".")[0] + "_halftoned." + result.split(".")[1]))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-    
-    def addzero(self, num):
+        im = Image.open(result.data)
+        h = halftone.Halftone()
+        output = h.make(im, style='grayscale', angles=[45], sample=16)
+        await self.save_and_send(ctx, output, "halftone.png")
 
+    def addzero(self, num):
         if len(str(num)) < 2:
             return "00" + str(num)
         if len(str(num)) < 3:
             return "0" + str(num)
         return str(num)
 
-    @commands.command()
+    @commands.command(enabled=False)
     async def wheelofban(self, ctx):
         """Spin the wheel of ban!"""
         waiting = discord.Embed(title="Spinning the wheel...", color=16202876)
@@ -367,9 +366,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         for x in files:
             os.remove(x)
 
-        wheel = Image.open(f"{root_directory}data/images/wheel_of_ban.png").convert("RGBA").resize((512, 512), Image.ANTIALIAS)
-        ban = Image.open(f"{root_directory}data/images/ban_spin_top.png").convert("RGBA").resize((512, 512), Image.ANTIALIAS)
-        ban_trans = Image.open(f"{root_directory}data/images/transparentban.png").convert("RGBA")
+        wheel = Image.open(f"{root_directory}lobstero/data/static/wheel_of_ban.png").convert("RGBA").resize((512, 512), Image.ANTIALIAS)
+        ban = Image.open(f"{root_directory}lobstero/data/static/ban_spin_top.png").convert("RGBA").resize((512, 512), Image.ANTIALIAS)
+        ban_mask = Image.open(f"{root_directory}lobstero/data/static/transparentban.png").convert("RGBA")
         degrees, to_spin, frameid = 0, 9.9, 0
 
         for _ in range(random.randint(25, 175)):
@@ -377,7 +376,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             degrees += to_spin
             whl = wheel.rotate(degrees)
             whl.paste(ban, None, ban)
-            out = banhandler.generate_frame(ban_trans)
+            out = banhandler.generate_frame(ban_mask)
             out.paste(whl, (63, 63), whl)
             out.save(f"{root_directory}image_downloads/wheel/img{self.addzero(frameid)}.png")
         for _ in range(70):
@@ -387,14 +386,14 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             degrees += to_spin
             whl = wheel.rotate(degrees)
             whl.paste(ban, None, ban)
-            out = banhandler.generate_frame(ban_trans)
+            out = banhandler.generate_frame(ban_mask)
             out.paste(whl, (63, 63), whl)
             out.save(f"{root_directory}image_downloads/wheel/img{self.addzero(frameid)}.png")
         for _ in range(20):
             frameid += 1
             whl = wheel.rotate(degrees)
             whl.paste(ban, None, ban)
-            out = banhandler.generate_frame(ban_trans)
+            out = banhandler.generate_frame(ban_mask)
             out.paste(whl, (63, 63), whl)
             out.save(f"{root_directory}image_downloads/wheel/img{self.addzero(frameid)}.png")
         
@@ -405,30 +404,26 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 path = "file '" + "img" + x.split("\img")[1] + "'\n"
                 writef.write(path)
 
-        os.system(r"C:\ffmpeg\bin\ffmpeg.exe" + r""" -y -r 30 -f concat -safe 0 -i """ + '"' + f"{root_directory}image_downloads/wheel/fileoutputs.txt" + '"' """ -c:v libx264 -vf "fps=30,format=yuv420p" """ + '"' +  root_directory + 'image_downloads/wheel/result.mp4"')
-        
-        
+        os.system(r"C:\ffmpeg\bin\ffmpeg.exe" + r""" -y -r 30 -f concat -safe 0 -i """ + '"' + f"{root_directory}data/static/fileoutputs.txt" + '"' """ -c:v libx264 -vf "fps=30,format=yuv420p" """ + '"' +  root_directory + 'image_downloads/wheel/result.mp4"')
+
         done = discord.Embed(title="Judgement comes!", color=16202876)
 
         await ctx.send(file=discord.File(f"{root_directory}image_downloads/wheel/result.mp4"))
         await snt.edit(embed=done)
 
-    def smooth_resize(self, img, basewidth = 1000, method = Image.LANCZOS):
+    def smooth_resize(self, img, basewidth=1000, method=Image.LANCZOS):
         wpercent = (basewidth/float(img.size[0]))
         hsize = int((float(img.size[1])*float(wpercent)))
         return img.resize((basewidth, hsize), method)
 
     @commands.command()
-    async def mosaic(self, ctx, url = None):
+    async def mosaic(self, ctx, url=None):
         """Sqaure dance!"""
-        prog = await ctx.send(embed=discord.Embed(title="Finding image... (1/4)", color=16202876))
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        await prog.edit(embed=discord.Embed(title="Processing... (2/4)", color=16202876))
-        
-        d_im = Image.open(str(result)).convert("RGBA")
+        d_im = Image.open(result.data).convert("RGBA")
         base = self.smooth_resize(d_im, 100, Image.NEAREST)
         c_base = base.convert("L").convert("RGBA")
         c_base = self.smooth_resize(d_im, int(base.size[0] / 8), Image.NEAREST)
@@ -437,19 +432,13 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         for w_pos in range(0, overlay.size[0] + 1, c_base.size[0]):
             for h_pos in range(0, overlay.size[1] + 1, c_base.size[1]):
-
                 canvas.paste(c_base, (w_pos, h_pos), c_base)
-        
+
         canvas = canvas.convert("L").convert("RGBA")
-        
         final = Image.blend(canvas, overlay, 0.3)
-        final.save(root_directory + "image_downloads/mosaic_editoutput.png")
-        await prog.edit(embed=discord.Embed(title="Uploading... (3/4)", color=16202876))
-        imgurl = await chn.send(file= discord.File(root_directory + "image_downloads/mosaic_editoutput.png"))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-        await prog.edit(embed=finalembed)
-    
+
+        await self.save_and_send(ctx, final, "mosaic.png")
+
     def make_meme(self, topString, bottomString, filename):
 
         img = Image.open(filename).convert("RGBA")
@@ -490,27 +479,19 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         draw.text(topTextPosition, topString, (255,255,255), font=font)
         draw.text(bottomTextPosition, bottomString, (255,255,255), font=font)
 
-        img.save(f"{root_directory}image_downloads/shitpostgen_editoutput.png")
+        return img
 
     @commands.command()
-    async def shitpost(self, ctx, url = None):
+    async def shitpost(self, ctx, url=None):
         """It's humour from the future!"""
-        prog = await ctx.send(embed=discord.Embed(title="Finding image... (1/4)", color=16202876))
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        await prog.edit(embed=discord.Embed(title="Processing... (2/4)", color=16202876))
-        retrieved = self.client.get_cog("Miscellaneous").get_commands()
-        mapped = {x.name : x for x in retrieved}
-        c = mapped["invoked_markov"]
-        t = await ctx.invoke(c)
-        self.make_meme(t, t, result)
-        await prog.edit(embed=discord.Embed(title="Uploading... (3/4)", color=16202876))
-        imgurl = await chn.send(file= discord.File(root_directory + "image_downloads/shitpostgen_editoutput.png"))
-        finalembed = discord.Embed(title="Complete! (4/4)", color=16202876)
-        finalembed.set_image(url=imgurl.attachments[0].url)
-        await prog.edit(embed=finalembed)
+        markov = await self.markov_generator.generate()
+        meme = self.make_meme(markov, markov, result.data)
+
+        await self.save_and_send(ctx, meme, "shitpost.png")
 
 def setup(bot):
     bot.add_cog(Cog(bot))

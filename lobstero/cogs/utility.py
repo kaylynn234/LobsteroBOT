@@ -233,7 +233,7 @@ Person can be an ID, mention, or name"""
 
     @commands.command(aliases=["w", "wi", "who", "userinfo"])
     @handlers.blueprints_or()
-    async def whois(self, ctx, user: discord.User = None):
+    async def whois(self, ctx, *, user: discord.User = None):
         """<whois (person)
 
 Gives you some simple information about a user."""
