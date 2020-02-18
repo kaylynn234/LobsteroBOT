@@ -313,7 +313,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         d_im = Image.open(result.data).convert("CMYK")
         d_im.thumbnail((200, 200))
-        await self.save_and_send(ctx, d_im, "xokify.png", format='JPEG', quality=1)
+        await self.save_and_send(ctx, d_im, "jpegify.jpeg", quality=1)
 
     @commands.command()
     async def chromatic(self, ctx, url=None):
