@@ -54,7 +54,7 @@ class LobsterContext(commands.Context):
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
         try:
-            await super().send(
+            return await super().send(
                 content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after,
                 nonce=nonce)
 
@@ -62,7 +62,7 @@ class LobsterContext(commands.Context):
             if self.guild:
                 perms = self.guild.me.permissions_in(self.channel)
                 if perms.send_messages:
-                    return await super().send((
+                    await super().send((
                         "⚠️ **|** I tried to send an embed or image in this channel, "
                         "but was unable to due to a lack of permissions."), delete_after=5)
 
