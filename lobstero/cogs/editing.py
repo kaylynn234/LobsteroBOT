@@ -118,7 +118,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         constructed = None
         if url is not None:
             value = None
-            c = commands.converters.MemberConverter()
+            c = commands.MemberConverter()
             try:
                 m = await c.convert(p_ctx, url)
             except commands.BadArgument:  # Member lookup failed, assume emoji
