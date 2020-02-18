@@ -452,12 +452,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         # find biggest font size that works
         fontSize = int(imageSize[1]/5)
-        font = ImageFont.truetype(f"{root_directory}data/fonts/impact.ttf", fontSize)
+        font = ImageFont.truetype(f"{root_directory}lobstero/data/static/impact.ttf", fontSize)
         topTextSize = font.getsize(topString)
         bottomTextSize = font.getsize(bottomString)
         while topTextSize[0] > imageSize[0]-20 or bottomTextSize[0] > imageSize[0]-20:
             fontSize = fontSize - 1
-            font = ImageFont.truetype(f"{root_directory}data/fonts/impact.ttf", fontSize)
+            font = ImageFont.truetype(f"{root_directory}lobstero/data/static/impact.ttf", fontSize)
             topTextSize = font.getsize(topString)
             bottomTextSize = font.getsize(bottomString)
 
