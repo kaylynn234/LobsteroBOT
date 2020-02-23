@@ -70,7 +70,7 @@ Denies the specified object access to bot functionality.
 Allows the specified object access to bot functionality.
         """
         if what.lower() not in ["member", "channel", "guild"]:
-            await embeds.simple_embed("Not a valid block type.", ctx)
+            return await embeds.simple_embed("Not a valid block type.", ctx)
 
         c = getattr(commands, f"{what.capitalize())}Converter")
         ready_to_convert, converted = c(), None
