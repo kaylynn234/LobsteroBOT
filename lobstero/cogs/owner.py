@@ -39,6 +39,27 @@ Sends a message to a user (specified by ID) in DMs.
         except discord.errors.Forbidden:
             await ctx.send("Message not sent.")
 
+    async def handle_bwlist(self, new, ctx, what, who):
+        """Actually does the things for blacklists and whitelists"""
+        if what.lower() not in ["member", "channel", "guild"]:
+            await embeds.simple_embed("Not a valid block type.", ctx)
+
+        if what.lower() == "channel":
+            c = getattr(commands, f"TextChannelConverter")
+        else:
+            c = getattr(commands, f"{what.capitalize()}Converter")
+        ready_to_convert, converted = c(), None
+
+        try:
+            converted = await ready_to_convert.convert(ctx, who)
+        except commands.BadArgument:
+            return await embeds.simple_embed(f"Couldn't find a matching {what.lower()}.", ctx)
+
+        # sue me
+        to_set = getattr(db, "blacklist_add") if new else getattr(db, "blacklist_remove")
+        to_set(str(converted.id), what.lower())
+        await embeds.simple_embed("Blacklisted successfully.", ctx)
+
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
@@ -47,19 +68,8 @@ Sends a message to a user (specified by ID) in DMs.
 
 Denies the specified object access to bot functionality.
         """
-        if what.lower() not in ["member", "channel", "guild"]:
-            await embeds.simple_embed("Not a valid block type.", ctx)
 
-        c = getattr(commands, f"{what.capitalize()}Converter")
-        ready_to_convert, converted = c(), None
-
-        try:
-            converted = await ready_to_convert.convert(ctx, who)
-        except commands.BadArgument:
-            return await embeds.simple_embed(f"Couldn't find a matching {what.lower()}.", ctx)
-
-        db.blacklist_add(str(converted.id), what.lower())
-        await embeds.simple_embed("Blacklisted successfully.", ctx)
+        await self.handle_bwlist(True, ctx, what, who)
 
     @commands.command()
     @commands.guild_only()
@@ -69,26 +79,8 @@ Denies the specified object access to bot functionality.
 
 Allows the specified object access to bot functionality.
         """
-        if what.lower() not in ["member", "channel", "guild"]:
-            return await embeds.simple_embed("Not a valid block type.", ctx)
 
-        c = getattr(commands, f"{what.capitalize()}Converter")
-        ready_to_convert, converted = c(), None
-
-        try:
-            converted = await ready_to_convert.convert(ctx, who)
-        except commands.BadArgument:
-            return await embeds.simple_embed(f"Couldn't find a matching {what.lower()}.", ctx)
-
-        db.blacklist_remove(str(converted.id), what.lower())
-        await embeds.simple_embed("Blacklisted successfully.", ctx)
-
-    def file_len(self, fname) -> int:
-        """Opens a file, returning its length in lines"""
-        with open(fname, encoding="utf-8", errors="ignore") as f:
-            for i, l in enumerate(f):
-                pass
-        return i + 1
+        await self.handle_bwlist(False, ctx, what, who)
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
