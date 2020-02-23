@@ -47,7 +47,7 @@ Sends a message to a user (specified by ID) in DMs.
 
 Denies the specified object access to bot functionality.
         """
-        if what.lower() not in ["member", "user", "guild"]:
+        if what.lower() not in ["member", "channel", "guild"]:
             await embeds.simple_embed("Not a valid block type.", ctx)
 
         c = getattr(commands, f"{what.capitalize()}Converter")
