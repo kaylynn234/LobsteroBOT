@@ -137,7 +137,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
     async def handle_blacklist(self, ctx):
         """A check that runs once before every command execution.
-        In our case, this checks if a user is blacklisted.
+        In our case, this checks if a user/server/channel is blacklisted.
         If they are, they get sent a spooky message, and the command isn't executed.
         """
 
@@ -150,7 +150,7 @@ class LobsteroBOT(commands.AutoShardedBot):
             misc.utclog(ctx, f"{ctx.author} cannot use command {ctx.command.name}.")
             await ctx.send((
                 f"**{ctx.author.name}**, {random.choice(text.quotelist)} "
-                "Your access to bot functions is currently disabled."), delete_after=10)
+                "Your access to bot functions has been disabled."), delete_after=10)
             await ctx.message.add_reaction("🚫")
         else:
             if ctx.valid:

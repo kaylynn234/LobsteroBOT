@@ -42,44 +42,46 @@ Sends a message to a user (specified by ID) in DMs.
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
-    async def blacklist(self, ctx, *, who: Union[discord.User, discord.TextChannel, discord.Guild]):
-        """<blacklist {User, Guild, Channel}
+    async def blacklist(self, ctx, what, *, who):
+        """<blacklist {User, Guild, Channel} (something)
 
 Denies the specified object access to bot functionality.
         """
-        if isinstance(who, discord.User):
-            blocktype = "user"
-        elif isinstance(who, discord.TextChannel):
-            blocktype = "channel"
-        elif isinstance(who, discord.Guild):
-            blocktype = "guild"
-        else:
-            print("I'm not sure how we got here")
-            return
+        if what.lower() not in ["member", "user", "guild"]:
+            await embeds.simple_embed("Not a valid block type.", ctx)
 
-        db.blacklist_add(str(who.id), blocktype)
-        await embeds.simple_embed("User blacklisted", ctx)
+        c = getattr(commands, f"{what.lower()}Converter".capitalize())
+        ready_to_convert, converted = c(), None
+
+        try:
+            converted = await ready_to_convert.convert(ctx, who)
+        except commands.BadArgument:
+            return await embeds.simple_embed(f"Couldn't find a matching {what.lower()}.", ctx)
+
+        db.blacklist_add(str(converted.id), what.lower())
+        await embeds.simple_embed("Blacklisted successfully.", ctx)
 
     @commands.command()
     @commands.guild_only()
     @commands.is_owner()
-    async def whitelist(self, ctx, *, who: Union[discord.User, discord.TextChannel, discord.Guild]):
+    async def whitelist(self, ctx, what, *, who):
         """<whitelist {User, Guild, Channel}
 
 Allows the specified object access to bot functionality.
         """
-        if isinstance(who, discord.User):
-            blocktype = "user"
-        elif isinstance(who, discord.TextChannel):
-            blocktype = "channel"
-        elif isinstance(who, discord.Guild):
-            blocktype = "guild"
-        else:
-            print("I'm not sure how we got here")
-            return
+        if what.lower() not in ["member", "user", "guild"]:
+            await embeds.simple_embed("Not a valid block type.", ctx)
 
-        db.blacklist_remove(str(who.id), blocktype)
-        await embeds.simple_embed("User removed from blacklist", ctx)
+        c = getattr(commands, f"{what.lower()}Converter".capitalize())
+        ready_to_convert, converted = c(), None
+
+        try:
+            converted = await ready_to_convert.convert(ctx, who)
+        except commands.BadArgument:
+            return await embeds.simple_embed(f"Couldn't find a matching {what.lower()}.", ctx)
+
+        db.blacklist_remove(str(converted.id), what.lower())
+        await embeds.simple_embed("Blacklisted successfully.", ctx)
 
     def file_len(self, fname) -> int:
         """Opens a file, returning its length in lines"""
