@@ -14,7 +14,11 @@ root_directory = sys.path[0] + "/"
 
 
 class Cog(commands.Cog, name="Economy & Games"):
-    """Ever wanted to earn and gamble away insignificant pieces of cheese? Now's your chance!."""
+    """Ever wanted to earn and gamble away insignificant pieces of cheese? Now's your chance!
+Game and gambling commands reside in this module. 
+Roll the dice. Lose it all, only to win it back ten-fold.
+As a Lobstero Cheese Economy Member, your lows are the lowest, but at your high you become a self-propelled demi-god of cheese.
+If you're not willing to risk it, you'll never experience the ecstasy of true RNG. You'll also save a significant amount of money."""
 
     def __init__(self, bot):
         self.bot = bot

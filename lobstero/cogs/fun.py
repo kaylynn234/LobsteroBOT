@@ -56,7 +56,9 @@ fishchances = (
 
 
 class Cog(commands.Cog, name="Fun"):
-    """Commands to (hopefully) brighten your day."""
+    """Commands to (hopefully) brighten your day.
+This module contains most of the fun commands. Stuff like cat/ dog images and hugging your friends.
+You can also roll dice."""
 
     def __init__(self, bot):
         self.bot = bot

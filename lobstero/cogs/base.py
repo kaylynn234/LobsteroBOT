@@ -18,7 +18,9 @@ psutil.cpu_percent(interval=None, percpu=True)  # Returns a meaningless value on
 
 
 class Cog(commands.Cog, name="Miscellaneous"):
-    """The commands that don't really fit anywhere."""
+    """The commands that don't really fit anywhere.
+Most of these are more "meta" commands, and revolve around the bot itself.
+Also features git-related commands."""
 
     def __init__(self, bot):
         self.bot = bot

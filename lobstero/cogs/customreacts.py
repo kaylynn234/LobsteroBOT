@@ -15,7 +15,9 @@ root_directory = sys.path[0] + "/"
 
 
 class Cog(commands.Cog, name="Custom Reactions"):
-    """It's not spam, I swear."""
+    """Custom reactions are configured in this module, as well as the settings surrounding them.
+For example, you can deny specific channels access to custom reactions as an anti-spam measure.
+"""
     def __init__(self, bot):
         self.bot = bot
 
@@ -220,7 +222,6 @@ class Cog(commands.Cog, name="Custom Reactions"):
 
     @commands.Cog.listener()
     @commands.guild_only()
-    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def on_message(self, message):
         """Called every message. Handles reactions."""
         if message.author.bot is False and message.guild:

@@ -24,7 +24,9 @@ bp_numbered = {i: x for i, x in enumerate(valid_bp_responses, 1)}
 
 
 class Cog(commands.Cog, name="Settings and server customization"):
-    """A module that provides commands for managing your server's Lobstero settings."""
+    """A module that provides commands for managing Lobstero and your server.
+Welcome messages and command blueprints can configured in this module.
+General server settings and self-assignable roles can also be configured."""
     def __init__(self, bot):
         self.bot = bot
 

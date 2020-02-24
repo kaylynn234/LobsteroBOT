@@ -22,7 +22,10 @@ m_aliases = ["moderation", "moderate", "mod"]
 
 
 class Cog(commands.Cog, name="Moderation"):
-    """For those whomst are powerful."""
+    """This module contains Lobstero's moderation commands.
+You can use the commands here to do several things, such as muting or banning members.
+You can also use this module to view the wrongdoings of a member. 
+"""
     def __init__(self, bot):
         self.bot = bot
         self.check_for_updates.start()

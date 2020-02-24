@@ -16,7 +16,8 @@ root_directory = sys.path[0] + "/"
 
 
 class Cog(commands.Cog, name="Bot Owner"):
-    """Owner stuff."""
+    """Owner related commands.
+You shouldn't even see this. if you do, you know what it does."""
     def __init__(self, bot):
         self.bot = bot
 
