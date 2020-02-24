@@ -83,7 +83,7 @@ class LobsteroHELP(commands.HelpCommand):
         for command in cog.get_commands():
             try:
                 usable = await command.can_run(self.context)
-            except commands.CheckFailure:
+            except:  # fuck you flake8
                 usable = False
 
             if usable:
