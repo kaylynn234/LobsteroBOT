@@ -189,7 +189,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
         self.handler = handlers.LobsterHandler(self)
 
-        super().__init__(command_prefix, help_command=LobsteroHELP, **kwargs)
+        super().__init__(command_prefix, help_command=LobsteroHELP(), **kwargs)
 
         self.load_extension("jishaku")
         self.restricted_channels = {  # will implement this in a db later, for now this'll work
