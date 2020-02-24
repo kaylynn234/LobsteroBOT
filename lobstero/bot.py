@@ -120,7 +120,7 @@ class LobsteroHELP(commands.HelpCommand):
             f"```{self.context.prefix}{command.qualified_name} {command.signature}```",
             "*<arg>* represents a required argument. *[arg]* represents an optional argument.",
             "**Do not actually use these symbols when using commands!**\n",
-            command.help
+            f"{command.help or '*(No detailed help provided)*'}"
         ]
 
         if isinstance(command, commands.Group):
