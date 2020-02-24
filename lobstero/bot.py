@@ -118,7 +118,7 @@ class LobsteroHELP(commands.HelpCommand):
         embed = discord.Embed(title="Help", color=16202876)
         description = [
             f"```{self.context.prefix}{command.qualified_name} {command.signature}```",
-            "*<arg>* represents a required argument. *[arg]* represents an optional argument.",
+            "<*arg*> represents a required argument. [*arg*] represents an optional argument.",
             "**Do not actually use these symbols when using commands!**\n",
             f"{command.help or '*(No detailed help provided)*'}"
         ]
