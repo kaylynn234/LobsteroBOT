@@ -381,7 +381,7 @@ class HelpPagesMenu(menus.ListPageSource):
         self.data_len = len(data)
 
     async def format_page(self, menu, entries):
-        current = entries[0]
+        current = entries
         current.title = f"Help (page {self.current_page + 1}/{self.data_len})"
 
         return current
