@@ -372,3 +372,16 @@ class BlueprintConfirmationMenu(menus.Menu):
     async def button_no(self, _):
         self.choice = False
         self.stop()
+
+
+class HelpPagesMenu(menus.ListPageSource):
+    """A simple menu class for the help command."""
+    def __init__(self, data):
+        super().__init__(data, per_page=1)
+        self.data_len = len(data)
+
+    async def format_page(self, menu, entries):
+        current = entries[0]
+        current.title = f"Help (page {self.current_page + 1}/{self.data_len})"
+
+        return current

@@ -26,7 +26,7 @@ class Cog(commands.Cog, name="Bot Owner"):
     async def respond(self, ctx, userid: int, *, message):
         """<respond (userid) (message)
 
-Sends a message to a user (specified by ID) in DMs. 
+Sends a message to a user (specified by ID) in DMs.
         """
         user = self.bot.get_user(userid)
         try:

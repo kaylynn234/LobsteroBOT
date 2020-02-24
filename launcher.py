@@ -21,8 +21,7 @@ logging.basicConfig(level=logging.INFO)
 
 bot = LobsteroBOT(
     case_insensitive=lc.config.case_insensitive,
-    owner_ids=set(lc.config.owner_id),
-    help_command=None)
+    owner_ids=set(lc.config.owner_id))
 
 try:
     from discord.ext import menus

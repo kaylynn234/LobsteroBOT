@@ -8,9 +8,10 @@ import discord
 from typing import Any, Type
 
 from discord.ext import commands
+from discord.ext.menus import MenuPages
 from chattymarkov import ChattyMarkovAsync
-from lobstero.utils import db, misc, text
-from lobstero.models import handlers
+from lobstero.utils import db, misc, text, embeds, strings
+from lobstero.models import handlers, menus
 from lobstero import lobstero_config
 
 lc = lobstero_config.LobsteroCredentials()
@@ -50,7 +51,7 @@ if failed:
     exit(1)
 
 
-class LobsterContext(commands.Context):
+class LobsteroCONTEXT(commands.Context):
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
         try:
@@ -63,10 +64,120 @@ class LobsterContext(commands.Context):
                 perms = self.guild.me.permissions_in(self.channel)
                 if perms.send_messages:
                     await super().send((
-                        "⚠️ **|** I tried to send an embed or image in this channel, "
+                        "⚠️ **|** I tried to send an embed or file in this channel, "
                         "but was unable to due to a lack of permissions."), delete_after=5)
 
             raise
+
+    async def simple_embed(self, content):
+        """Sends an embed."""
+        await embeds.simple_embed(content, self)
+
+
+class LobsteroHELP(commands.HelpCommand):
+
+    async def generate_cog_help(self, cog):
+        usable_commands = []
+        retrieved = cog.get_commands()  # normally i wouldn't, but we'll reuse this
+
+        for command in cog.get_commands():
+            try:
+                usable = await command.can_run(self.context)
+            except commands.CheckFailure:
+                usable = False
+
+            if usable:
+                usable_commands.append(command)
+
+        if not usable_commands:  # empty list
+            return None
+
+        embed = discord.Embed(title="Help", color=16202876)
+        description = [
+            f"```{cog.qualified_name}```",
+            f"{cog.description}\n",
+            "```Commands```",
+            strings.blockjoin([command.name for command in usable_commands])
+        ]
+
+        if len(usable_commands) != len(retrieved):
+            delta = len(retrieved) - len(usable_commands)
+            if delta == 1:
+                embed.set_footer(text=(
+                    "1 command has been omitted because you lack the "
+                    "permissions required to use it."))
+            else:
+                embed.set_footer(text=(
+                    f"{delta} commands have been omitted because you lack the "
+                    "permissions required to use them."))
+
+        embed.description = "\n".join(description)
+        return embed
+
+    async def single_help(self, command):
+        embed = discord.Embed(title="Help", color=16202876)
+        description = [
+            f"```{self.context.prefix}{command.qualified_name} {command.signature}```",
+            "*<arg>* represents a required argument. *[arg]* represents an optional argument.",
+            "**Do not actually use these symbols when using commands!**\n",
+            command.help
+        ]
+
+        if isinstance(command, commands.Group):
+            embed.add_field(
+                name=f"{len(command.subcommand)} subcommand(s):",
+                value=strings.blockjoin([c.name for c in command.commands]))
+
+        if command.aliases:
+            embed.add_field(
+                name=f"{len(command.aliases)} alias(es):",
+                value=strings.blockjoin(command.aliases))
+
+        cd = getattr(command._buckets._cooldown, 'per', None)
+
+        embed.description = "\n".join(description)
+        if cd:
+            embed.set_footer(text=f"This command has a {cd} second cooldown.")
+
+        await self.context.send(embed=embed)
+
+    async def send_command_help(self, command):
+        await self.single_help(command)
+
+    async def send_group_help(self, group):
+        await self.single_help(group)
+
+    async def send_cog_help(self, cog):
+        to_send = await self.generate_cog_help(cog)
+        if to_send:
+            await self.context.send(embed=to_send)
+        else:
+            await self.context.simple_embed(
+                "You do not have the permissions required to use this module.")
+
+    async def send_bot_help(self, _):
+        embed = discord.Embed(title="Help", color=16202876)
+
+        cogs = sorted(self.context.bot.cogs.values(), key=lambda c: c.qualified_name)
+        raw_pages = [await self.generate_cog_help(cog) for cog in cogs]
+        cog_pages = [page for page in raw_pages if page is not None]
+
+        description = [
+            "From here, you can:"
+            "_ _   • Use the reactions below to navigate between module help pages."
+            "_ _   • Use *<help (module)* to view help on a module."
+            "_ _   • Use *<help (command)* to view help on a command.\n"
+            "You can also use *<info* to view more information about Lobstero."
+        ]
+
+        embed.description = "\n".join(description)
+
+        pages = menus.HelpPagesMenu([embed] + cog_pages)
+        menu = MenuPages(pages, timeout=90, clear_reactions_after=True)
+        await menu.start(self.context)
+
+    async def send_error_message(self, error):
+        await self.context.simple_embed(error)
 
 
 class LobsteroBOT(commands.AutoShardedBot):
@@ -78,7 +189,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
         self.handler = handlers.LobsterHandler(self)
 
-        super().__init__(command_prefix, **kwargs)
+        super().__init__(command_prefix, help_command=LobsteroHELP, **kwargs)
 
         self.load_extension("jishaku")
         self.restricted_channels = {  # will implement this in a db later, for now this'll work
@@ -86,7 +197,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         }
 
     async def get_prefix(self, message) -> str:
-        """Gets the prefix that should be used based on context."""
+        """Gets the prefix that should be used based on message context."""
 
         prefix_l = db.prefix_list()
         if str(message.guild.id) not in prefix_l:
@@ -226,7 +337,7 @@ class LobsteroBOT(commands.AutoShardedBot):
             await c_ctx.send(markov)
 
         # Process commands
-        ctx = await self.get_context(message, cls=LobsterContext)
+        ctx = await self.get_context(message, cls=LobsteroCONTEXT)
         await self.invoke(ctx)
 
     async def on_command_error(self, ctx, error) -> None:
