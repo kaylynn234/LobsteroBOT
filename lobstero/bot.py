@@ -163,10 +163,10 @@ class LobsteroHELP(commands.HelpCommand):
         cog_pages = [page for page in raw_pages if page is not None]
 
         description = [
-            "From here, you can:"
-            "_ _   • Use the reactions below to navigate between module help pages."
-            "_ _   • Use *<help (module)* to view help on a module."
-            "_ _   • Use *<help (command)* to view help on a command.\n"
+            "From here, you can:",
+            "_ _   • Use the reactions below to navigate between module help pages.",
+            "_ _   • Use *<help (module)* to view help on a module.",
+            "_ _   • Use *<help (command)* to view help on a command.\n",
             "You can also use *<info* to view more information about Lobstero."
         ]
 
