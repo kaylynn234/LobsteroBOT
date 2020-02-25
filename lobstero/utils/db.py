@@ -689,6 +689,27 @@ def clear_blueprint(guildid: str, _id: str):
     table.delete(**data)
 
 
+def retrieve_ooeric():
+    """More."""
+    table = db['ooer']
+    data = {"ooer": "ooer"}
+    res = table.find(**data)
+    if res:
+        return int(list(res)[0]["amount"])
+    else:
+        return 0
+
+
+def ooeric():
+    """More."""
+    table = db['ooer']
+    data = {"ooer": "ooer"}
+    current = retrieve_ooeric()
+    data["amount"] = current + 1
+    table.upsert(data, ["ooer"])
+    return current + 1
+
+
 aio = mock.Mock()
 this_module = sys.modules[__name__]
 for name in dir():

@@ -628,6 +628,12 @@ Use <inventory to see the fish you own."""
 
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=["count"])
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def ooeric(self, ctx):
+        await ctx.send(f"{db.ooeric()} ooeric. More.")
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
