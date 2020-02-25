@@ -124,7 +124,7 @@ class LobsteroHELP(commands.HelpCommand):
         ]
 
         if isinstance(command, commands.Group):
-            description[0] += " (subcommand)"
+            description[0] += "(subcommand)"
             description[1] += " (*subcommand*) represents where a subcommand can be used."
             embed.add_field(
                 name=f"{len(command.commands)} subcommand(s):",
