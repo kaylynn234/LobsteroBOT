@@ -74,7 +74,8 @@ You can also roll dice."""
     @commands.command(enabled=(lc.auth.cat_api_kay != "None"))
     @handlers.blueprints_or()
     async def cat(self, ctx):
-        """images of the felines"""
+        """Images of the felines"""
+
         url = f"https://api.thecatapi.com/v1/images/search?api_key={lc.auth.cat_api_kay}"
         async with self.session.get(url) as resp:
             data = await resp.json()
@@ -86,7 +87,8 @@ You can also roll dice."""
     @commands.command()
     @handlers.blueprints_or()
     async def dog(self, ctx):
-        """images of the canines"""
+        """Images of the canines."""
+
         url = "https://dog.ceo/api/breeds/image/random"
         async with self.session.get(url) as resp:
             data = await resp.json()
@@ -99,6 +101,7 @@ You can also roll dice."""
     @handlers.blueprints_or()
     async def fox(self, ctx):
         """Sends a random fox picture. """
+
         url = "https://randomfox.ca/floof/"
         async with self.session.get(url) as resp:
             data = await resp.json()
@@ -110,9 +113,7 @@ You can also roll dice."""
     @commands.command(aliases=["luggi", "sadcat"])
     @handlers.blueprints_or()
     async def cursedcat(self, ctx, number: int = None):
-        """<cursedcat (number)
-
-Sends either a specific or random cursed cat. All parameters are optional.
+        """Sends either a specific or random cursed cat.
 Nobody knows where they came from originally.
 Thanks Luggi."""
 
@@ -121,7 +122,7 @@ Thanks Luggi."""
         if number is None:
             cat_num = int(random.randint(0, len(cat_filenames) - 1))
         else:
-            cat_num = misc.clamp(number, 0, len(cat_filenames - 1))
+            cat_num = misc.clamp(number, 0, len(cat_filenames) - 1)
 
         embed = discord.Embed(title=f"Cursed cat image #{cat_num + 1}", color=16202876)
         filename = f"{root_directory}lobstero/data/static/cursedcats/{cat_filenames[cat_num]}"
@@ -133,11 +134,9 @@ Thanks Luggi."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def dice(self, ctx, sides: int):
-        """Usage: <dice (number)
+        """Rolls a dice with the amount of sides you provide.
+It's not every day you experience the rolling of the dice."""
 
-Rolls a dice with sides ``number``. All parameters are required.
-It's not every day you experience the rolling of the dice.
-        """
         numero = random.randint(1, sides)
         await ctx.send("🎲 **You rolled ** ``" + str(numero) + "``.")
 
@@ -145,10 +144,8 @@ It's not every day you experience the rolling of the dice.
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def say(self, ctx, *, mesgg: str):
-        """<say (text)
+        """Make the bot say something haha funni for you."""
 
-Make the bot say something haha funni for you.
-All parameters are required."""
         await ctx.send(mesgg)
         await ctx.message.delete()
 
@@ -156,9 +153,8 @@ All parameters are required."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def garkov(self, ctx):
-        """<garkov
+        """Markov but garfield."""
 
-Markov but garfield. No parameters are required."""
         if lc.config.wkhtmltoimage_path != "None":
             conf = {"config": config}
         else:
@@ -187,10 +183,8 @@ Markov but garfield. No parameters are required."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def conglomerate(self, ctx):
-        """<conglomerate
+        """Randomized text madness."""
 
-Randomized text madness. No parameters are required.
-        """
         wordlist, num, endstr = [], random.randint(6, 18), ""
         async for message in ctx.channel.history(limit=250):
             if message.clean_content != "":
@@ -203,8 +197,7 @@ Randomized text madness. No parameters are required.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def gnome(self, ctx, *, member=None):
-        """I'm gnot a gnoblin, I'm gnot a gnelf...
-Usage: <gnome @mention"""
+        """I'm gnot a gnoblin, I'm gnot a gnelf..."""
 
         if member is None:
             embed = discord.Embed(
@@ -261,11 +254,9 @@ Usage: <gnome @mention"""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def hug(self, ctx, *, user=None):
-        """<hug (@mentions)
+        """Show somebody love an affection. Use mentions to specify who you want to hug.
+Up to 6 people can be hugged at once."""
 
-Show somebody love an affection. Use mentions to specify who you want to hug.
-Up to 6 people can be hugged at once.
-        """
         mentionlist = [x for x in ctx.message.mentions if x != ctx.author]
         embed = discord.Embed(color=16202876)
 
@@ -297,11 +288,9 @@ Up to 6 people can be hugged at once.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def megahug(self, ctx, *, user=None):
-        """<megahug (@mention)
+        """It's like hugging somebody four times at once!
+You can only hug one person this tightly."""
 
-It's like hugging somebody four times at once!
-You can only hug one person this tightly.
-        """
         mentionlist = [x for x in ctx.message.mentions]
         embed = discord.Embed(color=16202876)
         if len(mentionlist) == 1 and mentionlist[0] == ctx.author:
@@ -329,10 +318,8 @@ You can only hug one person this tightly.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def haiku(self, ctx):
-        """<haiku
+        """Spits out a haiku."""
 
-This is most definitely poetry. No parameters are required.
-Spits out a haiku."""
         async with self.session.get("http://randomhaiku.com/") as resp:
             pagecontent = await resp.text()
         pagecontent = strings.str_between(pagecontent, "<poem>", "</poem>")
@@ -344,10 +331,8 @@ Spits out a haiku."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def dadjoke(self, ctx):
-        """<dadjoke
+        """Gives you a tidbit of "humour." This was a terrible idea."""
 
-Gives you a tidbit of "humour." This was a terrible idea.
-        """
         url = 'https://icanhazdadjoke.com/'
         headers = {'Accept': 'text/plain'}
         async with self.session.get(url, headers=headers) as resp:
@@ -358,8 +343,8 @@ Gives you a tidbit of "humour." This was a terrible idea.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def corpus(self, ctx, *, text: str = None):
-        """Cephalon lobstero
-Usage: <corpus some text here"""
+        """Cephalon lobstero"""
+
         newtext = ""
         for x in list(text):
             strpos = 0
@@ -378,7 +363,8 @@ Usage: <corpus some text here"""
     @handlers.blueprints_or()
     async def love(self, ctx, person1: str = None, person2: str = None):
         """Calculates chance of love between two people.
-Usage: <love person1 "person with name longer then 1 word" """
+Make sure to quote names "like so" if they're longer than two words."""
+
         if person2:
             p_1, p_2 = urllib.parse.quote_plus(person1), urllib.parse.quote_plus(person2)
             url = "https://www.lovecalculator.com/love.php?name1=" + str(p_1) + "&name2=" + str(p_2)
@@ -398,8 +384,8 @@ Usage: <love person1 "person with name longer then 1 word" """
     @commands.guild_only()
     @handlers.blueprints_or()
     async def inspire(self, ctx):
-        """Inspirobot is very inspiring.
-Usage: <inspire"""
+        """Inspirobot is very inspiring."""
+
         url = "https://inspirobot.me/api?generate=true"
         async with self.session.get(url) as resp:
             pagecontent = await resp.text()
@@ -411,8 +397,8 @@ Usage: <inspire"""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def suggestmusic(self, ctx):
-        """Music from the bot owner's spotify library.
-Usage: <suggestmusic"""
+        """Music from the bot owner's spotify library."""
+
         client_credentials_manager = SpotifyClientCredentials(
             lc.auth.spotify_client_id, lc.auth.spotify_client_secret)
 
@@ -442,8 +428,8 @@ Usage: <suggestmusic"""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def activitygraph(self, ctx):
-        """It's educational!
-Usage: <activitygraph"""
+        """It's educational!"""
+
         messagelist = [str(x.author) async for x in ctx.channel.history(limit=250)]
 
         counted_messages = Counter(messagelist)
@@ -471,37 +457,12 @@ Usage: <activitygraph"""
         embed.set_image(url="attachment://activity_data.png")
         await ctx.send(file=image, embed=embed)
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        should_continue = 0
-
-        if message.guild is None:
-            return
-
-        if "lobstero " in message.content.lower() and "play " in message.content.lower():
-            should_continue = 1
-        if message.guild.id == 177192169516302336:
-            should_continue = 0
-
-        table = db.give_table()
-        if message.guild.id not in table:
-            th = misc.populate({})
-        else:
-            th = misc.populate(table[message.guild.id])
-
-        if should_continue and th["random_messages"]:
-            ytquery = strings.slicer(message.content.lower(), "play").replace("play ", "")
-            query_string = urllib.parse.urlencode({"search_query": ytquery})
-            async with self.session.get(f"https://www.youtube.com/results?{query_string}") as resp:
-                pagecontent = await resp.text()
-
-            search_results = re.findall(r'href=\"\/watch\?v=(.{11})', pagecontent)
-            await message.channel.send(f"https://www.youtube.com/watch?v={search_results[0]}")
-
     @commands.command()
     @commands.guild_only()
     @handlers.blueprints_or()
     async def lmgtfy(self, ctx, *, query):
+        """Too lazy to google something yourself? Lobstero can do it."""
+
         val = urllib.parse.quote_plus(query)
         embed = discord.Embed(
             title='Search result:', description=f"https://lmgtfy.com/?qtype=search&q={val}",
@@ -514,6 +475,7 @@ Usage: <activitygraph"""
     @handlers.blueprints_or()
     async def fortune(self, ctx):
         """Fortune cookies, with (of course) a twist."""
+
         async with self.session.get("http://yerkee.com/api/fortune") as resp:
             pagecontent = await resp.text()
 
@@ -554,10 +516,8 @@ Usage: <activitygraph"""
     @commands.cooldown(1, 10, commands.BucketType.user)
     @handlers.blueprints_or()
     async def fish(self, ctx):
-        """<fish
-
-Throw out a line and take a fish. No parameters are required.
-Use <inventory to see the fish you own."""
+        """Throw out a line and take a fish.
+Use the inventory command to see the fish you own."""
 
         if db.economy_check(ctx.author.id) < 11:
             embed = discord.Embed(
@@ -583,6 +543,7 @@ Use <inventory to see the fish you own."""
     @handlers.blueprints_or()
     async def shareatag(self, ctx):
         """Find out who shares a tag with you."""
+
         discrim = ctx.author.discriminator
         shared = [str(x) for x in self.bot.users if x.discriminator == discrim]
 
@@ -596,6 +557,8 @@ Use <inventory to see the fish you own."""
     @commands.cooldown(1, 60, commands.BucketType.user)
     @handlers.blueprints_or()
     async def maizemaze(self, ctx):
+        """Help botto navigate through a treacherous maze of corn and horror."""
+
         mazes[ctx.author] = menus.MaizeMenu()
         await mazes[ctx.author].start(ctx)
 
@@ -604,6 +567,8 @@ Use <inventory to see the fish you own."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def goodnight(self, ctx, *, user: discord.User):
+        """Say goodnight to a friend."""
+
         await embeds.simple_embed("User bedtime'd.", ctx)
         embed = discord.Embed(title="It is bed o'clock", color=16202876)
         embed.set_image(url=text.bedtime_url)
@@ -614,11 +579,8 @@ Use <inventory to see the fish you own."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def buttoncmd(self, ctx):
-        """
-        <88x31
+        """Grabs a random 88x31 button from https://cyber.dabamos.de/88x31/."""
 
-        Gets a random 88x31 button from https://cyber.dabamos.de/88x31/. No parameters are required.
-        """
         async with self.session.get("https://cyber.dabamos.de/88x31/") as resp:
             data = await resp.text()
         found = re.findall('<img.*?src="(.*?)"[^\>]+>', data)
@@ -632,7 +594,35 @@ Use <inventory to see the fish you own."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def ooeric(self, ctx):
+        """Count with the fruit of god."""
         await ctx.send(f"{db.ooeric()} ooeric. More.")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        should_continue = 0
+
+        if message.guild is None:
+            return
+
+        if "lobstero " in message.content.lower() and "play " in message.content.lower():
+            should_continue = 1
+        if message.guild.id == 177192169516302336:
+            should_continue = 0
+
+        table = db.give_table()
+        if message.guild.id not in table:
+            th = misc.populate({})
+        else:
+            th = misc.populate(table[message.guild.id])
+
+        if should_continue and th["random_messages"]:
+            ytquery = strings.slicer(message.content.lower(), "play").replace("play ", "")
+            query_string = urllib.parse.urlencode({"search_query": ytquery})
+            async with self.session.get(f"https://www.youtube.com/results?{query_string}") as resp:
+                pagecontent = await resp.text()
+
+            search_results = re.findall(r'href=\"\/watch\?v=(.{11})', pagecontent)
+            await message.channel.send(f"https://www.youtube.com/watch?v={search_results[0]}")
 
 
 def setup(bot):

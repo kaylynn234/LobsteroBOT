@@ -179,6 +179,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def blur(self, ctx, url=None):
         """Blur an image. Everyone has to start somewhwere."""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -192,6 +193,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def gay(self, ctx, url=None):
         """Unleash the powers of homosexuality on any image."""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -209,7 +211,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @commands.command()
     async def fry(self, ctx, url=None):
-        """Deepfrying, except not really."""
+        """Deep-frying, except not really."""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -223,6 +226,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def nom(self, ctx, url=None):
         """Eating is a fun and enjoyable activity."""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -249,6 +253,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def bless(self, ctx, url=None):
         """🛐🛐🛐"""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -265,6 +270,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command(name="asciify")
     async def asciify_command(self, ctx, url=None):
         """Turn an image into some spicy dots."""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -284,6 +290,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def xokify(self, ctx, url=None):
         """xok"""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -306,6 +313,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def jpeg(self, ctx, url=None):
         """Ever wanted to make an image look terrible?"""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -317,6 +325,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def chromatic(self, ctx, url=None):
         """Fancy lens things!"""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -338,6 +347,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def halftone(self, ctx, url=None):
         """Fancy depressive dots."""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -357,6 +367,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command(enabled=False)
     async def wheelofban(self, ctx):
         """Spin the wheel of ban!"""
+
         waiting = discord.Embed(title="Spinning the wheel...", color=16202876)
         snt = await ctx.send(embed=waiting)
         files = glob.glob(f"{root_directory}image_downloads/wheel/*.png")
@@ -419,6 +430,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def mosaic(self, ctx, url=None):
         """Sqaure dance!"""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return
@@ -484,6 +496,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @commands.command()
     async def shitpost(self, ctx, url=None):
         """It's humour from the future!"""
+
         result = await self.processfile(ctx, url)
         if result is None:
             return

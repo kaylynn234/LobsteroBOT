@@ -34,7 +34,9 @@ class afkh:
 
 
 class Cog(commands.Cog, name="Utilities"):
-    """You may find yourself in need of them someday."""
+    """A bunch of utility-related commands.
+Think avatars, emoji, and so on.
+Also features commands for setting AFk statuses and similar."""
     def __init__(self, bot):
         self.bot = bot
         self.bot.afks = []
@@ -47,7 +49,8 @@ class Cog(commands.Cog, name="Utilities"):
     @commands.command(aliases=["e", "emote"])
     @handlers.blueprints_or()
     async def emoji(self, ctx, emoji: str):
-        """Gets a large version of an emoji."""
+        """Grabs a large version of an emoji."""
+
         em = strings.split_count(emoji)
         embed_mesg = discord.Embed(title="Emoji", color=16202876)
         if em:
@@ -68,9 +71,8 @@ class Cog(commands.Cog, name="Utilities"):
     @commands.command(aliases=["a", "pfp"])
     @handlers.blueprints_or()
     async def avatar(self, ctx, user: str = None):
-        """<avatar (member)
+        """Grabs the avatar of a member. Will send yours if no arguments are prvoided."""
 
-Gets the avatar of a member. If no parameters are present, returns the author's avatar."""
         if user is None:
             member = ctx.message.mentions[0]
         else:
@@ -82,9 +84,7 @@ Gets the avatar of a member. If no parameters are present, returns the author's 
     @commands.command()
     @handlers.blueprints_or()
     async def afk(self, ctx, *, reason="afk"):
-        """<afk (reason)
-
-Set an afk status so that people know why you're not in chat."""
+        """Set an afk status so that people know why you're not in chat."""
         await ctx.send(f"I set your AFK - {reason}")
         data = afkh(ctx.author, reason)
         self.bot.afks.append(data)
@@ -92,11 +92,9 @@ Set an afk status so that people know why you're not in chat."""
     @commands.command()
     @handlers.blueprints_or()
     async def afkmessage(self, ctx, *, message="Welcome back. I removed your afk."):
-        """<afkmessage (message)
+        """Set a custom message for when you return from being AFK. 
+Use the command without an argument to reset it."""
 
-Set a custom message for when you return from being AFK. 
-Use the command without an argument to reset it.
-Usage: <afkmessage your text here"""
         if message == "Welcome back. I removed your afk.":
             await embeds.simple_embed("AFK message reset.", ctx)
             db.afk_message_set(ctx.author.id, message)
@@ -112,17 +110,15 @@ Usage: <afkmessage your text here"""
     @commands.command(aliases=["p", "pong"])
     @handlers.blueprints_or()
     async def ping(self, ctx):
-        """Check how bad Kay's australian internet is.
-Usage: <ping"""
+        """Shows the bot's connection to discord."""
         racket = "<:pong:521111731364429834>" 
         await ctx.send(f"{racket} **Pong!** Took {round(self.bot.latency * 1000, 2)} ms.")
 
     @commands.command()
+    @commands.cooldown(1, 300, commands.BucketType.member)
     @handlers.blueprints_or()
     async def clear(self, ctx):
-        """<clear
-
-Clear recent messages sent by the bot."""
+        """Clear recent messages sent by the bot."""
 
         messagelist = [m async for m in ctx.channel.history(limit=10) if m.author == ctx.guild.me]
         await ctx.channel.delete_messages(messagelist)
@@ -130,9 +126,7 @@ Clear recent messages sent by the bot."""
     @commands.command(enabled=False)
     @handlers.blueprints_or()
     async def profile(self, ctx, *, user: discord.Member = None):
-        """View the lobstero profile of a user - including earned badges, hugs given, and role colour.
-Usage: <profile Person
-Person can be an ID, mention, or name"""
+        """View the lobstero profile of a user - including earned badges, hugs given, and role colour."""
 
         if user is None:
             user = ctx.message.author
@@ -210,33 +204,12 @@ Person can be an ID, mention, or name"""
         to_send = discord.File(f"{root_directory}image_downloads/profile_result/{str(user.id)}.png")
         await ctx.send(file=to_send)
 
-    @commands.Cog.listener()
-    @commands.guild_only()
-    async def on_message(self, message):
-
-        for member in self.bot.afks:
-            if member.user == message.author:
-                result = db.return_afk_message(message.author.id)
-                readable = date.delta(
-                    pendulum.now("Atlantic/Reykjavik"), member.time, justnow=timedelta(seconds=0))[0]
-                elapsed = f"\n(*Away for {readable}*)"
-                if result is None:
-                    await message.channel.send(
-                        "Welcome back. I removed your afk." + elapsed, delete_after=10)
-                else:
-                    await message.channel.send(result + elapsed, delete_after=10)
-                self.bot.afks.remove(member)
-                return
-
-            if member.user.mention in message.content and not message.author.bot:
-                await message.channel.send(member.print(), delete_after=10)
-
     @commands.command(aliases=["w", "wi", "who", "userinfo"])
     @handlers.blueprints_or()
     async def whois(self, ctx, *, user: discord.User = None):
-        """<whois (person)
+        """Shows some simple information about a user.
+If no parameters are provided, shows details for you instead."""
 
-Gives you some simple information about a user."""
         embed = discord.Embed(title="Details about " + user.name, color=16202876)
         embed.add_field(name="Account created", value=str(user.created_at), inline=True)
         embed.add_field(name="Avatar URL", value=str(user.avatar_url), inline=True)
@@ -248,9 +221,8 @@ Gives you some simple information about a user."""
     @commands.group()
     @commands.guild_only()
     async def tag(self, ctx, *, tagname=None):
-        """<tag (text))
+        """Finds details about the provided tag."""
 
-Finds details about the provided tag."""
         if tagname is None:
             return await embeds.simple_embed("Please specify a tag to find the value of.", ctx)
         value = db.return_tag(ctx.guild.id, tagname.lower())
@@ -266,9 +238,8 @@ Finds details about the provided tag."""
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def addtag(self, ctx, tagname=None, *, tagvalue=None):
-        """<tag add (name) (value)
+        """Adds a tag for this server. Make sure you quote arguments that are multiple words."""
 
-Adds a tag for this server. Make sure you quote arguments that are multiple words."""
         if tagvalue is None:
             return await embeds.simple_embed("Please specify a tag name and a tag value.", ctx)
         db.set_tag(ctx.guild.id, tagname, tagvalue)
@@ -278,9 +249,9 @@ Adds a tag for this server. Make sure you quote arguments that are multiple word
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def removetag(self, ctx, tagname=None):
-        """<tag remove (text)
+        """Removes a tag from this server by name.
+Make sure you quote arguments that are multiple words."""
 
-Removes a tag from this server by name. Make sure you quote arguments that are multiple words."""
         if tagname is None:
             return await embeds.simple_embed("Please specify a tag name.", ctx.guild.id)
         db.delete_tag(ctx.guild.id, tagname)
@@ -290,9 +261,8 @@ Removes a tag from this server by name. Make sure you quote arguments that are m
     @commands.guild_only()
     @handlers.blueprints_or()
     async def taglist(self, ctx):
-        """<tag list
+        """Lists all tags on this server."""
 
-Lists all tags on this server."""
         results = db.return_all_tags(ctx.guild.id)
         if not results:
             return await embeds.simple_embed("There are no tags on this server!", ctx.channel.id)
@@ -304,9 +274,8 @@ Lists all tags on this server."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def math(self, ctx, *, equation):
-        """<math (equation)
+        """Does math for you."""
 
-Does math for you."""
         parser = Parser()
 
         try:
@@ -327,21 +296,17 @@ Does math for you."""
     @commands.guild_only()
     @commands.cooldown(1, 60, commands.BucketType.user)
     @handlers.blueprints_or()
-    async def remindme(self, ctx, *, resdate=None):
-        """<remindme (reason) (date)
-
-Schedules a reminder for you. Valid usage is similar to below:
-
-    <remindme stop procrrastinating in 20m
+    async def remindme(self, ctx, *, when=None):
+        """Schedules a reminder for you. Valid usage is similar to below:
+<remindme stop procrastinating in 20m
 
 Valid usage can also include the following:
+<remindme do something important in 12 hours, 13 minutes and 1 second"""
 
-    <remindme do something important in 12 hours, 13 minutes and 1 second
-        """
-        if resdate:
-            if " in " in resdate:
-                date = f'in {resdate.split(" in ")[-1]}'
-                reason = " in ".join(resdate.split(" in ")[0:-1])
+        if when:
+            if " in " in when:
+                date = f'in {when.split(" in ")[-1]}'
+                reason = " in ".join(when.split(" in ")[0:-1])
                 decoded = dateparser.parse(date, settings={'TIMEZONE': 'UTC'})
                 if decoded:
                     passed = pendulum.parse(str(decoded))
@@ -379,6 +344,27 @@ Valid usage can also include the following:
                     except discord.errors.Forbidden:
                         pass
                 db.negate_reminder(item["id"])
+    
+    @commands.Cog.listener()
+    @commands.guild_only()
+    async def on_message(self, message):
+
+        for member in self.bot.afks:
+            if member.user == message.author:
+                result = db.return_afk_message(message.author.id)
+                readable = date.delta(
+                    pendulum.now("Atlantic/Reykjavik"), member.time, justnow=timedelta(seconds=0))[0]
+                elapsed = f"\n(*Away for {readable}*)"
+                if result is None:
+                    await message.channel.send(
+                        "Welcome back. I removed your afk." + elapsed, delete_after=10)
+                else:
+                    await message.channel.send(result + elapsed, delete_after=10)
+                self.bot.afks.remove(member)
+                return
+
+            if member.user.mention in message.content and not message.author.bot:
+                await message.channel.send(member.print(), delete_after=10)
 
 
 def setup(bot):

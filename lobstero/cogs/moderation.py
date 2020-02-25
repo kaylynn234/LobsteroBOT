@@ -57,12 +57,9 @@ You can also use this module to view the wrongdoings of a member.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def records(self, ctx):
-        """<records
+        """Displays a list of all infractions on this server.
+Multiple subcommands exist for more fine-grained viewing."""
 
-Displays a list of all infractions on this server.
-Multiple subcommands exist for more fine-grained viewing.
-No parameters are required.
-        """
         results = db.find_all_infractions(ctx.guild.id)
         data = [list(item.items()) for item in list(results)]
         desc = (
@@ -76,10 +73,8 @@ No parameters are required.
     @records.command(name="id")
     @handlers.blueprints_or()
     async def records_id(self, ctx, id_=None):
-        """<records id
+        """Displays specific details about an infraction based on case ID."""
 
-Displays specific details about an infraction based on case ID.
-        """
         if not id_:
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
@@ -104,10 +99,8 @@ Displays specific details about an infraction based on case ID.
     @records.command(name="member", aliases=["user"])
     @handlers.blueprints_or()
     async def records_member(self, ctx, member=None):
-        """<records member
+        """Displays all infractions committed by a specific member."""
 
-Displays all infractions committed by a specific member.
-        """
         user = None
         try:
             user = await commands.MemberConverter().convert(ctx, member)
@@ -132,11 +125,9 @@ Displays all infractions committed by a specific member.
     @records.command(name="summary", aliases=["viewall"])
     @handlers.blueprints_or()
     async def records_summary(self, ctx, member=None):
-        """<records summary (member)
+        """Shows a count-based summary of the infractions a member has committed.
+Striked infractions are not counted."""
 
-Shows a count-based summary of the infractions a member has committed.
-Striked infractions are not counted. All parameters are required.
-        """
         user = None
         try:
             user = await commands.MemberConverter().convert(ctx, member)
@@ -165,10 +156,8 @@ Striked infractions are not counted. All parameters are required.
     @records.command(name="strike")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def records_strike(self, ctx, id_=None):
-        """<records strike (id)
+        """Strikes a record. This causes it to not be counted in member summaries, and will make it appear crossed-out when navigating infractions."""
 
-Strikes a record. This causes it to not be counted in member summaries, and will make it appear crossed-out when navigating infractions.
-        """
         if not id_:
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
@@ -189,11 +178,9 @@ Strikes a record. This causes it to not be counted in member summaries, and will
     @records.command(name="close")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def records_close(self, ctx, id_=None):
-        """<records close (id)
+        """Close a record. This is not the same as striking a record!
+Closing a record stops it from expiring."""
 
-Close a record. This is not the same as striking a record!
-Closing a record stops it from expiring.
-        """
         if not id_:
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
@@ -213,21 +200,18 @@ Closing a record stops it from expiring.
     @records.command(name="filter")
     @handlers.blueprints_or()
     async def records_filter(self, ctx, *args):
-        """<records filter (pairs)
-
-Shows infraction records for this server, but offers much more fine-grained control over what is displayed.
+        """Shows infraction records for this server, but offers much more fine-grained control over what is displayed.
 For example, the following will only show infractions that were performed by Kaylynn and affected Delta:
-
-    <records filter staff Kaylynn#4444 member Delta
+<records filter staff Kaylynn#4444 member Delta
 
 Available filters can be seen below:
 
-    Member: A member username, nickname, mention or ID. Only infractions that affect this member will be shown.
-    Staff: A member username, nickname, mention or ID for a staff member. Only punishments performed by this member will be shown.
-    Operation: Text representing the punishment type you wish to filter. Only infractions of this punishment type will be shown.
+Member: A member username, nickname, mention or ID. Only infractions that affect this member will be shown.
+Staff: A member username, nickname, mention or ID for a staff member. Only punishments performed by this member will be shown.
+Operation: Text representing the punishment type you wish to filter. Only infractions of this punishment type will be shown.
 
-The specific pairs that you pass are optional, but the command requires at least one pair to be present.
-"""
+The specific pairs that you pass are optional, but the command requires at least one pair to be present."""
+
         chunked = [x for x in misc.chunks(args, 2) if len(x) > 1]
         print(chunked)
 
@@ -303,6 +287,7 @@ The specific pairs that you pass are optional, but the command requires at least
     @handlers.blueprints_or()
     async def m(self, ctx):
         """A base command for all moderation actions."""
+
         embed = discord.Embed(color=16202876, title="Moderation")
         embed.description = text.mod_how_to
         await ctx.send(embed=embed)
@@ -313,10 +298,8 @@ The specific pairs that you pass are optional, but the command requires at least
     @commands.bot_has_permissions(
         read_message_history=True, send_messages=True, embed_links=True, attach_files=True)
     async def m_warn(self, ctx, *, arg: handlers.GreedyMention):
-        """<m warn (users) (reason)
+        """Warns a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``."""
 
-Warns a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
-        """
         r = await self.handle_confirmation_and_logging(
             ctx, arg, text.action_warn,
             "User warned",
@@ -332,11 +315,9 @@ Warns a user (or users) and logs it to the channel (or channels) specified using
         read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         manage_roles=True)
     async def m_mute(self, ctx, *, arg: handlers.GreedyMention):
-        """<m mute (users) (reason)
+        """Mutes a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
+A mute role is created and set up if it does not already exist."""
 
-Mutes a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
-A mute role is created and set up if it does not already exist.
-        """
         r = await self.handle_confirmation_logging_and_expiry(
             ctx, arg, text.action_mute,
             "User muted",
@@ -353,11 +334,9 @@ A mute role is created and set up if it does not already exist.
         read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         manage_roles=True)
     async def m_deafen(self, ctx, *, arg: handlers.GreedyMention):
-        """<m deafen (users) (reason)
+        """Deafens a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
+A deafen role is created and set up if it does not already exist."""
 
-Deafens a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
-A deafen role is created and set up if it does not already exist.
-        """
         r = await self.handle_confirmation_logging_and_expiry(
             ctx, arg, text.action_deafen, "User deafened", "Users deafened")
         if r[0]:
@@ -372,10 +351,8 @@ A deafen role is created and set up if it does not already exist.
         read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         kick_members=True)
     async def m_kick(self, ctx, *, arg: handlers.GreedyMention):
-        """<m kick (users) (reason)
+        """Kicks a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``."""
 
-Kicks a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
-        """
         r = await self.handle_confirmation_and_logging(
             ctx, arg, text.action_kick, "User kicked", "Users kicked")
         if r[0]:
@@ -390,10 +367,8 @@ Kicks a user (or users) and logs it to the channel (or channels) specified using
         read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         ban_members=True)
     async def m_ban(self, ctx, *, arg: handlers.GreedyMention):
-        """<m ban (users) (reason)
+        """Bans a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``. No messages are deleted."""
 
-Bans a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``. No messages are deleted.
-        """
         r = await self.handle_confirmation_logging_and_expiry(
             ctx, arg, text.action_ban, "User banned", "Users banned")
         if r[0]:
@@ -408,10 +383,9 @@ Bans a user (or users) and logs it to the channel (or channels) specified using 
         read_message_history=True, send_messages=True, embed_links=True, attach_files=True,
         ban_members=True)
     async def m_softban(self, ctx, *, arg: handlers.GreedyMention):
-        """<m softban
+        """Softbans a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``.
+7 days of messages are deleted and the affected members are immediately unbanned. Think of it as a way to delete messages *very* quickly."""
 
-Softbans a user (or users) and logs it to the channel (or channels) specified using ``<channels set moderation``. 7 days of messages are deleted and the affected members are immediately unbanned.
-        """
         r = await self.handle_confirmation_and_logging(
             ctx, arg, text.action_softban, "User softbanned", "Users softbanned")
         if r[0]:
@@ -658,29 +632,24 @@ Softbans a user (or users) and logs it to the channel (or channels) specified us
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def prune(self, ctx, *args):
-        """<prune (pairs)
-
-Prunes messages from the current channel. Use with no arguments to delete the 15 most recent messages.
+        """Prunes messages from the current channel. Use with no arguments to delete the 15 most recent messages.
 Alternatively, pass pairs of arguments to delete messages matching certain criteria:
-
-    <prune count 25 has image
+<prune count 25 has image
 
 The above will delete the most recent 25 messages in this channel that have images attached to them.
 Valid criteria can be seen below:
 
-    Count = Number. This is the amount of messages to delete.
-    Has = Text. This is should be either "embed", "image" or "file". Only messages with one of these will be deleted.
-    From = Text. This is a user ID, username, user mention or user nickname. Only messages sent by this member will be deleted.
-    Mentions = Text. This is a user ID, username, user mention or user nickname. Only messages that mention this user will be deleted.
-    Contains = Text. This should be either "mention", "emoji" or "link". Only messages that contain one of these will be deleted..
-    Formatting = Text. This should be either "spoiler", "bold", "italic", "underline", "strikethrough" or "quote". Only messages that contain one of these will be deleted.
+Count = Number. This is the amount of messages to delete.
+Has = Text. This is should be either "embed", "image" or "file". Only messages with one of these will be deleted.
+From = Text. This is a user ID, username, user mention or user nickname. Only messages sent by this member will be deleted.
+Mentions = Text. This is a user ID, username, user mention or user nickname. Only messages that mention this user will be deleted.
+Contains = Text. This should be either "mention", "emoji" or "link". Only messages that contain one of these will be deleted..
+Formatting = Text. This should be either "spoiler", "bold", "italic", "underline", "strikethrough" or "quote". Only messages that contain one of these will be deleted.
 
 Multiple of the same criteria can be chained together for greater control over deletion:
+<prune count 25 has image contains emoji contains link
 
-    <prune count 25 has image contains emoji contains link
-
-The above will delete the most recent 25 messages in this channel with images, emoji and links.
-        """
+The above will delete the most recent 25 messages in this channel with images, emoji and links."""
 
         if len(args) == 1:
             if args[0].isnumeric:
@@ -736,10 +705,7 @@ The above will delete the most recent 25 messages in this channel with images, e
     @commands.cooldown(1, 300, commands.BucketType.channel)
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def archive(self, ctx):
-        """<archive
-
-Archives pins for the current channel. No parameters are required.
-        """
+        """Archives pins for the current channel. No parameters are required."""
 
         table = db.give_table()
         if ctx.guild.id not in table:

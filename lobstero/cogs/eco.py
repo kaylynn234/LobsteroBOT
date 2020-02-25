@@ -15,8 +15,9 @@ root_directory = sys.path[0] + "/"
 
 class Cog(commands.Cog, name="Economy & Games"):
     """Ever wanted to earn and gamble away insignificant pieces of cheese? Now's your chance!
-Game and gambling commands reside in this module. 
-Roll the dice. Lose it all, only to win it back ten-fold.
+Game and gambling commands reside in this module.
+Roll the dice. Lose it all. 
+Only to win it back ten-fold.
 As a Lobstero Cheese Economy Member, your lows are the lowest, but at your high you become a self-propelled demi-god of cheese.
 If you're not willing to risk it, you'll never experience the ecstasy of true RNG. You'll also save a significant amount of money."""
 
@@ -43,12 +44,10 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
     @commands.command(aliases=["$", "money", "check", "bal"])
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def balance(self, ctx):
-        if ctx.message.mentions:
-            user = ctx.message.mentions[0]
-        else:
-            user = ctx.message.author
+    async def balance(self, ctx, who: discord.Member = None):
+        """Shows the cheese balance of you or someone else."""
 
+        who = ctx.author if who is None else who
         bal = db.economy_check(user.id)
         if bal == 0:
             await embeds.simple_embed("Looks like this person doesn't have any cheese. ", ctx)
@@ -66,14 +65,8 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
     @commands.guild_only()
     @handlers.blueprints_or()
     async def guess(self, ctx):
-        """<guess
-
-Test your luck and see if you can guess a random card for some cheese.
-No parameters are required.
-To see the costs and outcomes of playing, use <guess prices.
-This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
-        """
-        chs = "<a:cheese:533544087484366848>"
+        """Test your luck and see if you can guess a random card for some cheese.
+This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."""
 
         embed = discord.Embed(title="Guess the card!", color=16202876, description=text.guess_what)
         sentembed = await ctx.send(embed=embed)
@@ -236,6 +229,8 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
     @guess.command(name="prices")
     @handlers.blueprints_or()
     async def guess_prices(self, ctx):
+        """Shows the prices for cheese guessing."""
+
         chs = "<a:cheese:533544087484366848>"
         embed = discord.Embed(title="Card guessing prices", color=16202876)
         embed.add_field(
@@ -257,11 +252,8 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def bigbrain(self, ctx):
-        """<bigbrain
+        """Engage in a fun game of Big Brain Trivia™!"""
 
-Engage in a fun game of Big Brain Trivia™!
-This command has no arguments.
-        """
         url = "https://opentdb.com/api.php?amount=1&type=boolean"
         async with self.session.get(url) as resp:
             data = await resp.json()
@@ -308,9 +300,8 @@ This command has no arguments.
     @commands.guild_only()
     @handlers.blueprints_or()
     async def flip(self, ctx):
-        """<fip
+        """Flip a coin and test your luck. That's it."""
 
-Flip a coin and test your luck. No arguments are required."""
         coinlist = (["heads" for _ in range(500)] + ["tails" for _ in range(500)])
         random.shuffle(coinlist)
         embed = discord.Embed(
@@ -326,11 +317,9 @@ Flip a coin and test your luck. No arguments are required."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def cheeseboard(self, ctx):
-        """<cheeseboard
+        """Shows a leaderboard for cheese values.
+Who's the richest of them all?"""
 
-Shows a leaderboard for cheese values. No arguments are required.
-Who's the richest of them all?
-        """
         richlist = db.return_all_balances()
         userlist, i = [], 0
         while len(userlist) != 7:
@@ -352,21 +341,19 @@ Who's the richest of them all?
     @commands.command(aliases=["inv"])
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def inventory(self, ctx, user: discord.Member = None):
-        """<inventory [user]
+    async def inventory(self, ctx, who: discord.Member = None):
+        """Shows the lobstero inventory of yourself or someone else."""
 
-Views the lobstero inventory of yourself or a given user.
-        """
-        user = ctx.author if user is None else user
-        inv = db.find_inventory(user.id)
+        who = ctx.author if who is None else who
+        inv = db.find_inventory(who.id)
         strpairs = [f"**{list(x.keys())[0]}**: {list(x.values())[0]}" for x in inv]
         if not strpairs:
             embed = discord.Embed(
-                title=f"Inventory for {user}",
+                title=f"Inventory for {who}",
                 description="Absolutely nothing!", color=16202876)
             return await ctx.send(embed=embed)
 
-        source = menus.ListEmbedMenuClean(strpairs, f"Inventory for {user}", 15, True)
+        source = menus.ListEmbedMenuClean(strpairs, f"Inventory for {who}", 15, True)
         menu = MenuPages(source, timeout=30, clear_reactions_after=True)
 
         await menu.start(ctx)
@@ -374,57 +361,42 @@ Views the lobstero inventory of yourself or a given user.
     @commands.command(aliases=["give"])
     @commands.guild_only()
     @commands.is_owner()
-    async def grant(self, ctx, user: discord.Member, *, sobject):
-        """<grant (user) (object) (amount)
+    async def grant(self, ctx, who: discord.Member, *, item):
+        """Divinely grants items to somebody. Owner-exclusive."""
 
-Divinely grants items to somebody. Owner-exclusive.
-All parameters are required.
-User should be a user ID, user mention, user nickname or username. Amount should be a number.
-        """
-
-        split = sobject.split(" ")
+        split = item.split(" ")
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
-        db.grant_item(user.id, thing, amount)
+        db.grant_item(who.id, thing, amount)
         await embeds.simple_embed("Item granted!", ctx)
 
     @commands.command(aliases=["take"])
     @commands.guild_only()
     @commands.is_owner()
-    async def rescind(self, ctx, user: discord.Member, *, sobject):
-        """<rescind (user) (object) (amount)
+    async def rescind(self, ctx, who: discord.Member, *, item):
+        """What can be given can also be taken away. Owner-exclusive."""
 
-What can be given can also be taken away. Owner-exclusive.
-All parameters are required.
-User should be a user ID, user mention, user nickname or username. Amount should be a number.
-        """
-
-        split = sobject.split(" ")
+        split = item.split(" ")
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
-        res = db.remove_item(user.id, thing, amount)
+        res = db.remove_item(who.id, thing, amount)
         await embeds.simple_embed(
             "Item rescinded." if res else "Not enough of that item to do that.", ctx)
 
     @commands.command()
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def pay(self, ctx, user: discord.Member, *, sobject):
-        """<grant (user) (object) (amount)
+    async def pay(self, ctx, who: discord.Member, *, item):
+        """Pays an amount of any item you own to somebody."""
 
-Pays an amount of any item you own to somebody.
-All parameters are required.
-User should be a user ID, user mention, user nickname or username. Amount should be a number.
-        """
-
-        split = sobject.split(" ")
+        split = item.split(" ")
         amount = int(split[-1])
         thing = " ".join(split[0:-1])
         res = db.remove_item(ctx.author.id, thing, amount)
         if res:
-            db.grant_item(user.id, thing, amount)
-        await embeds.simple_embed(
-            "Payment successful!" if res else "You don't have enough of that item to do that!", ctx)
+            db.grant_item(who.id, thing, amount)
+        await ctx.simple_embed(
+            "Payment successful!" if res else "You don't have enough of that item to do that!")
 
 
 def setup(bot):

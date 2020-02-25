@@ -37,9 +37,7 @@ Also features git-related commands."""
 
     @commands.command()
     async def search(self, ctx, *, text="aaaaaaaaaaaqdqdqfdqwfqwerfgeqrfgqwr3gfqerf"):
-        """<search (query)
-
-Searches for a command matching the supplied query.
+        """Searches for a command matching the supplied query.
 If no query is given when using the command, it returns nothing."""
 
         results = []
@@ -84,9 +82,8 @@ If no query is given when using the command, it returns nothing."""
 
     @commands.command(aliases=["invite"])
     async def info(self, ctx):
-        """<info
-Contains an invite link to add the bot to your server.
-Also has a link to join Lobstero's support server."""
+        """Contains an invite link to add the bot to your server, as well as other information about the bot."""
+
         embed = discord.Embed(
             color=16202876,
             description=(
@@ -118,10 +115,9 @@ Also has a link to join Lobstero's support server."""
     @commands.cooldown(1, 3600, commands.BucketType.user)
     @commands.guild_only()
     async def bugreport(self, ctx, problem, *, text):
-        """<bugreport (problem) (description)
-
-Opens an issue on GitHub as a bug report. **THE TEXT YOU SUPPLY IS PUBLIC**.
+        """Opens an issue on GitHub as a bug report. **THE TEXT YOU SUPPLY IS PUBLIC**.
 Misuse of this command will result in a blacklist."""
+
         if self.manager:
             r = self.manager.get_repo(lc.config.github_repo)
             bug_report_label = r.get_label("bug")
@@ -138,15 +134,16 @@ Misuse of this command will result in a blacklist."""
     @commands.is_owner()
     @commands.guild_only()
     async def git(self, ctx):
-        """<git
+        """A base command for repo interactions."""
 
-A base command for repo interactions."""
         await ctx.send("Use a subcommand.")
 
-    @git.command(name="close")
+    @git.command(name="lock")
     @commands.is_owner()
     @commands.guild_only()
-    async def git_close_issue(self, ctx, issue_n: int, *, reason):
+    async def git_lock_issue(self, ctx, issue_n: int, *, reason):
+        """Locks an issue on github by issue number and reason."""
+
         if self.manager:
             r = self.manager.get_repo(lc.config.github_repo)
             issue = r.get_issue(issue_n)
@@ -160,6 +157,8 @@ A base command for repo interactions."""
     @commands.is_owner()
     @commands.guild_only()
     async def git_add_label(self, ctx, issue_n: int, *, label):
+        """Adds a label to a github issue by issue name and label."""
+
         if self.manager:
             r = self.manager.get_repo(lc.config.github_repo)
             issue = r.get_issue(issue_n)
@@ -174,6 +173,8 @@ A base command for repo interactions."""
     @commands.is_owner()
     @commands.guild_only()
     async def git_remove_label(self, ctx, issue_n: int, *, label):
+        """Removes a label from a github issue by issue name and label."""
+
         if self.manager:
             r = self.manager.get_repo(lc.config.github_repo)
             issue = r.get_issue(issue_n)
@@ -193,6 +194,8 @@ A base command for repo interactions."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def hardwarestats(self, ctx):
+        """Hardware information abotu Lobstero. Mostly useless."""
+
         core_count = psutil.cpu_count()
         thread_count = psutil.cpu_count(logical=False)
         packet_info = psutil.net_io_counters()

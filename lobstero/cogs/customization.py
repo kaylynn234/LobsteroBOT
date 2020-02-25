@@ -44,13 +44,11 @@ General server settings and self-assignable roles can also be configured."""
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def settings(self, ctx, value=None, changeto=None):
-        """<settings (setting) (value)
-
-Allows or deny specific features of Lobstero on this server.
+        """Allows or deny specific features of Lobstero on this server.
 Use <settings to see editable settings and their uses.
 Use ``<settings (setting) (value)`` to change a value.
-Valid usage would be something along the lines of ``<settings respond_on_mention True``
-        """
+Valid usage would be something along the lines of ``<settings respond_on_mention True``"""
+
         if value and changeto:
             if value.lower() in acceptable and str(changeto).lower() in ["true", "false"]:
                 newval = True if changeto.lower() == "true" else False
@@ -66,15 +64,14 @@ Valid usage would be something along the lines of ``<settings respond_on_mention
     @handlers.blueprints_or()
     async def wm(self, ctx):
         """A base command for all welcome messages."""
+
         pass
 
     @wm.command(name="add", aliases=["create"])
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def wm_add(self, ctx, *, message=None):
-        """<wm add (message)
-
-Adds a welcome message to this server.
+        """Adds a welcome message to this server.
 Messages are sent in the channel that is set using ``<channels set ``.
 Example usage is ``<wm add this is a cool welcome message! hi %u!``
 
@@ -82,8 +79,8 @@ Example usage is ``<wm add this is a cool welcome message! hi %u!``
 %+u will be replaced with the username and discriminator of the new user.
 %@u will be replaced with a mention of the new user.
 
-Emoji, mentions of specific users, specific channels, and specific roles will function normally.
-        """
+Emoji, mentions of specific users, specific channels, and specific roles will function normally."""
+
         if message is not None:
             db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
             db.add_welcome_message(str(ctx.guild.id), message)
@@ -95,12 +92,10 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @handlers.blueprints_or()
     async def channels(self, ctx):
-        """<channels
-
-Provides tools to set the channels that Lobstero uses to function.
+        """Provides tools to set the channels that Lobstero uses to function.
 Use ``<channels`` alone to display currently set values.
-``<channels set`` is probably the subcommand you want to use.
-"""
+``<channels set`` is probably the subcommand you want to use."""
+
         current = db.settings_value_for_guild(ctx.guild.id)
         wm, pa, ml = "None", "None", "None"
         if "wmessagechannel" in current:
@@ -124,9 +119,7 @@ Use ``<channels`` alone to display currently set values.
     @channels.command(name="set")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def channels_set(self, ctx, name=None):
-        """<channels set (value)
-
-Allows you set the channels that are used for various Lobstero features.
+        """Allows you set the channels that are used for various Lobstero features.
 Use this command (with the value you want to change as an argument) in any channel to set the channel for that value.
 For example, using the below would set the pin archive channel to the channel it was used in:
 
@@ -137,8 +130,8 @@ Usable values:
 
     ``welcome_messages`` - This is the channel where welcome messages will be sent.
     ``archives`` - This is where pinned messages are sent when <archive is used.
-    ``moderation`` - This is where moderation logging goes. Use this in multiple channels to toggle each one as a logging channel.
-        """
+    ``moderation`` - This is where moderation logging goes. Use this in multiple channels to toggle each one as a logging channel."""
+
         if not name:
             await embeds.simple_embed("No value was chosen to set!", ctx)
 
@@ -194,6 +187,7 @@ Usable values:
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def wm_del(self, ctx, *, message):
         """Removes a welcome message from this server by index. """
+
         res = db.remove_welcome_message(str(ctx.guild.id), message)
         if res:
             await embeds.simple_embed("Matching welcome messages deleted.", ctx)
@@ -205,6 +199,7 @@ Usable values:
     @handlers.blueprints_or()
     async def wm_list(self, ctx):
         """Lists all welcome messages on this server. """
+
         data = db.all_welcome_messages_for_guild(str(ctx.guild.id))
         messages = [x["message"] for x in data]
         source = menus.ListEmbedMenu(messages, "Welcome messages for this server", 10, True)

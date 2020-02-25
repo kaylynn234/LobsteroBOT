@@ -25,10 +25,8 @@ You shouldn't even see this. if you do, you know what it does."""
     @commands.guild_only()
     @commands.is_owner()
     async def respond(self, ctx, userid: int, *, message):
-        """<respond (userid) (message)
+        """Sends a message to a user in DMs."""
 
-Sends a message to a user (specified by ID) in DMs.
-        """
         user = self.bot.get_user(userid)
         try:
             await user.send(embed=discord.Embed(
@@ -42,6 +40,7 @@ Sends a message to a user (specified by ID) in DMs.
 
     async def handle_bwlist(self, new, ctx, what, who):
         """Actually does the things for blacklists and whitelists"""
+
         if what.lower() not in ["member", "channel", "guild"]:
             await embeds.simple_embed("Not a valid block type.", ctx)
 
@@ -65,10 +64,7 @@ Sends a message to a user (specified by ID) in DMs.
     @commands.guild_only()
     @commands.is_owner()
     async def blacklist(self, ctx, what, *, who):
-        """<blacklist {User, Guild, Channel} (something)
-
-Denies the specified object access to bot functionality.
-        """
+        """Denies the specified object access to bot functionality."""
 
         await self.handle_bwlist(True, ctx, what, who)
 
@@ -76,10 +72,7 @@ Denies the specified object access to bot functionality.
     @commands.guild_only()
     @commands.is_owner()
     async def whitelist(self, ctx, what, *, who):
-        """<whitelist {User, Guild, Channel}
-
-Allows the specified object access to bot functionality.
-        """
+        """Allows the specified object access to bot functionality."""
 
         await self.handle_bwlist(False, ctx, what, who)
 
@@ -88,6 +81,7 @@ Allows the specified object access to bot functionality.
     @commands.is_owner()
     async def serverinfo(self, ctx):
         """Provides a set of information about connected servers."""
+
         guilds = len(self.bot.guilds)
         members = len(list(self.bot.get_all_members()))
         channels = len(list(self.bot.get_all_channels()))
@@ -106,6 +100,7 @@ Allows the specified object access to bot functionality.
     @commands.is_owner()
     async def serverinfo_page(self, ctx):
         """Shows a list of servers."""
+
         data = [f"[{guild.id}] {guild.name}" for guild in self.bot.guilds]
         menu = menus.ListEmbedMenu(data, "Showing all servers", 10, True)
         pages = MenuPages(source=menu)
@@ -116,6 +111,7 @@ Allows the specified object access to bot functionality.
     @commands.is_owner()
     async def serverinfo_details(self, ctx, guildid: int = None):
         """Shows details about a specific server."""
+
         guild = self.bot.get_guild(guildid)
 
         if guild is None:
@@ -154,7 +150,8 @@ Allows the specified object access to bot functionality.
     @commands.guild_only()
     @commands.is_owner()
     async def serverinfo_channels(self, ctx, guildid: int = None):
-        """Shows a list of channels on a server.."""
+        """Shows a list of channels on a server."""
+
         guild = self.bot.get_guild(guildid)
 
         if guild is None:
@@ -170,6 +167,7 @@ Allows the specified object access to bot functionality.
     @commands.is_owner()
     async def serverinfo_members(self, ctx, guildid: int = None):
         """Shows a list of members in a server."""
+
         guild = self.bot.get_guild(guildid)
 
         if guild is None:
@@ -185,6 +183,7 @@ Allows the specified object access to bot functionality.
     @commands.is_owner()
     async def serverinfo_peek(self, ctx, channelid: int = None):
         """Looks through recent messages in a channel."""
+
         channel = self.bot.get_channel(channelid)
 
         if channel is None:
