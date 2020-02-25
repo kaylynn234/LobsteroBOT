@@ -125,7 +125,7 @@ class LobsteroHELP(commands.HelpCommand):
 
         if isinstance(command, commands.Group):
             embed.add_field(
-                name=f"{len(command.subcommand)} subcommand(s):",
+                name=f"{len(command.subcommands)} subcommand(s):",
                 value=strings.blockjoin([c.name for c in command.commands]))
 
         if command.aliases:
