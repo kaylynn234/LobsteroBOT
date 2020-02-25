@@ -117,13 +117,15 @@ class LobsteroHELP(commands.HelpCommand):
     async def single_help(self, command):
         embed = discord.Embed(title="Help", color=16202876)
         description = [
-            f"```{self.context.prefix}{command.qualified_name} {command.signature}```",
+            f"{self.context.prefix}{command.qualified_name} {command.signature}",
             "<*arg*> represents a required argument. [*arg*] represents an optional argument.",
             "**Do not actually use these symbols when using commands!**\n",
             f"{command.help or '*(No detailed help provided)*'}"
         ]
 
         if isinstance(command, commands.Group):
+            description[0] += " (subcommand)"
+            description[1] += " (*subcommand*) represents where a subcommand can be used."
             embed.add_field(
                 name=f"{len(command.commands)} subcommand(s):",
                 value=strings.blockjoin([c.name for c in command.commands]))
@@ -135,6 +137,7 @@ class LobsteroHELP(commands.HelpCommand):
 
         cd = getattr(command._buckets._cooldown, 'per', None)
 
+        description[0] = f"```{description[0]}```"
         embed.description = "\n".join(description)
         if cd:
             embed.set_footer(text=f"This command has a {cd} second cooldown.")
