@@ -488,8 +488,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 draw.text((topTextPositionX + x_p, topTextPositionY + y_p), topString, (0,0,0), font=font)
                 draw.text((bottomTextPositionX + x_p, bottomTextPositionY + y_p), topString, (0,0,0), font=font)
 
-        draw.text(topTextPosition, topString, (255,255,255), font=font)
-        draw.text(bottomTextPosition, bottomString, (255,255,255), font=font)
+        draw.text(topTextPosition, topString, (255, 255, 255), font=font)
+        draw.text(bottomTextPosition, bottomString, (255, 255, 255), font=font)
 
         return img
 

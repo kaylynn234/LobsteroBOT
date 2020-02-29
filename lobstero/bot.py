@@ -349,7 +349,7 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def on_error(self, event_method, *args, **kwargs):
         msg = f"""**Additional notes:**
         Event: {event_method}
-        Provided args: {", ".join(args)}
+        Provided args: {", ".join([str(i) for i in args])}
         Provided kwargs: {", ".join([f"{x}: {y}" for x, y in kwargs])}
         """
         await self.handler.format_tb_and_send(additional=msg)
