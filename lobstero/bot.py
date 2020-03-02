@@ -347,6 +347,9 @@ class LobsteroBOT(commands.AutoShardedBot):
         await self.handler.handle(ctx, error)
 
     async def on_error(self, event_method, *args, **kwargs):
+        if str(event_method) == "on_command_error":
+            return  # already handled
+
         msg = f"""**Additional notes:**
         Event: {event_method}
         Provided args: {", ".join([str(i) for i in args])}

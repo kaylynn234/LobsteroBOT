@@ -33,6 +33,9 @@ class LobsterHandler():
         f = io.StringIO()
         traceback.print_exc(8, f)  # Prints to a stream
         to_be_formatted = f.getvalue()
+        if "discord.errors.Forbidden" in to_be_formatted:
+            return  # we don't need to spam DMs with this nonsense.
+
         sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
 
         for userid in lc.config.owner_id:
