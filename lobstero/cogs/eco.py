@@ -48,13 +48,13 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
         """Shows the cheese balance of you or someone else."""
 
         who = ctx.author if who is None else who
-        bal = db.economy_check(user.id)
+        bal = db.economy_check(who.id)
         if bal == 0:
             await embeds.simple_embed("Looks like this person doesn't have any cheese. ", ctx)
         else:
             embed = discord.Embed(title=" ", color=16202876)
             embed.add_field(
-                name=f"User {user}'s balance.", value=f"{bal} <a:cheese:533544087484366848>")
+                name=f"User {who}'s balance.", value=f"{bal} <a:cheese:533544087484366848>")
             embed.set_thumbnail(url=(
                 "https://arnweb.blob.core.windows.net/cache/1/b/6/3/d/7"
                 "/1b63d7cb7717896aa0fe806c17dba9a57476b2ce.jpg"))
