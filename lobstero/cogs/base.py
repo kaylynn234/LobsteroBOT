@@ -92,6 +92,11 @@ If no query is given when using the command, it returns nothing."""
                 "Find the bot on GitHub at https://github.com/kaylynn234/LobsteroBOT"
                 "\n\n**Recent updates**:\n"))
 
+        appinfo = await self.bot.application_info()
+        invite_url = (
+            "https://discordapp.com/api/oauth2/authorize"
+            f"?client_id={appinfo.id}&scope=bot")
+
         if self.manager:
             for c in self.recent_commits:
                 embed.description += (
@@ -101,15 +106,17 @@ If no query is given when using the command, it returns nothing."""
         embed.add_field(
             name="Lobstero's support server",
             value=f"[``Click here``]({lc.config.support_server_url})")
-        appinfo = await self.bot.application_info()
-        _id = appinfo.id
+
         embed.add_field(
             name="Invite Lobstero to your server",
-            value=(
-                "[``Click here``](https://discordapp.com/api/oauth2/authorize"
-                f"?client_id={_id}&scope=bot)"))
+            value=f"[``Click here``]({invite_url})")
+
+        text = (
+            f"If you're on mobile and can't use the links "
+            f"below, use <{invite_url}> and <{lc.config.support_server_url}> instead.")
+
         embed.set_footer(text=f"Connected on {(len(self.bot.guilds))} servers.")
-        await ctx.send(embed=embed)
+        await ctx.send(text, embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 3600, commands.BucketType.user)
