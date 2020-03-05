@@ -77,7 +77,7 @@ You can also roll dice."""
 
         for chunk_offset in range(0, 10000, 100):
             try:
-                self.bot.spotify_reesults.append(
+                self.bot.spotify_results.append(
                     sp.user_playlist_tracks(
                         username, playlist_id,
                         fields="tracks.items(track(name,album(artists, name, images)))",
