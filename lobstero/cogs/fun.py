@@ -73,11 +73,11 @@ You can also roll dice."""
         sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
         username = lc.config.spotify_user_uri
         playlist_id = lc.config.spotify_playlist_uri
-        self.bot.spotify_results = []
+        self.bot.raw_spotify_results = []
 
         for chunk_offset in range(0, 10000, 100):
             try:
-                self.bot.spotify_results.append(
+                self.bot.raw_spotify_results.append(
                     sp.user_playlist_tracks(
                         username, playlist_id,
                         fields="tracks.items(track(name,album(artists, name, images)))",
