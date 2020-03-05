@@ -41,14 +41,14 @@ def populate(thing: Any) -> dict:
     return standard
 
 
-async def handle_dm(owners, message) -> None:
+async def handle_dm(owners, message, bot) -> None:
     """Handles a DM if one is received."""
     attachment_urls = None
 
     if message.attachments:
         attachment_urls = "\n".join([x.url for x in message.attachments])
     if "https://discord" in message.content.lower():
-        appinfo = await self.bot.application_info()
+        appinfo = await bot.application_info()
         _id = appinfo.id
         await message.channel.send(embed=discord.Embed(
             title="Hol' up!", description=(
