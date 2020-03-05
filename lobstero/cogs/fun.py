@@ -62,10 +62,39 @@ You can also roll dice."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.task = self.bot.loop.create_task(self.aiohttp_init())
+        self.task = self.bot.loop.create_task(self.aio_init())
 
-    async def aiohttp_init(self):
+    async def aio_init(self):
         self.session = aiohttp.ClientSession()
+
+        client_credentials_manager = SpotifyClientCredentials(
+            lc.auth.spotify_client_id, lc.auth.spotify_client_secret)
+
+        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+        username = lc.config.spotify_user_uri
+        playlist_id = lc.config.spotify_playlist_uri
+        self.bot.raw_spotify_results = []
+
+        for chunk_offset in range(0, 10000, 100):
+            try:
+                self.bot.raw_spotify_reesults.append(
+                    sp.user_playlist_tracks(
+                        username, playlist_id,
+                        fields="tracks.items(track(name,album(artists, name, images)))",
+                        offset=chunk_offset))
+            except spotipy.client.SpotifyException:
+                break  # end of playlist
+
+        # collate songs
+        self.bot.spotify_results = []
+
+        for page in self.bot.raw_spotify_results:
+            for item in page['items']:
+                self.bot.spotify_results.append({
+                    "song": item['track']['name'],
+                    "album": item['track']['album']['name'],
+                    "image": item['track']['album']['images'][0]['url'],
+                    "artist": item['track']['album']['artists'][0]["name"]})
 
     def cog_unload(self):
         self.task.cancel()
@@ -399,29 +428,12 @@ Make sure to quote names "like so" if they're longer than two words."""
     async def suggestmusic(self, ctx):
         """Music from the bot owner's spotify library."""
 
-        client_credentials_manager = SpotifyClientCredentials(
-            lc.auth.spotify_client_id, lc.auth.spotify_client_secret)
-
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-        username = lc.config.spotify_user_uri
-        playlist_id = lc.config.spotify_playlist_uri
-        results = sp.user_playlist(
-            username, playlist_id,
-            fields="tracks.items(track(name,album(artists, name, images)))")
-
-        resultlist = []
-        for x in results['tracks']['items']:
-            resultlist.append([
-                x['track']['name'], x['track']['album']['name'],
-                x['track']['album']['images'][0]['url'],
-                x['track']['album']['artists'][0]["name"]])
-
-        y = random.choice(resultlist)
+        chosen = random.choice(self.bot.spotify_results)
         embed = discord.Embed(title="Suggested song", color=16202876)
-        embed.add_field(name="Artist", value=y[3], inline=True)
-        embed.add_field(name="Track name", value=y[0], inline=True)
-        embed.add_field(name="Album", value=y[1], inline=False)
-        embed.set_thumbnail(url=y[2])
+        embed.add_field(name="Artist", value=chosen["artist"], inline=True)
+        embed.add_field(name="Track name", value=chosen["song"], inline=True)
+        embed.add_field(name="Album", value=chosen["album"], inline=False)
+        embed.set_thumbnail(url=chosen["image"])
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -448,7 +460,8 @@ Make sure to quote names "like so" if they're longer than two words."""
         plotter.savefig(root_directory + 'lobstero/data/generated/activity_data.png')
 
         image = discord.File(
-            f"{root_directory}lobstero/data/generated/activity_data.png", filename="activity_data.png")
+            f"{root_directory}lobstero/data/generated/activity_data.png",
+            filename="activity_data.png")
 
         embed = discord.Embed(
             title="Recent activity",
