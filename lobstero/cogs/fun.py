@@ -80,7 +80,7 @@ You can also roll dice."""
                 self.bot.raw_spotify_results.append(
                     sp.user_playlist_tracks(
                         username, playlist_id,
-                        fields="tracks.items(track(name,album(artists, name, images)))",
+                        fields="items(track(name,album(artists, name, images)))",
                         offset=chunk_offset))
             except spotipy.client.SpotifyException:
                 break  # end of playlist
