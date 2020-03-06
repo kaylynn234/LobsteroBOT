@@ -710,6 +710,27 @@ def ooeric():
     return current + 1
 
 
+def add_investment_subreddit(userid, sub):
+    table = db["favourite_subreddits"]
+    data = {"user": userid, "subreddit": sub}
+    table.upsert(data, ["user", "subreddit"])
+
+
+def remove_investment_subreddit(userid, sub):
+    table = db["favourite_subreddits"]
+    data = {"user": userid, "subreddit": sub}
+    table.delete(**data)
+
+
+def all_investment_subreddits(userid):
+    table = db["favourite_subreddits"]
+    res = table.find(user=userid)
+    if res:
+        return [item["subreddit"] for item in res]
+    else:
+        return None
+
+
 aio = mock.Mock()
 this_module = sys.modules[__name__]
 for name in dir():

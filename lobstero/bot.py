@@ -24,7 +24,6 @@ config_types = {
     ("auth", "token"): str,
     ("config", "owner_name"): str,
     ("config", "owner_id"): list,
-    ("config", "image_channel"): int,
     ("config", "home_channel"): int,
     ("config", "cogs_to_load"): list,
     ("config", "prefixes"): list,

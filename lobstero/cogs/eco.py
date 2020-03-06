@@ -3,27 +3,60 @@ import random
 import aiohttp
 import discord
 import asyncio
+import praw
 
 from html import unescape
 from discord.ext.menus import MenuPages
 from discord.ext import commands
 from lobstero.utils import embeds, text, db
 from lobstero.models import menus, handlers
+from lobstero import lobstero_config 
+
+lc = lobstero_config.LobsteroCredentials()
 
 root_directory = sys.path[0] + "/"
 
 
+shop_item_values = {
+    # name lower: buy value, sell value
+    # use None to prevent item purchase/ selling
+    "token of love & friendship": (None, 1),
+    "shoe": (10, 2),
+    "ancient pair of glasses": (10, 2),
+    "red trout": (5, 3),
+    "exemplary tuna": (7, 5),
+    "agile cod": (13, 10),
+    "odd-looking salmon": (20, 15),
+    "peculiar barramundi": (60, 40),
+    "weird carp": (120, 100),
+    "ultimate catch": (1000, 300)
+}
+
+
 class Cog(commands.Cog, name="Economy & Games"):
     """Ever wanted to earn and gamble away insignificant pieces of cheese? Now's your chance!
-Game and gambling commands reside in this module.
-Roll the dice. Lose it all. 
-Only to win it back ten-fold.
+Game, economy and gambling commands reside in this module.
+You can sell things, buy things and gift them to people.
+
+Roll the dice. Lose it all - only to win it back ten-fold.
 As a Lobstero Cheese Economy Member, your lows are the lowest, but at your high you become a self-propelled demi-god of cheese.
-If you're not willing to risk it, you'll never experience the ecstasy of true RNG. You'll also save a significant amount of money."""
+If you're not willing to risk it, you'll never experience the ecstasy of true RNG."""
 
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.aiohttp_init())
+
+        if not hasattr(self.bot, "reddit_client"):
+            if lc.auth.reddit_client_ID == "None" or lc.auth.reddit_client_secret == "None":
+                self.bot.reddit_client = False
+
+            else:
+                self.bot.reddit_client = praw.Reddit(
+                    client_id=lc.auth.reddit_client_ID,
+                    client_secret=lc.auth.reddit_client_secret,
+                    user_agent='python:LobsteroBOT:v1.0.0 (by /u/lobstero_economy_bot)')
+
+                # anyone who wants to use anything else can suffer
 
     async def aiohttp_init(self):
         self.session = aiohttp.ClientSession()

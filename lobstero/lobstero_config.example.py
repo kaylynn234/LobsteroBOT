@@ -31,12 +31,6 @@ class LobsteroCredentials():
         # This dictates who can use the Owner commands.
         self.config.owner_id = [123456789]
 
-        # Image Channel: Should be an integer.
-        # This is the ID for the channel images used for embeds will be sent to.
-        # I suggest making a private/hidden channel in a disposable server for this
-        # Will be removed later.
-        self.config.image_channel = 123456789
-
         # Home Channel: Should be an integer.
         # This is the ID for the channel where messages about bot status are sent.
         self.config.home_channel = 123456789
@@ -52,15 +46,11 @@ class LobsteroCredentials():
         # Set it to "None" to disable the cat command.
         self.auth.cat_api_key = "xxxx"
 
-        # Spotify Web API client ID: Should be a string.
-        # Get this from https://developer.spotify.com/documentation/web-api/
-        # You'll need this if you want <suggestmusic to work.
-        # Set it to "None" to disable the suggestmusic command.
+        # Spotify Web API client ID and client secret: Should be a string.
+        # Get these from https://developer.spotify.com/documentation/web-api/
+        # You'll need them if you want <suggestmusic to work.
+        # Set them to "None" to disable the suggestmusic command.
         self.auth.spotify_client_id = "xxxx"
-
-        # Spotify Web API client secret: Should be a string.
-        # Get this from https://developer.spotify.com/documentation/web-api/
-        # You'll need this if you want <suggestmusic to work.
         self.auth.spotify_client_secret = "xxxx"
 
         # Spotify user URI: Should be a string.
@@ -96,17 +86,20 @@ class LobsteroCredentials():
         # FFMPEG path: SHould be a string
         self.config.ffmpeg = "..."
 
-        # Manager account username: Should be a string. Can be "Npne"
-        # This is the github username of the repo management account.
+        # Manager account username and password: Should be a string. Can be "None"
+        # These are the credentials of the github repo management account.
         self.auth.github_username = "None"
-
-        # Manager account password: Should be a string. Can be "Npne"
-        # This is the github password of the repo management account.
         self.auth.github_password = "None"
 
-        # GitHub repo: Should be a string. 
+        # GitHub repo: Should be a string.
         # This is where the manager does things.
         self.config.github_repo = "..."
+
+        # Reddit account client ID and client secret: Should be a string. Can be "None"
+        # Get one at https://github.com/reddit-archive/reddit/wiki/OAuth2-Quick-Start-Example#first-steps
+        # This is used for the meme economy commands.
+        self.auth.reddit_client_ID = "gtHDmj55nWtaAg"
+        self.auth.reddit_client_secret = "alzSinkz6dFYdR0MzYRLMlhXAr0"
 
         # The section below is used directly by the bot.
         # It shouldn't be changed unless you know what you're doing.
@@ -119,7 +112,7 @@ class LobsteroCredentials():
             "fun",
             "owner",
             "utility",
-            # "editing",
+            "editing",
             "customization",
             "eco",
             "customreacts"
