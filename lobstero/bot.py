@@ -300,7 +300,7 @@ class LobsteroBOT(commands.AutoShardedBot):
                 th = misc.populate(table[message.guild.id])
 
         else:
-            owners = [self.get_user(id_) for id_ in lc.config.owner.owner_id]
+            owners = [self.get_user(id_) for id_ in lc.config.owner_id]
             return await misc.handle_dm(owners, message, self)
 
         blacklists = (
