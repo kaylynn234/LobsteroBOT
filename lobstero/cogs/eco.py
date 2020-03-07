@@ -472,10 +472,11 @@ Use the commands here to buy or sell things.
         split = item.split(" ")
         try:
             amount = int(split[-1])
+            thing = " ".join(split[0:-1])
         except ValueError:
             amount = 1
+            thing = " ".join(split)
 
-        thing = " ".join(split[0:-1])
         item_in_shop = shop_item_values.get(thing.lower(), False)
         current_balance = db.economy_check(ctx.author.id)
         if not item_in_shop:
