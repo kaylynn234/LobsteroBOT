@@ -466,7 +466,7 @@ Use the commands here to buy or sell things.
     @shop.command(name="buy")
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def shop_buy(self, ctx, item):
+    async def shop_buy(self, ctx, *, item):
         """Buy an item from the shop."""
 
         split = item.split(" ")
@@ -524,7 +524,7 @@ Use the commands here to buy or sell things.
     @shop.command(name="sell")
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def shop_sell(self, ctx, item):
+    async def shop_sell(self, ctx, *, item):
         """Sell some of your items."""
 
         split = item.split(" ")
