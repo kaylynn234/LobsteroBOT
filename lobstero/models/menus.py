@@ -52,7 +52,7 @@ class ListEmbedMenuClean(menus.ListPageSource):
 
 class TupleEmbedMenu(menus.ListPageSource):
     """A simple menu class for paginating tuples nicely."""
-    def __init__(self, data, title, per_page: int = 10, desc=None, footer=None):
+    def __init__(self, data, title, per_page: int = 10, desc=None, footer=None, inline=False):
         super().__init__(data, per_page=per_page)
         self.title = title
         self.desc = desc
@@ -63,7 +63,7 @@ class TupleEmbedMenu(menus.ListPageSource):
         embed.description = self.desc
 
         for item in entries:
-            embed.add_field(name=item[0], value=item[1], inline=False)
+            embed.add_field(name=item[0], value=item[1], inline=inline)
 
         if self.footer:
             embed.set_footer(text=f"This is page {menu.current_page + 1}")
