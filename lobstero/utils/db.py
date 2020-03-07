@@ -731,6 +731,10 @@ def all_investment_subreddits(userid):
         return None
 
 
+def add_investment(userid, submissionid):
+    pass
+
+
 aio = mock.Mock()
 this_module = sys.modules[__name__]
 for name in dir():

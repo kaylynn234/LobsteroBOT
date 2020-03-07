@@ -18,18 +18,19 @@ root_directory = sys.path[0] + "/"
 
 
 shop_item_values = {
-    # name lower: buy value, sell value
+    # name lower: buy value, sell value, buy amount
     # use None to prevent item purchase/ selling
-    "token of love & friendship": (None, 1),
-    "shoe": (10, 2),
-    "ancient pair of glasses": (10, 2),
-    "red trout": (5, 3),
-    "exemplary tuna": (7, 5),
-    "agile cod": (13, 10),
-    "odd-looking salmon": (20, 15),
-    "peculiar barramundi": (60, 40),
-    "weird carp": (120, 100),
-    "ultimate catch": (1000, 300)
+    "token of love & friendship": (None, 1, 1),
+    "shoe": (10, 2, 1),
+    "ancient pair of glasses": (10, 2, 1),
+    "red trout": (5, 3, 1),
+    "exemplary tuna": (7, 5, 1),
+    "agile cod": (13, 10, 1),
+    "odd-looking salmon": (20, 15, 1),
+    "peculiar barramundi": (60, 40, 1),
+    "weird carp": (120, 100, 1),
+    "ultimate catch": (1000, 300, 1),
+    "stock market token": (50, 3, 10)
 }
 
 
@@ -45,6 +46,7 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.aiohttp_init())
+        self.chs = "<a:cheese:533544087484366848>"
 
         if not hasattr(self.bot, "reddit_client"):
             if lc.auth.reddit_client_ID == "None" or lc.auth.reddit_client_secret == "None":
@@ -264,20 +266,19 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
     async def guess_prices(self, ctx):
         """Shows the prices for cheese guessing."""
 
-        chs = "<a:cheese:533544087484366848>"
         embed = discord.Embed(title="Card guessing prices", color=16202876)
         embed.add_field(
             name="Guess the card's suit",
-            value=f"**Cost to play**: 0 {chs} **Payout**: 20 {chs}")
+            value=f"**Cost to play**: 0 {self.bot.chs} **Payout**: 20 {self.bot.chs}")
         embed.add_field(
             name="Guess the card's type",
-            value=f"**Cost to play**: 0 {chs} **Payout**: 20 {chs}")
+            value=f"**Cost to play**: 0 {self.bot.chs} **Payout**: 20 {self.bot.chs}")
         embed.add_field(
             name="Guess the number on the card",
-            value=f"**Cost to play**: 20 {chs}. **Payout**: 100 {chs}")
+            value=f"**Cost to play**: 20 {self.bot.chs}. **Payout**: 100 {self.bot.chs}")
         embed.add_field(
             name="Guess the exact card",
-            value=f"**Cost to play**: 50 {chs} **Payout**: 1234 {chs}")
+            value=f"**Cost to play**: 50 {self.bot.chs} **Payout**: 1234 {self.bot.chs}")
 
         return await ctx.send(embed=embed)
 
@@ -428,8 +429,96 @@ Who's the richest of them all?"""
         res = db.remove_item(ctx.author.id, thing, amount)
         if res:
             db.grant_item(who.id, thing, amount)
+
         await ctx.simple_embed(
             "Payment successful!" if res else "You don't have enough of that item to do that!")
+
+    @commands.group(invoke_without_command=True, ignore_extra=False)
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def shop(self, ctx):
+        """A base command for the shop and all related commands.
+Use the commands here to buy or sell things.
+
+*Psst!* Buying stock market tokens gives you access to the illusive Cheese Market - but you didn't hear it from me."""
+
+        displayable = []
+
+        for item, info in shop_item_values.items():
+            cur = []
+            if info[0]:
+                cur.append(f"**{info[2]}**x can be bought for {info[0]} {self.bot.chs}")
+            else:
+                cur.append("Cannot be purchased!")
+
+            if info[1]:
+                cur.append(f"Can be sold for {info[1]} {self.bot.chs} each.")
+            else:
+                cur.append("Cannot be sold!")
+
+            displayable.append({item.capitalize(): "\n".join(cur)})
+
+        source = menus.TupleEmbedMenu(displayable, "Available items", 9, footer=True)
+        pages = MenuPages(source, clear_reactions_after=True)
+
+        await pages.start(ctx)
+
+    @shop.command(name="buy")
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def shop_buy(self, ctx, item):
+        """Buy an item from the shop."""
+
+        split = item.split(" ")
+        try:
+            amount = int(split[-1])
+        except ValueError:
+            amount = 1
+
+        thing = " ".join(split[0:-1])
+        item_in_shop = shop_item_values.get(thing.lower(), False)
+        current_balance = db.economy_check(ctx.author.id)
+        if not item_in_shop:
+            return await ctx.simple_embed("That item isn't available in the shop!")
+        if item_in_shop[0] is None:
+            return await ctx.simple_embed("That item can't be purchased!")
+        if amount * item_in_shop[0] > current_balance:
+            return await ctx.simple_embed("You can't afford that!")
+
+        to_pay = amount * item_in_shop[0]
+        r = random.randint(1, 200)
+
+        if r == 200:
+            await ctx.simple_embed(
+                "An obscure glitch in the shop's payment suite keeps your account untouched.")
+            to_pay = 0
+        elif r == 199:
+            await ctx.simple_embed(
+                "For some reason, money is transferred to your account instead of taken from it.")
+            to_pay *= -1
+        elif r == 198:
+            await ctx.simple_embed(
+                "The cashier is kind, and makes sure you only pay for half of your order.")
+            to_pay = int(to_pay / 2)
+        elif r == 197:
+            await ctx.simple_embed(
+                "The cashier lets you have a little extra for free.")
+            amount = int(amount * 1.25)
+
+        db.grant_item(ctx.author.id, thing, amount)
+        db.economy_manipulate(ctx.author.id, to_pay * -1)
+        desc = [
+            f"Purchase: {amount * item_in_shop[2]}x {thing.capitalize()}",
+            f"Balance before transaction: {current_balance} {self.bot.chs}",
+            f"Transaction total: {abs(to_pay)}",
+            f"Balance after transaction: {db.economy_check(ctx.author.id)} {self.bot.chs}"
+        ]
+
+        embed = discord.Embed(
+            title=f"Receipt for {ctx.author}",
+            description="\n".join(desc), color=16202876)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
