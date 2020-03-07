@@ -458,7 +458,7 @@ Use the commands here to buy or sell things.
 
             displayable.append((item.capitalize(), "\n".join(cur)))
 
-        source = menus.TupleEmbedMenu(displayable, "Available items", 9, footer=True)
+        source = menus.TupleEmbedMenu(displayable, "Available items", 9, footer=True, inline=True)
         pages = MenuPages(source, clear_reactions_after=True)
 
         await pages.start(ctx)
