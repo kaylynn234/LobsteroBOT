@@ -57,13 +57,14 @@ class TupleEmbedMenu(menus.ListPageSource):
         self.title = title
         self.desc = desc
         self.footer = footer
+        self.inline = inline
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(title=self.title, color=16202876)
         embed.description = self.desc
 
         for item in entries:
-            embed.add_field(name=item[0], value=item[1], inline=inline)
+            embed.add_field(name=item[0], value=item[1], inline=self.inline)
 
         if self.footer:
             embed.set_footer(text=f"This is page {menu.current_page + 1}")
