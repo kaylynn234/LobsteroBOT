@@ -509,10 +509,10 @@ Use the commands here to buy or sell things.
         db.grant_item(ctx.author.id, thing, amount)
         db.economy_manipulate(ctx.author.id, to_pay * -1)
         desc = [
-            f"Purchase: {amount * item_in_shop[2]}x {thing.capitalize()}",
-            f"Balance before transaction: {current_balance} {self.bot.chs}",
-            f"Transaction total: {abs(to_pay)}",
-            f"Balance after transaction: {db.economy_check(ctx.author.id)} {self.bot.chs}"
+            f"**Purchase**: {amount * item_in_shop[2]}x {thing.capitalize()}",
+            f"**Balance before transaction**: {current_balance} {self.bot.chs}",
+            f"**Transaction total**: {abs(to_pay)} {self.bot.chs}",
+            f"**Balance after transaction**: {db.economy_check(ctx.author.id)} {self.bot.chs}"
         ]
 
         embed = discord.Embed(
