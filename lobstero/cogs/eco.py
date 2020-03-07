@@ -456,7 +456,7 @@ Use the commands here to buy or sell things.
             else:
                 cur.append("Cannot be sold!")
 
-            displayable.append({item.capitalize(): "\n".join(cur)})
+            displayable.append((item.capitalize(), "\n".join(cur)))
 
         source = menus.TupleEmbedMenu(displayable, "Available items", 9, footer=True)
         pages = MenuPages(source, clear_reactions_after=True)
