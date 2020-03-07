@@ -540,7 +540,8 @@ Use the commands here to buy or sell things.
         current_inv = db.find_inventory(ctx.author.id)
 
         item_count_so_far = 0
-        for k, v in current_inv:
+        for item in current_inv:
+            k, v = list(item.items())[0]
             if k.lower() == thing.lower():
                 item_count_so_far = v
 
