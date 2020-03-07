@@ -46,7 +46,7 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.aiohttp_init())
-        self.chs = "<a:cheese:533544087484366848>"
+        self.bot.chs = "<a:cheese:533544087484366848>"
 
         if not hasattr(self.bot, "reddit_client"):
             if lc.auth.reddit_client_ID == "None" or lc.auth.reddit_client_secret == "None":
