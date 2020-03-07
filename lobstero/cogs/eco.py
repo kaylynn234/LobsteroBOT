@@ -568,5 +568,13 @@ Use the commands here to buy or sell things.
         await ctx.send(embed=embed)
 
 
+    @commands.group(invoke_without_command=True, ignore_extra=False)
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def investment(self, ctx):
+        "..."
+
+        await ctx.simple_embed("Something's brewing here. Check back later.")
+
 def setup(bot):
     bot.add_cog(Cog(bot))
