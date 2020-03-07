@@ -506,7 +506,7 @@ Use the commands here to buy or sell things.
                 "The cashier lets you have a little extra for free.")
             amount = int(amount * 1.25)
 
-        db.grant_item(ctx.author.id, thing, amount)
+        db.grant_item(ctx.author.id, thing, amount * item_in_shop[2])
         db.economy_manipulate(ctx.author.id, to_pay * -1)
         desc = [
             f"**Purchase**: {amount * item_in_shop[2]}x {thing.capitalize()}",
@@ -567,14 +567,17 @@ Use the commands here to buy or sell things.
 
         await ctx.send(embed=embed)
 
-
-    @commands.group(invoke_without_command=True, ignore_extra=False)
+    @commands.group(invoke_without_command=True, ignore_extra=False, aliases=["cheesemarket"])
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def investment(self, ctx):
-        "..."
+    async def wallstreet(self, ctx):
+        """A base command for investing with Stock Market Tokens.
+Use the shop commands to buy some.
+
+Displays your portfolio by default."""
 
         await ctx.simple_embed("Something's brewing here. Check back later.")
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
