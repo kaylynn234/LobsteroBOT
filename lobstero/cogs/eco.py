@@ -521,6 +521,51 @@ Use the commands here to buy or sell things.
 
         await ctx.send(embed=embed)
 
+    @shop.command(name="sell")
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def shop_sell(self, ctx, item):
+        """Sell some of your items."""
+
+        split = item.split(" ")
+        try:
+            amount = int(split[-1])
+            thing = " ".join(split[0:-1])
+        except ValueError:
+            amount = 1
+            thing = " ".join(split)
+
+        item_in_shop = shop_item_values.get(thing.lower(), False)
+        current_balance = db.economy_check(ctx.author.id)
+        current_inv = db.find_inventory(ctx.author.id)
+
+        item_count_so_far = 0
+        for k, v in current_inv:
+            if k.lower() == thing.lower():
+                item_count_so_far = v
+
+        if not item_in_shop:
+            return await ctx.simple_embed("That item isn't available in the shop!")
+        if item_in_shop[1] is None:
+            return await ctx.simple_embed("That item can't be sold!")
+        if amount > item_count_so_far:
+            return await ctx.simple_embed("You don't have enough of that item to do that!")
+
+        db.remove_item(ctx.author.id, thing, amount)
+        db.economy_manipulate(ctx.author.id, amount * item_in_shop[1])
+        desc = [
+            f"**Offer**: {amount}x {thing.capitalize()}",
+            f"**Balance before transaction**: {current_balance} {self.bot.chs}",
+            f"**Transaction total**: {abs(amount * item_in_shop[1])} {self.bot.chs}",
+            f"**Balance after transaction**: {db.economy_check(ctx.author.id)} {self.bot.chs}"
+        ]
+
+        embed = discord.Embed(
+            title=f"Receipt for {ctx.author}",
+            description="\n".join(desc), color=16202876)
+
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
