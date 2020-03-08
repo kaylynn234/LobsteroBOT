@@ -4,11 +4,13 @@ import aiohttp
 import discord
 import asyncio
 import praw
+import time
+import pendulum
 
 from html import unescape
 from discord.ext.menus import MenuPages
 from discord.ext import commands
-from lobstero.utils import embeds, text, db
+from lobstero.utils import embeds, text, db, misc
 from lobstero.models import menus, handlers
 from lobstero import lobstero_config 
 
@@ -437,8 +439,8 @@ Who's the richest of them all?"""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def shop(self, ctx):
-        """A base command for the shop and all related commands.
-Use the commands here to buy or sell things.
+        """A base command for the shop and all related subcommands.
+Use subcommands to buy or sell items.
 
 *Psst!* Buying stock market tokens gives you access to the illusive Cheese Market - but you didn't hear it from me."""
 
@@ -577,6 +579,111 @@ Use the shop commands to buy some.
 Displays your portfolio by default."""
 
         await ctx.simple_embed("Something's brewing here. Check back later.")
+
+    @wallstreet.command(name="browse")
+    @commands.is_owner()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def wallstreet_browse(self, ctx):
+        """Browse what's on offer at the cheese market and formulate your investment plan."""
+
+        current_investment_subs = db.all_investment_subreddits(ctx.author.id)
+        if not current_investment_subs:
+            embed = discord.Embed(
+                title="You haven't chosen any markets of interest!", color=16202876,
+                description="Use ``<wallstreet markets join`` to choose one.")
+
+            return await ctx.send(embed=embed)
+
+        sub = self.bot.reddit_client.subreddit("+".join(current_investment_subs))
+        posts = sub.random_rising(limit=100)  # iter of Submission
+
+        def is_valid(item):
+            item_date = getattr(item, "created_utc", False)
+            if not item_date:
+                return False
+
+            url = getattr(item, "url", False)
+            if not url:
+                return False
+            else:
+                is_meme = "reddit.com" not in url
+
+            age = pendulum.duration(seconds=time.time() - item_date)
+
+            return all([
+                not getattr(item, "over_18", False),
+                not getattr(item, "locked", False),
+                age.total_days() < 3,
+                is_meme])
+
+        filtered = filter(is_valid, posts)
+        source = menus.InvestmentBrowsingMenu(
+            [misc.calculate_investment_details(i) for i in filtered])
+
+        pages = MenuPages(source, clear_reactions_after=True)
+        await pages.start(ctx)
+
+    @wallstreet.group(invoke_without_command=True, ignore_extra=False)
+    @commands.is_owner()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def markets(self, ctx):
+        """A base command for managing investment markets.
+When no subcommand is used, it displays available "investment markets.
+They're actually just subreddits.
+Use ``<wallstreet markets join`` to grant yourself entry to one of them."""
+
+        source = menus.ListEmbedMenu(
+            text.really_awful_meme_subs, "Available markets", 5,
+            "Have ideas for safe-for-work meme subreddits? Suggest them on the support server!")
+
+        pages = MenuPages(source, clear_reactions_after=True)
+        await pages.start(ctx)
+
+    @markets.command(name="join")
+    @commands.is_owner()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def markets_join(self, ctx, *, sub):
+        """Joins an investment market."""
+
+        sub = sub.lower()
+        if sub.startswith("r/"):
+            sub = sub[2:]
+
+        current_markets = db.all_investment_subreddits(ctx.author.id)
+        if sub in current_markets:
+            return await ctx.simple_embed("You're already participating in this market!")
+        if len(current_markets) >= 5:
+            return await ctx.simple_embed("You can be in a maximum of 5 markets at once!")
+        if sub not in text.really_awful_meme_subs:
+            return await ctx.simple_embed("This is not an approved market!")
+
+        db.add_investment_subreddit(ctx.author.id, sub)
+        await ctx.simple_embed("Market joined.")
+
+    @markets.command(name="leave")
+    @commands.is_owner()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def markets_leave(self, ctx, *, sub):
+        """Joins an investment market."""
+
+        sub = sub.lower()
+        if sub.startswith("r/"):
+            sub = sub[2:]
+
+        current_markets = db.all_investment_subreddits(ctx.author.id)
+        if not current_markets:
+            return await ctx.simple_embed("You're not in any markets!")
+        if sub in current_markets:
+            return await ctx.simple_embed("You're not in this market!")
+        if sub not in text.really_awful_meme_subs:
+            return await ctx.simple_embed("This is not an approved market!")
+
+        db.remove_investment_subreddit(ctx.author.id, sub)
+        await ctx.simple_embed("Market left.")
 
 
 def setup(bot):

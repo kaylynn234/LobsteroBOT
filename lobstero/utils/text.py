@@ -307,3 +307,28 @@ Respond to this message with any of the following:
 %s
 
 Make sure your capitalization and spelling are both correct!"""
+
+really_awful_meme_subs = [
+    "fffffffuuuuuuuuuuuu",
+    "dogfort",
+    "catfort",
+    "memes",
+    "dankmemes",
+    "surrealmemes",
+    "meirl",
+    "2meirl4meirl",
+    "adviceanimals",
+    "inglip",
+    "cursedimages",
+    "blursedimages",
+    "wholesomememes",
+    "terriblefacebookmemes",
+    "animemes",
+    "fellowkids",
+    "okbuddyretard",
+    "deepfriedmemes",
+    "shittyadviceanimals",
+    "politicalcompassmemes",
+    "funny",
+    "im14andthisisdeep"
+]

@@ -386,3 +386,16 @@ class HelpPagesMenu(menus.ListPageSource):
         current.title = f"Help (page {menu.current_page + 1}/{self.data_len})"
 
         return current
+
+
+class InvestmentBrowsingMenu(menus.ListPageSource):
+    """A simple menu class for asset stuff."""
+    def __init__(self, data):
+        super().__init__(data, per_page=1)
+        self.data_len = len(data)
+
+    async def format_page(self, menu, entries):
+        current = entries
+        current.set_footer(text=f"This is asset {menu.current_page + 1} of {self.data_len}")
+
+        return current

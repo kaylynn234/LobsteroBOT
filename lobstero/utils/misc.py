@@ -2,6 +2,7 @@
 Generally to do with logging/data manipulation"""
 
 import math
+import time
 
 from typing import Type, Any, Sequence
 
@@ -86,3 +87,28 @@ def chunks(l, n) -> list:
 def clamp(x, minimum, maximum):
     """Fits a number into a range."""
     return max(minimum, min(x, maximum))
+
+
+def calculate_investment_details(submission):
+    age = pendulum.duration(seconds=time.time() - submission.created_utc)
+    adjusted_score = submission.score * (submission.upvote_ratio / 100)
+    asset_growth_score = round(adjusted_score / age.total_hours(), 3)
+    asset_interactivity_score = ((age.total_hours() * (submission.upvote_ratio / 100)) / 72) * 100
+
+    info = [
+        f"This asset's ID is ``{submission.id}``. Save this value to invest in this asset!"
+        "Basic asset information can be seen below:\n"
+        f"**Growth score**: {asset_growth_score}",
+        "*The growth score is a measure used to judge the growth of an asset.*",
+        f"**Interactivity score**: {asset_interactivity_score}%"
+        "*The interactivity score shows how happy the market is with this asset over time.*\n"
+        "*For both values, higher is better*"
+    ]
+
+    embed = discord.Embed(
+        title="Market browser",
+        description="\n".join(info), color=16202876)
+
+    embed.set_image(url=submission.url)
+
+    return embed
