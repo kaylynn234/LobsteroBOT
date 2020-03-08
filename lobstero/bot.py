@@ -203,25 +203,25 @@ class LobsteroHELP(commands.HelpCommand):
         return super().command_not_found(string)
 
     async def subcommand_not_found(self, command, string):
-        self.not_found = str(command.qualified_name)
-        return super().subcommand_not_found(command, string)
+        r = super().subcommand_not_found(command, string)
+        if "no subcommands." not in str(r):
+            self.not_found = command.qualified_name
+
+        return r
 
     async def send_error_message(self, error):
         usable = [c.qualified_name for c in await self.all_usable_commands()]
         if not self.not_found:
             matches = False
         else:
-            if self.not_found.endswith("no subcommands."):
-                matches = False
-            else:
-                matches = difflib.get_close_matches(self.not_found, usable)
+            matches = difflib.get_close_matches(self.not_found, usable)
 
         if not matches:
             return await self.context.simple_embed(error)
 
         embed = discord.Embed(title=error, color=16202876)
-        lines = ["Did you mean"]
-        lines += [f"_ _   ``<{m}``" for m in matches]
+        lines = ["Did you mean: \n"]
+        lines += [f"``<{m}``" for m in matches]
         embed.description = "\n".join(lines)
 
         await self.context.send(embed=embed)
