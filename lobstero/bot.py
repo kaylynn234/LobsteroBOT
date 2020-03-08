@@ -77,7 +77,7 @@ class LobsteroCONTEXT(commands.Context):
 
 class LobsteroHELP(commands.HelpCommand):
 
-    async def __init__(self):
+    def __init__(self):
         self.not_found = None
         super().__init__()
 
