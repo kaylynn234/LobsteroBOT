@@ -55,11 +55,13 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
                 self.bot.reddit_client = False
 
             else:
-                self.bot.reddit_client = praw.Reddit(
-                    client_id=lc.auth.reddit_client_ID,
-                    client_secret=lc.auth.reddit_client_secret,
-                    user_agent='python:LobsteroBOT:v1.0.0 (by /u/lobstero_economy_bot)')
-
+                try:
+                    self.bot.reddit_client = praw.Reddit(
+                        client_id=lc.auth.reddit_client_ID,
+                        client_secret=lc.auth.reddit_client_secret,
+                        user_agent='python:LobsteroBOT:v1.0.0 (by /u/lobstero_economy_bot)')
+                except:
+                    self.bot.reddit_client = False
                 # anyone who wants to use anything else can suffer
 
     async def aiohttp_init(self):
