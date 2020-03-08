@@ -200,11 +200,11 @@ class LobsteroHELP(commands.HelpCommand):
 
     async def command_not_found(self, string):
         self.not_found = string
-        super().command_not_found(string)
+        return super().command_not_found(string)
 
     async def subcommand_not_found(self, command, string):
         self.not_found = str(command.qualified_name)
-        super().subcommand_not_found(command, string)
+        return super().subcommand_not_found(command, string)
 
     async def send_error_message(self, error):
         usable = [c.qualified_name for c in await self.all_usable_commands()]
