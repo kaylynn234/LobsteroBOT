@@ -211,7 +211,10 @@ class LobsteroHELP(commands.HelpCommand):
         if not self.not_found:
             matches = False
         else:
-            matches = difflib.get_close_matches(self.not_found, usable)
+            if self.not_found.endswith("no subcommands."):
+                matches = False
+            else:
+                matches = difflib.get_close_matches(self.not_found, usable)
 
         if not matches:
             return await self.context.simple_embed(error)
