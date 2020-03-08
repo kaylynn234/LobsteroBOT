@@ -630,7 +630,7 @@ Displays your portfolio by default."""
     @handlers.blueprints_or()
     async def markets(self, ctx):
         """A base command for managing investment markets.
-When no subcommand is used, it displays available "investment markets.
+When no subcommand is used, it displays available "investment markets."
 They're actually just subreddits.
 Use ``<wallstreet markets join`` to grant yourself entry to one of them."""
 
