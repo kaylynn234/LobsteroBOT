@@ -635,7 +635,7 @@ They're actually just subreddits.
 Use ``<wallstreet markets join`` to grant yourself entry to one of them."""
 
         source = menus.ListEmbedMenu(
-            text.really_awful_meme_subs, "Available markets", 5,
+            [f"r/{s}" for s in text.really_awful_meme_subs], "Available markets", 10,
             "Have ideas for safe-for-work meme subreddits? Suggest them on the support server!")
 
         pages = MenuPages(source, clear_reactions_after=True)
