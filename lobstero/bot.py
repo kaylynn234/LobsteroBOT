@@ -2,6 +2,8 @@
 This is where the subclassed bot object lies."""
 
 import logging
+import difflib
+
 import random
 import discord
 
@@ -74,6 +76,24 @@ class LobsteroCONTEXT(commands.Context):
 
 
 class LobsteroHELP(commands.HelpCommand):
+
+    async def __init__(self):
+        self.not_found = None
+        super().__init__()
+
+    async def all_usable_commands(self):
+        usable_commands = []
+
+        for command in self.context.bot.commands:
+            try:
+                usable = await command.can_run(self.context)
+            except:  # fuck you flake8
+                usable = False
+
+            if usable:
+                usable_commands.append(command)
+
+        return usable_commands
 
     async def generate_cog_help(self, cog):
         usable_commands = []
@@ -178,8 +198,30 @@ class LobsteroHELP(commands.HelpCommand):
         menu = MenuPages(pages, timeout=90, clear_reactions_after=True)
         await menu.start(self.context)
 
+    async def command_not_found(self, string):
+        self.not_found = string
+        return await super().command_not_found(string)
+
+    async def subcommand_not_found(self, command, string):
+        self.not_found = str(command.qualified_name)
+        return await super().subcommand_not_found(command, string)
+
     async def send_error_message(self, error):
-        await self.context.simple_embed(error)
+        usable = [c.qualified_name for c in await self.all_usable_commands()]
+        if not self.not_found:
+            matches = False
+        else:
+            matches = difflib.get_close_matches(self.not_found, usable)
+
+        if not matches:
+            return await self.context.simple_embed(error)
+
+        embed = discord.Embed(title=error, color=16202876)
+        lines = "Did you mean"
+        lines += [f"_ _   ``<{m}``" for m in matches]
+        embed.description = "\n".join(lines)
+
+        await self.context.send(embed=embed)
 
 
 class LobsteroBOT(commands.AutoShardedBot):
