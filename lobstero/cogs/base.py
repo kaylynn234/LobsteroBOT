@@ -35,8 +35,8 @@ Also features git-related commands."""
                 latest = r.get_commits()
                 for c, _ in zip(latest, range(3)):
                     self.recent_commits.append(c)
-            except:
-                pass
+        except:
+            pass
 
     @commands.command()
     async def search(self, ctx, *, text="aaaaaaaaaaaqdqdqfdqwfqwerfgeqrfgqwr3gfqerf"):
