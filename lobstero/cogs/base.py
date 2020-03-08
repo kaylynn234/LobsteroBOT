@@ -29,11 +29,14 @@ Also features git-related commands."""
         if "None" not in [lc.auth.github_username, lc.auth.github_password]:
             self.manager = Github(lc.auth.github_username, lc.auth.github_password)
 
-        if self.manager:
-            r = self.manager.get_repo(lc.config.github_repo)
-            latest = r.get_commits()
-            for c, _ in zip(latest, range(3)):
-                self.recent_commits.append(c)
+        try:
+            if self.manager:
+                r = self.manager.get_repo(lc.config.github_repo)
+                latest = r.get_commits()
+                for c, _ in zip(latest, range(3)):
+                    self.recent_commits.append(c)
+            except:
+                pass
 
     @commands.command()
     async def search(self, ctx, *, text="aaaaaaaaaaaqdqdqfdqwfqwerfgeqrfgqwr3gfqerf"):
