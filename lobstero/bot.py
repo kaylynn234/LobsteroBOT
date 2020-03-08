@@ -217,7 +217,7 @@ class LobsteroHELP(commands.HelpCommand):
             return await self.context.simple_embed(error)
 
         embed = discord.Embed(title=error, color=16202876)
-        lines = "Did you mean"
+        lines = ["Did you mean"]
         lines += [f"_ _   ``<{m}``" for m in matches]
         embed.description = "\n".join(lines)
 
