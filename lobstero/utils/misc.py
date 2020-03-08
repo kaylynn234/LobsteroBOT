@@ -96,12 +96,12 @@ def calculate_investment_details(submission):
     asset_interactivity_score = ((age.total_hours() * (submission.upvote_ratio / 100)) / 72) * 100
 
     info = [
-        f"This asset's ID is ``{submission.id}``. Save this value to invest in this asset!"
+        f"This asset's ID is ``{submission.id}``. Save this value to invest in this asset!",
         "Basic asset information can be seen below:\n"
         f"**Growth score**: {asset_growth_score}",
         "*The growth score is a measure used to judge the growth of an asset.*",
-        f"**Interactivity score**: {asset_interactivity_score}%"
-        "*The interactivity score shows how happy the market is with this asset over time.*\n"
+        f"**Interactivity score**: {round(asset_interactivity_score, 3)}%",
+        "*The interactivity score shows how happy the market is with this asset over time.*\n",
         "*For both values, higher is better*"
     ]
 
