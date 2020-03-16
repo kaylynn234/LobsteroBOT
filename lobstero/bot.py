@@ -79,17 +79,25 @@ class LobsteroHELP(commands.HelpCommand):
 
     def __init__(self):
         self.not_found = None
-        super().__init__(command_attrs={"aliases": ["hlep", "hpel", "pehl", "phel", "pleh"]})
+        super().__init__(command_attrs={
+            "aliases": ["hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp"]})
 
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
-            desc = list(embed.description)
-            title = list(embed.title)
-            random.shuffle(desc)
-            random.shuffle(title)
+            if self.context.invoked_with == "halp":
+                embed.description = embed.description.replace("e", "a")
+                embed.title = embed.title.replace("e", "a")
+            elif self.context.invoked_with == "holp":
+                embed.description = embed.description.replace("e", "o")
+                embed.title = embed.title.replace("e", "o")
+            else:
+                desc = list(embed.description)
+                title = list(embed.title)
+                random.shuffle(desc)
+                random.shuffle(title)
 
-            embed.description = "".join(desc)
-            embed.title = "".join(title)
+                embed.description = "".join(desc)
+                embed.title = "".join(title)
 
         return embed
 
