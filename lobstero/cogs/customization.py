@@ -84,7 +84,7 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
         if message is not None:
             db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
             db.add_welcome_message(str(ctx.guild.id), message)
-            await embeds.simple_embed("Welcome message added!", ctx.message.channel.id)
+            await embeds.simple_embed("Welcome message added!", ctx)
         else:
             await embeds.simple_embed(
                 "Please provide the message that you wish to add as a welcome message.", ctx)
