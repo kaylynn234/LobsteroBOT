@@ -3,9 +3,10 @@ This is where the subclassed bot object lies."""
 
 import logging
 import difflib
-
 import random
+
 import discord
+import uwuify
 
 from typing import Any, Type
 
@@ -80,7 +81,7 @@ class LobsteroHELP(commands.HelpCommand):
     def __init__(self):
         self.not_found = None
         super().__init__(command_attrs={
-            "aliases": ["hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp"]})
+            "aliases": ["hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp", "howolp", "huwulp"]})
 
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
@@ -90,6 +91,18 @@ class LobsteroHELP(commands.HelpCommand):
             elif self.context.invoked_with == "holp":
                 embed.description = embed.description.replace("e", "o").replace("E", "O")
                 embed.title = embed.title.replace("e", "o").replace("E", "O")
+            elif self.context.invoked_with == "howolp":
+                embed.description = uwuify.uwu_text(embed.description)
+                embed.title = uwuify.uwu_text(embed.title)
+
+                embed.description = embed.description.replace("u", "o").replace("U", "O")
+                embed.title = embed.title.replace("u", "o").replace("U", "O")
+            elif self.context.invoked_with == "huwulp":
+                embed.description = uwuify.uwu_text(embed.description)
+                embed.title = uwuify.uwu_text(embed.title)
+            elif self.context.invoked_with == "pleh":
+                embed.title = " ".join([w[len(w)::-1] for w in embed.title.split(" ")])
+                embed.description = " ".join([w[len(w)::-1] for w in embed.description.split(" ")])
             else:
                 desc = list(embed.description)
                 title = list(embed.title)
