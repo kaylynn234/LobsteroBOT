@@ -88,8 +88,8 @@ class LobsteroHELP(commands.HelpCommand):
             random.shuffle(desc)
             random.shuffle(title)
 
-            embed.description = desc
-            embed.title = title
+            embed.description = "".join(desc)
+            embed.title = "".join(title)
 
         return embed
 
