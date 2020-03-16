@@ -85,11 +85,11 @@ class LobsteroHELP(commands.HelpCommand):
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
             if self.context.invoked_with == "halp":
-                embed.description = embed.description.replace("e", "a")
-                embed.title = embed.title.replace("e", "a")
+                embed.description = embed.description.replace("e", "a").replace("E", "A")
+                embed.title = embed.title.replace("e", "a").replace("E", "A")
             elif self.context.invoked_with == "holp":
-                embed.description = embed.description.replace("e", "o")
-                embed.title = embed.title.replace("e", "o")
+                embed.description = embed.description.replace("e", "o").replace("E", "O")
+                embed.title = embed.title.replace("e", "o").replace("E", "O")
             else:
                 desc = list(embed.description)
                 title = list(embed.title)
