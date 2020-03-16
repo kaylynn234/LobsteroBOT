@@ -207,6 +207,7 @@ class LobsteroHELP(commands.HelpCommand):
         ]
 
         embed.description = "\n".join(description)
+        embed = await self.check_and_jumble(embed)
 
         pages = menus.HelpPagesMenu([embed] + cog_pages)
         menu = MenuPages(pages, timeout=90, clear_reactions_after=True)
