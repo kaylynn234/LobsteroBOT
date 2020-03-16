@@ -79,7 +79,20 @@ class LobsteroHELP(commands.HelpCommand):
 
     def __init__(self):
         self.not_found = None
+        self.command_attrs = {"aliases": ["hlep", "hpel", "pehl", "phel", "pleh"]}
         super().__init__()
+
+    async def check_and_jumble(self, embed):
+        if self.context.invoked_with != "help":
+            desc = list(embed.description)
+            title = list(embed.title)
+            random.shuffle(desc)
+            random.shuffle(title)
+
+            embed.description = desc
+            embed.title = title
+
+        return embed
 
     async def all_usable_commands(self):
         usable_commands = []
@@ -131,7 +144,7 @@ class LobsteroHELP(commands.HelpCommand):
                     "permissions required to use them."))
 
         embed.description = "\n".join(description)
-        return embed
+        return await self.check_and_jumble(embed)
 
     async def single_help(self, command):
         embed = discord.Embed(title="Help", color=16202876)
@@ -160,6 +173,8 @@ class LobsteroHELP(commands.HelpCommand):
         embed.description = "\n".join(description)
         if cd:
             embed.set_footer(text=f"This command has a {cd} second cooldown.")
+
+        embed = await self.check_and_jumble(embed)
 
         await self.context.send(embed=embed)
 
