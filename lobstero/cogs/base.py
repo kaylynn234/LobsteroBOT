@@ -204,7 +204,7 @@ Misuse of this command will result in a blacklist."""
     @commands.guild_only()
     @handlers.blueprints_or()
     async def hardwarestats(self, ctx):
-        """Hardware information abotu Lobstero. Mostly useless."""
+        """Hardware information about Lobstero. Mostly useless."""
 
         core_count = psutil.cpu_count()
         thread_count = psutil.cpu_count(logical=False)
