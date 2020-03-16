@@ -133,7 +133,7 @@ Usable values:
     ``moderation`` - This is where moderation logging goes. Use this in multiple channels to toggle each one as a logging channel."""
 
         if not name:
-            await embeds.simple_embed("No value was chosen to set!", ctx)
+            return await embeds.simple_embed("No value was chosen to set!", ctx)
 
         if name.lower() == "welcome_messages":
             db.edit_settings_value(ctx.guild.id, "wmessagechannel", ctx.channel.id)
