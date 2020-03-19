@@ -92,9 +92,9 @@ class LobsteroHELP(commands.HelpCommand):
 
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
-            if self.context.invoked_with in ["halp", "holp", "hilp", "hulp"]:
+            if self.context.invoked_with.lower() in ["halp", "holp", "hilp", "hulp"]:
                 tr = str.maketrans(
-                    "e" + self.context.invoked_with[1],
+                    "e" + self.context.invoked_with[1].lower(),
                     "E" + self.context.invoked_with[1].capitalize())
 
                 embed.description = embed.description.translate(tr)
