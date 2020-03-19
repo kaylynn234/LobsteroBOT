@@ -86,28 +86,29 @@ class LobsteroHELP(commands.HelpCommand):
     def __init__(self):
         self.not_found = None
         super().__init__(command_attrs={
-            "aliases": ["hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp", "howolp", "huwulp"]})
+            "aliases": [
+                "hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp", "howolp", "huwulp",
+                "hilp", "hulp", "hylp"]})
 
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
-            if self.context.invoked_with == "halp":
-                embed.description = embed.description.replace("e", "a").replace("E", "A")
-                embed.title = embed.title.replace("e", "a").replace("E", "A")
-            elif self.context.invoked_with == "holp":
-                embed.description = embed.description.replace("e", "o").replace("E", "O")
-                embed.title = embed.title.replace("e", "o").replace("E", "O")
-            elif self.context.invoked_with == "howolp":
-                embed.description = uwuify.uwu_text(embed.description)
-                embed.title = uwuify.uwu_text(embed.title)
+            if self.context.invoked_with in ["halp", "holp", "hilp", "hulp"]:
+                tr = str.maketrans(
+                    "e" + self.context.invoked_with[1],
+                    "E" + self.context.invoked_with[1].capitalize())
 
-                embed.description = embed.description.replace("u", "o").replace("U", "O")
-                embed.title = embed.title.replace("u", "o").replace("U", "O")
-            elif self.context.invoked_with == "huwulp":
+                embed.description = embed.description.translate(tr)
+                embed.title = embed.title.translate(tr)
+            elif self.context.invoked_with in ["howolp", "huwulp"]:
                 embed.description = uwuify.uwu_text(embed.description)
                 embed.title = uwuify.uwu_text(embed.title)
             elif self.context.invoked_with == "pleh":
                 embed.title = " ".join([w[len(w)::-1] for w in embed.title.split(" ")])
                 embed.description = " ".join([w[len(w)::-1] for w in embed.description.split(" ")])
+            elif self.context.invoked_with == "hylp":
+                tr = str.maketrans("aeiou", "yyyyy")
+                embed.title = embed.title.translate(tr)
+                embed.description = embed.description.translate(tr)
             else:
                 desc = list(embed.description)
                 title = list(embed.title)
