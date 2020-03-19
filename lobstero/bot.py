@@ -302,7 +302,7 @@ class LobsteroEH():
         """Handles an exception given context and the exception itself.
         Logging is handled for you, and statistics are automatically updated."""
 
-        # error = getattr(error, "original", error)  # just in case
+        error = getattr(error, "original", error)  # just in case
         cannot_send = (
             discord.errors.Forbidden, discord.ext.menus.CannotReadMessageHistory,
             discord.ext.menus.CannotEmbedLinks, discord.ext.menus.CannotSendMessages
