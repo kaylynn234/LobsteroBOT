@@ -303,10 +303,10 @@ class LobsteroEH():
         Logging is handled for you, and statistics are automatically updated."""
 
         # error = getattr(error, "original", error)  # just in case
-        cannot_send = [
+        cannot_send = (
             discord.errors.Forbidden, discord.ext.menus.CannotReadMessageHistory,
             discord.ext.menus.CannotEmbedLinks, discord.ext.menus.CannotSendMessages
-        ]
+        )
 
         handled, message = None, None
         error_name = strings.pascalcase(type(error).__name__)
@@ -567,12 +567,10 @@ class LobsteroBOT(commands.AutoShardedBot):
         ctx = await self.get_context(message, cls=LobsteroCONTEXT)
         await self.invoke(ctx)
 
-    async def on_command_error(self, ctx, error):
-        await self.handler.handle(ctx, error)
+    async def on_command_error(self, context, exception):
+        await self.handler.handle(context, exception)
 
     async def on_error(self, event_method, *args, **kwargs):
-        if str(event_method) == "on_command_error":
-            return  # already handled
 
         msg = f"""**Additional notes:**
         Event: {event_method}
