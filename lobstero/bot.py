@@ -94,8 +94,8 @@ class LobsteroHELP(commands.HelpCommand):
         if self.context.invoked_with != "help":
             if self.context.invoked_with.lower() in ["halp", "holp", "hilp", "hulp"]:
                 tr = str.maketrans(
-                    "e" + self.context.invoked_with[1].lower(),
-                    "E" + self.context.invoked_with[1].upper())
+                    "e" + "E",
+                    self.context.invoked_with[1].lower() + self.context.invoked_with[1].upper())
 
                 embed.description = embed.description.translate(tr)
                 embed.title = embed.title.translate(tr)
