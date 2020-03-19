@@ -1,6 +1,5 @@
 """
-Well, this is it. This is Lobstero.
-It's a mess.
+help
 """
 
 # imports imports imports

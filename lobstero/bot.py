@@ -268,7 +268,7 @@ class LobsteroHELP(commands.HelpCommand):
         await self.context.send(embed=embed)
 
 
-class LobsterEH():
+class LobsteroEH():
     """A very bad solution to error handling."""
 
     def __init__(self, bot):
@@ -395,6 +395,13 @@ class LobsterEH():
 
         if not handled:
             try:
+                await ctx.send(
+                    "Something went wrong, and the developer has been notified. "
+                    "Check my permissions in this channel.")
+            except:
+                pass  # whoop-di-doo
+
+            try:
                 raise error
             except Exception:
                 await self.format_tb_and_send(additional=str((dir(error), error.args)))
@@ -409,7 +416,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.log = logging.getLogger(__name__)  # type: Type[logging.Logger]
         self.first_run = True
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
-        self.handler = LobsterEH(self)
+        self.handler = LobsteroEH(self)
 
         super().__init__(command_prefix, help_command=LobsteroHELP(), **kwargs)
 
