@@ -302,7 +302,7 @@ class LobsteroEH():
         """Handles an exception given context and the exception itself.
         Logging is handled for you, and statistics are automatically updated."""
 
-        error = getattr(error, "original", error)  # just in case
+        # error = getattr(error, "original", error)  # just in case
         cannot_send = [
             discord.errors.Forbidden, discord.ext.menus.CannotReadMessageHistory,
             discord.ext.menus.CannotEmbedLinks, discord.ext.menus.CannotSendMessages
@@ -402,10 +402,7 @@ class LobsteroEH():
             except:
                 pass  # whoop-di-doo
 
-            try:
-                raise error
-            except Exception:
-                await self.format_tb_and_send(additional=str((dir(error), error.args)))
+            await self.format_tb_and_send(additional=str((dir(error), error.args)))
 
             raise error  # Raise again, now that it's been logged on discord.
 
@@ -570,7 +567,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         ctx = await self.get_context(message, cls=LobsteroCONTEXT)
         await self.invoke(ctx)
 
-    async def on_command_error(self, ctx, error) -> None:
+    async def on_command_error(self, ctx, error):
         await self.handler.handle(ctx, error)
 
     async def on_error(self, event_method, *args, **kwargs):
