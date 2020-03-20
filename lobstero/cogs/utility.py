@@ -42,7 +42,6 @@ Also features commands for setting AFk statuses and similar."""
         self.bot.afks = []
         self.check_reminders.start()
 
-
     def cog_unload(self):
         self.check_reminders.cancel()
 
@@ -55,7 +54,7 @@ Also features commands for setting AFk statuses and similar."""
         embed_mesg = discord.Embed(title="Emoji", color=16202876)
         if em:
             escape = f"{ord(em[0]):X}"
-            filename = f"{root_directory}data/emojis/{escape}.png"
+            filename = f"{root_directory}data/static/emojis/{escape}.png"
             to_send = discord.File(filename, filename=f"{escape}.png")
             embed_mesg.set_image(url=f"attachment://{escape}.png")
             return await ctx.send(file=to_send, embed=embed_mesg)
