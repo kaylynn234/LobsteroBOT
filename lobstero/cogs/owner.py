@@ -42,7 +42,7 @@ You shouldn't even see this. if you do, you know what it does."""
         """Actually does the things for blacklists and whitelists"""
 
         if what.lower() not in ["member", "channel", "guild"]:
-            await embeds.simple_embed("Not a valid block type.", ctx)
+            return await embeds.simple_embed("Not a valid block type.", ctx)
 
         if what.lower() == "channel":
             c = getattr(commands, f"TextChannelConverter")
