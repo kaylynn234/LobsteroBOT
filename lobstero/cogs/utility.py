@@ -53,8 +53,8 @@ Also features commands for setting AFk statuses and similar."""
         em = strings.split_count(emoji)
         embed_mesg = discord.Embed(title="Emoji", color=16202876)
         if em:
-            escape = f"{ord(em[0]):X}"
-            filename = f"{root_directory}data/static/emojis/{escape}.png"
+            escape = "-".join([f"{ord(e):X}" for e in em])
+            filename = f"{root_directory}lobstero/data/static/emojis/{escape}.png"
             to_send = discord.File(filename, filename=f"{escape}.png")
             embed_mesg.set_image(url=f"attachment://{escape}.png")
             return await ctx.send(file=to_send, embed=embed_mesg)

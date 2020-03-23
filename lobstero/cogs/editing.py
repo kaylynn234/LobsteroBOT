@@ -130,11 +130,18 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
                 c = commands.PartialEmojiConverter()
                 try:
-                    e = await c.convert(p_ctx, url)
+                    found_emoji = strings.split_count(url)
+                    if not found_emoji:
+                        e = await c.convert(p_ctx, url)
                 except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
                     constructed = await self.package(url)
                 else:  # Emoji lookup was a success
-                    constructed = await self.package(str(e.url))
+                    if found_emoji:
+                        escape = "-".join([f"{ord(e):X}" for e in found_emoji])
+                        filename = f"{root_directory}lobstero/data/static/emojis/{escape}.png"
+                        constructed = await self.package(filename, False)
+                    else:
+                        constructed = await self.package(str(e.url))
 
             else:  # Member conversion was a success, get an avatar url and download it
                 value = m.avatar_url_as(static_format="png", size=2048)
