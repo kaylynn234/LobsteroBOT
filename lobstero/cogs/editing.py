@@ -465,7 +465,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         new_im = im.resize((round(width, -1), round(height, -1)))
         width, height = new_im.size
         canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-        width, height = width / 10, height / 10 
+        width, height = int(width / 10), int(height / 10)
         positions = []
 
         for x in range(0, width * 10, width):
