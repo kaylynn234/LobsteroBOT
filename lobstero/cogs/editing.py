@@ -469,21 +469,25 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         im = Image.open(result.data).convert("RGBA")
         im.thumbnail((4000, 4000))
         width, height = im.size
+        if width <= 50 or height <= 50:
+            return await ctx.simple_embed("Image too small!")
+
+        divisor = random.choice([2, 4, 5, 10])
         new_im = im.resize((round(width, -1), round(height, -1)))
         width, height = new_im.size
         canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-        width, height = int(width / 10), int(height / 10)
+        width, height = int(width / divisor), int(height / divisor)
         positions = []
 
-        for x in range(0, width * 10, width):
-            for y in range(0, height * 10, height):
+        for x in range(0, width * divisor, width):
+            for y in range(0, height * divisor, height):
                 dimensions = (x, y, x + width, y + height)
                 positions.append(new_im.crop(dimensions))
 
         random.shuffle(positions)
         counter = 0
-        for x in range(0, width * 10, width):
-            for y in range(0, height * 10, height):
+        for x in range(0, width * divisor, width):
+            for y in range(0, height * divisor, height):
                 canvas.paste(positions[counter], (x, y))
                 counter += 1
 

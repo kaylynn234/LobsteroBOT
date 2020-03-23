@@ -78,7 +78,7 @@ class LobsteroCONTEXT(commands.Context):
 
     async def simple_embed(self, content):
         """Sends an embed."""
-        await embeds.simple_embed(content, self)
+        return await embeds.simple_embed(content, self)
 
 
 class LobsteroHELP(commands.HelpCommand):
