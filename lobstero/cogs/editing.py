@@ -451,14 +451,45 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         await self.save_and_send(ctx, final, "mosaic.png")
 
+    @commands.command()
+    async def quilt(self, ctx, url=None):
+        """Jumbled squares."""
+
+        result = await self.processfile(ctx, url)
+        if result is None:
+            return
+
+        im = Image.open(result.data).convert("RGBA")
+        im.thumbnail(4000, 4000)
+        width, height = im.size
+        new_im = im.resize(round(width, -1), round(height, -1))
+        width, height = new_im.size
+        canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        width, height = width / 10, height / 10 
+        positions = []
+
+        for x in range(0, width * 10, width):
+            for y in range(0, height * 10, height):
+                dimensions = (x, y, x + width, y + height)
+                positions.append(new_im.crop(dimensions))
+
+        random.shuffle(positions)
+        counter = 0
+        for x in range(0, width * 10, width):
+            for y in range(0, height * 10, height):
+                canvas.paste(positions[counter], (x, y))
+                counter += 1
+
+        await self.save_and_send(ctx, canvas, "quilt.png")
+
     def make_meme(self, topString, bottomString, filename):
 
         img = Image.open(filename).convert("RGBA")
-        
+
         wpercent = (2048/float(img.size[0]))
         hsize = int((float(img.size[1])*float(wpercent)))
-        img = img.resize((2048,hsize), Image.ANTIALIAS)
-        
+        img = img.resize((2048, hsize), Image.ANTIALIAS)
+
         imageSize = img.size    
 
         # find biggest font size that works
