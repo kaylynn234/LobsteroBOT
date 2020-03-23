@@ -460,7 +460,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             return
 
         im = Image.open(result.data).convert("RGBA")
-        im.thumbnail(4000, 4000)
+        im.thumbnail((4000, 4000))
         width, height = im.size
         new_im = im.resize(round(width, -1), round(height, -1))
         width, height = new_im.size
