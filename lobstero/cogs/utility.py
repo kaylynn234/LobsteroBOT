@@ -304,7 +304,7 @@ Make sure you quote arguments that are multiple words."""
         data = []
 
         for item in reminders:
-            id_and_when = f"Reminder ID #{item['id']}: {humanize.naturaltime(pendulum.parse(item['expiry'] - rn))}"
+            id_and_when = f"Reminder ID #{item['id']}: {humanize.naturaltime(pendulum.parse(item['expiry']) - rn)}"
             if len(item["reason"]) > 120:
                 clipped = item["reason"][:119] + "..."
             else:
