@@ -291,36 +291,96 @@ Make sure you quote arguments that are multiple words."""
 
         return await ctx.send(embed=embed)
 
-    @commands.command(aliases=["reminder", "remind"])
+    @commands.group(invoke_without_command=True, ignore_extra=False, aliases=["reminder", "remind", "reminders"])
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def remind(self, ctx):
+        """A base command for managing reminders. Displays a list of active reminders if no subcommand is used."""
+        reminders = db.find_reminders_for_user(ctx.author.id)
+        if not reminders:
+            return await ctx.simple_embed("Looks like you don't have any reminders to list.")
+
+        rn = pendulum.now("Atlantic/Reykjavik")
+        data = []
+
+        for item in reminders:
+            id_and_when = f"Reminder ID #{item['id']}: {humanize.naturaltime(pendulum.parse(item['date_raw'] - rn))}"
+            if len(item["reason"]) > 120:
+                clipped = item["reason"][:119] + "..."
+            else:
+                clipped = item["reason"][:119]
+            data.append((id_and_when, clipped))
+
+        menu = menus.TupleEmbedMenu(data, "Current reminders", 10, footer=True)
+        pages = MenuPages(menu, clear_reactions_after=True)
+
+        await pages.start(ctx)
+
+    @remind.command(name="add")
     @commands.guild_only()
     @commands.cooldown(1, 60, commands.BucketType.user)
     @handlers.blueprints_or()
-    async def remindme(self, ctx, *, when=None):
+    async def remind_add(self, ctx, *, whatandwhen):
         """Schedules a reminder for you. Valid usage is similar to below:
-<remindme stop procrastinating in 20m
+<remind add stop procrastinating in 20m
 
 Valid usage can also include the following:
-<remindme do something important in 12 hours, 13 minutes and 1 second"""
+<remind add do something important in 12 hours, 13 minutes and 1 second"""
 
-        if when:
-            if " in " in when:
-                date = f'in {when.split(" in ")[-1]}'
-                reason = " in ".join(when.split(" in ")[0:-1])
-                decoded = dateparser.parse(date, settings={'TIMEZONE': 'UTC'})
-                if decoded:
-                    passed = pendulum.parse(str(decoded))
-                    db.add_reminder(
-                        ctx.author.id, reason, passed,
-                        str(pendulum.now("Atlantic/Reykjavik")))  # utc + 0
-
-                    await embeds.simple_embed(
-                        f"Got it! I'll remind you in {passed.diff_for_humans(absolute=True)}.", ctx)
-                else:
-                    await embeds.simple_embed("That doesn't seem like a valid date!", ctx)
-            else:
-                await embeds.simple_embed("No date was provided!", ctx)
+        if " in " not in whatandwhen:
+            await ctx.simple_embed("No date was provided!")
         else:
-            await embeds.simple_embed("I can't remind you about nothing.", ctx)
+            date = f'in {whatandwhen.split(" in ")[-1]}'
+            reason = " in ".join(whatandwhen.split(" in ")[0:-1])
+            decoded = dateparser.parse(date, settings={'TIMEZONE': 'UTC'})
+            if decoded:
+                passed = pendulum.parse(str(decoded))
+                db.add_reminder(ctx.author.id, reason, passed, str(pendulum.now("Atlantic/Reykjavik")))  # utc + 0
+
+                await ctx.simple_embed(f"Got it! I'll remind you in {passed.diff_for_humans(absolute=True)}.", ctx)
+            else:
+                await embeds.simple_embed("That doesn't seem like a valid date!", ctx)
+
+    @remind.command(name="remove", aliases=["delete"])
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def remind_remove(self, ctx, *, reminderid):
+        """Removes a currently active reminder by ID."""
+        reminder = db.find_reminder(int(reminderid))
+        if not reminder:
+            return await ctx.simple_embed("This reminder does not exist.")
+        if int(reminder["user"]) != ctx.author.id:
+            return await ctx.simple_embed("This reminder exists, but is not owned by you.")
+
+        db.negate_reminder(int(reminderid))
+        await ctx.simple_embed("Reminder removed..")
+
+    @remind.command(name="remove", aliases=["delete"])
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def remind_view(self, ctx, *, reminderid):
+        """Shows details on a currently active reminder by ID."""
+        reminder = db.find_reminder(int(reminderid))
+        if not reminder:
+            return await ctx.simple_embed("This reminder does not exist.")
+        if int(reminder["user"]) != ctx.author.id:
+            return await ctx.simple_embed("This reminder exists, but is not owned by you.")
+
+        embed = discord.Embed(title="Reminder information", color=16202876)
+        if len(reminder["reason"]) > 1000:
+            clipped = reminder["reason"][:1000] + "... (Content too large to display.)"
+        else:
+            clipped = reminder["reason"]
+
+        expires_at = pendulum.parse(reminder["expiry"])
+        set_at = pendulum.parse(reminder["issued"])
+        rn = pendulum.now("Atlantic/Reykjavik")  # utc+0
+
+        embed.add_field(name="Reminder text", value=clipped, inline=False)
+        embed.add_field(name="Set at", value=humanize.naturaldate(set_at), inline=False)
+        embed.add_field(name="Expires", value=humanize.naturaltime(expires_at - rn), inline=False)
+
+        await ctx.send(embed=embed)
 
     @tasks.loop(seconds=10)
     async def check_reminders(self):
@@ -332,18 +392,20 @@ Valid usage can also include the following:
             expires_at = pendulum.parse(item["expiry"])
             set_at = pendulum.parse(item["issued"])
             rn = pendulum.now("Atlantic/Reykjavik")  # utc+0
+
             if rn > expires_at:
                 user = self.bot.get_user(int(item["user"]))
                 if user:
-                    embed = discord.Embed(
-                        title=f"Reminder from {set_at.diff_for_humans()}", color=16202876)
+                    embed = discord.Embed(title=f"Reminder from {set_at.diff_for_humans()}", color=16202876)
                     embed.description = item["reason"]
+
                     try:
                         await user.send(embed=embed)
                     except discord.errors.Forbidden:
                         pass
+
                 db.negate_reminder(item["id"])
-    
+
     @commands.Cog.listener()
     @commands.guild_only()
     async def on_message(self, message):

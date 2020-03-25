@@ -51,7 +51,7 @@ class ListEmbedMenuClean(menus.ListPageSource):
 
 
 class TupleEmbedMenu(menus.ListPageSource):
-    """A simple menu class for paginating tuples nicely."""
+    """A simple menu class for paginating two-tuples nicely."""
     def __init__(self, data, title, per_page: int = 10, desc=None, footer=None, inline=False):
         super().__init__(data, per_page=per_page)
         self.title = title

@@ -539,6 +539,16 @@ def find_reminder(id_):
         return None
 
 
+def find_reminders_for_user(id_):
+    """Finds all reminders for a user."""
+    table = db['reminders']
+    res = table.find_one(user=id_)
+    if res:
+        return [dict(i) for i in res]
+    else:
+        return None
+
+
 def negate_reminder(_id):
     """Deletes a reminder by id."""
     table = db['reminders']
