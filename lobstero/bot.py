@@ -568,6 +568,9 @@ class LobsteroBOT(commands.AutoShardedBot):
         await self.invoke(ctx)
 
     async def on_command_error(self, context, exception):
+        if context.command:
+            context.command.reset_cooldown(context)
+
         await self.handler.handle(context, exception)
 
     async def on_error(self, event_method, *args, **kwargs):
