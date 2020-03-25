@@ -567,7 +567,7 @@ Use the inventory command to see the fish you own."""
     @commands.command()
     @commands.guild_only()
     @commands.max_concurrency(1, commands.BucketType.guild)
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(6, 60, commands.BucketType.user)
     @handlers.blueprints_or()
     async def maizemaze(self, ctx):
         """Help botto navigate through a treacherous maze of corn and horror."""
