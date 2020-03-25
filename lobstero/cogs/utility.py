@@ -355,7 +355,7 @@ Valid usage can also include the following:
         db.negate_reminder(int(reminderid))
         await ctx.simple_embed("Reminder removed..")
 
-    @remind.command(name="remove", aliases=["delete"])
+    @remind.command(name="view", aliases=["id"])
     @commands.guild_only()
     @handlers.blueprints_or()
     async def remind_view(self, ctx, *, reminderid):
