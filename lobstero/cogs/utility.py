@@ -337,7 +337,7 @@ Valid usage can also include the following:
                 passed = pendulum.parse(str(decoded))
                 db.add_reminder(ctx.author.id, reason, passed, str(pendulum.now("Atlantic/Reykjavik")))  # utc + 0
 
-                await ctx.simple_embed(f"Got it! I'll remind you in {passed.diff_for_humans(absolute=True)}.", ctx)
+                await ctx.simple_embed(f"Got it! I'll remind you in {passed.diff_for_humans(absolute=True)}.")
             else:
                 await embeds.simple_embed("That doesn't seem like a valid date!", ctx)
 
@@ -353,7 +353,7 @@ Valid usage can also include the following:
             return await ctx.simple_embed("This reminder exists, but is not owned by you.")
 
         db.negate_reminder(int(reminderid))
-        await ctx.simple_embed("Reminder removed..")
+        await ctx.simple_embed("Reminder removed.")
 
     @remind.command(name="view", aliases=["id"])
     @commands.guild_only()
