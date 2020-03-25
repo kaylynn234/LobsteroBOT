@@ -697,7 +697,7 @@ The above will delete the most recent 25 messages in this channel with images, e
             await embeds.simple_embed(
                 "Messages deleted." if filtered_messages
                 else "No matching messages were found!", ctx)
-        except discord.errors.Forbidden:
+        except (discord.errors.Forbidden, discord.errors.HTTPException):
             await embeds.simple_embed("Cannot delete messages more than 14 days old!", ctx)
 
     @commands.command()
