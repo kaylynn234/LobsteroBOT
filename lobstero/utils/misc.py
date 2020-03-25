@@ -61,10 +61,10 @@ async def handle_dm(owners, message, bot) -> None:
     else:
         await message.channel.send(embed=discord.Embed(
             title="Hol' up!", description=(
-                "All messages sent to Lobstero are monitored but are not public,"
+                "All messages sent to Lobstero are monitored but are not public, "
                 "and are only seen by the bot's owner.\n"
                 "**Commands do not work in DMs**. If you want to know how to do something, "
-                "use <help on any server.\n**If you want to send feedback, please use"
+                "use <help on any server.\n**If you want to send feedback, please use "
                 "<feedback, as it's easier for the bot's developer to keep up with.** "
                 "Or you can just send a DM to Lobstero, so do whatever. Your choice. ")))
 
