@@ -291,7 +291,7 @@ Make sure you quote arguments that are multiple words."""
 
         return await ctx.send(embed=embed)
 
-    @commands.group(invoke_without_command=True, ignore_extra=False, aliases=["reminder", "remind", "reminders"])
+    @commands.group(invoke_without_command=True, ignore_extra=False, aliases=["reminder", "reminders"])
     @commands.guild_only()
     @handlers.blueprints_or()
     async def remind(self, ctx):
