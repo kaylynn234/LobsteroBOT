@@ -118,9 +118,9 @@ Use this command without a subcommand to display currently set values.
         mapped_channels = map(lambda k: (self.bot.get_channel(k["channel"]), k["type"]), channels)
         name_types = {c[0].name if c[0] else "(Inaccessible/ deleted)": c[1] for c in mapped_channels}
         sorted_channels = sorted(list(name_types.items()), key=lambda t: (t[1], t[0]))
-        flattened_channels = [f"` {i[1]} channel`: {i[0]}" for i in sorted_channels]
+        flattened_channels = [f"``{i[1]} channel``: {i[0]}" for i in sorted_channels]
 
-        pages = menus.ListEmbedMenu(flattened_channels, "Showing currently set channels", footer=True)
+        pages = menus.ListEmbedMenuClean(flattened_channels, "Showing currently set channels", footer=True)
         menu = MenuPages(pages, clear_reactions_after=True)
 
         await menu.start(ctx)
