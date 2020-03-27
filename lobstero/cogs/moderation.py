@@ -436,7 +436,7 @@ A deafen role is created and set up if it does not already exist."""
             await ctx.send(embed=completed)
 
             mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
-            mchannels = filter(None, map(lambda k: self.bot.get_channel(k), mchannels))
+            mchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), mchannels))
 
             logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
             warned = ", ".join([member.mention for member in users])
@@ -527,7 +527,7 @@ A deafen role is created and set up if it does not already exist."""
             await ctx.send(embed=completed)
 
             mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
-            mchannels = filter(None, map(lambda k: self.bot.get_channel(k), mchannels))
+            mchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), mchannels))
 
             logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
             warned = ", ".join([member.mention for member in users])
@@ -709,7 +709,7 @@ The above will delete the most recent 25 messages in this channel with images, e
     async def archive(self, ctx):
         """Archives pins for the current channel. No parameters are required."""
 
-        channel = self.bot.get_channel(db.find_settings_channels(ctx.guild.id, "archive")[0])
+        channel = self.bot.get_channel(db.find_settings_channels(ctx.guild.id, "archive")[0]["channel"])
         if not channel:
             return await ctx.simple_embed("There is no archive channel set on this server!")
 
