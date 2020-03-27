@@ -2,6 +2,7 @@
 
 import discord
 from discord import utils
+from lobstero.models import menus
 from lobstero.utils import db, misc
 
 
