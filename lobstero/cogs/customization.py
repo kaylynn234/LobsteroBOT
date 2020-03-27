@@ -115,7 +115,7 @@ Use this command without a subcommand to display currently set values.
 ``<channels set`` is probably the subcommand you want to use."""
 
         channels = db.find_settings_channels(ctx.guild.id)
-        mapped_channels = map(lambda k: (self.bot.get_channel(k["channel"], k["type"])), channels)
+        mapped_channels = map(lambda k: (self.bot.get_channel(k["channel"]), k["type"]), channels)
         name_types = {c[0].name if c[0] else "(Inaccessible/ deleted)": c[1] for c in mapped_channels}
         sorted_channels = sorted(list(name_types.items()), lambda t: (t[1], t[0]))
         flattened_channels = [f"``{i[1]} channel``: {i[0]}" for i in sorted_channels]
