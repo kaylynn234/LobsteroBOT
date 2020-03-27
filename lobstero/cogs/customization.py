@@ -149,7 +149,7 @@ When specifying a channel, the channel mention, channel ID or channel name can b
             return await ctx.simple_embed("That channel isn't on this server.")
 
         print("ye")
-        res = db.add_settings_channel(ctx.guild.id, channel.id, channeltype.lower())
+        res = db.add_settings_channel(ctx.guild.id, found_channel.id, channeltype.lower())
         print("poog0-wkgw")
         if res:
             await ctx.simple_embed("Channel added!")
