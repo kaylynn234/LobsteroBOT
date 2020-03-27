@@ -110,12 +110,20 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @handlers.blueprints_or()
     async def channels(self, ctx):
-        """Provides tools to set the channels that Lobstero uses to function.
-Use ``<channels`` alone to display currently set values.
+        """A base command for managing the channels that Lobstero uses to function.
+Use this command without a subcommand to display currently set values.
 ``<channels set`` is probably the subcommand you want to use."""
 
-        embed = discord.Embed(title="Showing currently set channels", color=16202876)
-        await ctx.send(embed=embed)
+        channels = db.find_settings_channels(ctx.guild.id)
+        mapped_channels = map(lambda k: (self.bot.get_channel(k["channel"], k["type"])), channels)
+        name_types = {c[0].name if c[0] else "(Inaccessible/ deleted)": c[1] for c in mapped_channels}
+        sorted_channels = sorted(list(name_types.items()), lambda t: (t[1], t[0]))
+        flattened_channels = [f"``{i[1]} channel``: {i[0]}" for i in sorted_channels]
+
+        pages = menus.ListEmbedMenu(flattened_channels, "Showing currently set channels", footer=True)
+        menu = MenuPages(pages, clear_reactions_after=True)
+
+        await menu.start(ctx)
 
     @channels.command(name="set")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
