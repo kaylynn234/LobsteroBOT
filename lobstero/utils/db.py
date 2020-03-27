@@ -520,13 +520,7 @@ def close_infraction(_id):
 
 def is_logging_enabled(guildid):
     """Is it?"""
-    res = settings_value_for_guild(guildid)
-    if res:
-        if "moderationlogs" in res:
-            if res["moderationlogs"] is not None:
-                return (True, json.loads(res["moderationlogs"]))
-
-    return (False, False)
+    return bool(find_settings_channels(guildid, "moderation"))
 
 
 def find_reminder(id_):

@@ -392,63 +392,18 @@ A deafen role is created and set up if it does not already exist."""
             for user in r[1]:
                 db.log_infraction(
                     "softban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
-                await moderation.handle_softban(ctx, user)
+                await moderation.handle_softban(ctx, user)  
 
     async def handle_confirmation_and_logging(self, ctx, arg, description="No information provided.", later="Moderation action taken", later_plural="Moderation actions taken"):
         users, reason = arg
         if not users:
             return False
-        table = db.give_table()
-        m = None
 
-        if int(ctx.guild.id) not in list(table.keys()):
-            th = misc.populate({})
-        else:
-            th = misc.populate(table[ctx.guild.id])
+        outcome = await moderation.confirm(self, ctx, users, description, reason)
+        if not outcome[0]:
+            return (False, users, reason, False)
 
-        if th["moderation_confirmation"]:
-            precautionary = discord.Embed(color=16202876, title="Operation summary")
-            warned = ", ".join([member.mention for member in users])
-            precautionary.description = description
-            precautionary.add_field(name="Affected members", value=warned, inline=False)
-            precautionary.add_field(name="Reason", value=reason, inline=False)
-            precautionary.set_footer(
-                text="You can disable this message by using the \"settings\" command.")
-
-            m = menus.ConfirmationMenu(precautionary)
-            await m.start(ctx, wait=True)
-
-            if not m.clicked:
-                return (False, users, reason, False)
-
-        completed = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
-        warned = ", ".join([member.mention for member in users])
-        completed.description = f"Punishment submitted."
-        completed.add_field(name="Affected members", value=warned, inline=False)
-        completed.add_field(name="Reason", value=reason, inline=False)
-        if db.is_logging_enabled(ctx.guild.id) is False:
-            completed.set_footer(
-                text="You can configure a logging channel using the <channels command")
-
-        if m:
-            await m.message.edit(embed=completed)
-        else:
-            await ctx.send(embed=completed)
-
-            mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
-            mchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), mchannels))
-
-            logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
-            warned = ", ".join([member.mention for member in users])
-            logging.description = f"Punishment submitted."
-            logging.add_field(name="Affected members", value=warned, inline=False)
-            logging.add_field(name="Reason", value=reason, inline=False)
-
-            for channel in mchannels:
-                try:
-                    await channel.send(embed=logging)
-                except discord.errors.Forbidden:
-                    pass
+        await moderation.log(self, ctx, reason, users, later, later_plural, outcome[1])
 
         return (True, users, reason, False)
 
@@ -456,42 +411,21 @@ A deafen role is created and set up if it does not already exist."""
         users, reason = arg
         if not users:
             return False
-        table = db.give_table()
-        m = None
 
-        if int(ctx.guild.id) not in list(table.keys()):
-            th = misc.populate({})
-        else:
-            th = misc.populate(table[ctx.guild.id])
-
-        if th["moderation_confirmation"]:
-            precautionary = discord.Embed(color=16202876, title="Operation summary")
-            warned = ", ".join([member.mention for member in users])
-            precautionary.description = description
-            precautionary.add_field(name="Affected members", value=warned, inline=False)
-            precautionary.add_field(name="Reason", value=reason, inline=False)
-            precautionary.set_footer(
-                text="You can disable this message by using the \"settings\" command.")
-
-            m = menus.ConfirmationMenu(precautionary)
-            await m.start(ctx, wait=True)
-
-            if not m.clicked:
-                return (False, users, reason, False)
+        outcome = await moderation.confirm(self, ctx, users, description, reason)
+        if not outcome[0]:
+            return (False, users, reason, False)
 
         expiry = discord.Embed(color=16202876, title="Set an expiry")
         expiry.description = text.mod_can_expire
-        if m:
-            await m.message.edit(embed=expiry)
+        if outcome[1]:
+            await outcome[1].edit(embed=expiry)
         else:
             await ctx.send(embed=expiry)
 
         future, parsed = None, None
         try:
-            future = await self.bot.wait_for(
-                'message', timeout=10.0,
-                check=lambda message: message.author == ctx.author)
-
+            future = await self.bot.wait_for('message', timeout=10, check=lambda message: message.author == ctx.author)
         except asyncio.futures.TimeoutError:
             expiry_r = "Timed out."
 
@@ -499,6 +433,7 @@ A deafen role is created and set up if it does not already exist."""
             if "in" not in future.content:
                 future.content = f"in {future.content}"
             parsed = dateparser.parse(future.content, settings={'TIMEZONE': 'UTC'})
+
         if parsed:
             expires_at = pendulum.parse(str(parsed))
             rn = expires_at
@@ -513,33 +448,7 @@ A deafen role is created and set up if it does not already exist."""
             expiry_r = "Couldn't make sense of the provided date."
             await embeds.simple_embed(f"Got it. This punishment won't expire - {expiry_r}", ctx)
 
-        completed = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
-        warned = ", ".join([member.mention for member in users])
-        completed.description = f"Punishment submitted."
-        completed.add_field(name="Affected members", value=warned, inline=False)
-        completed.add_field(name="Reason", value=reason, inline=False)
-        if db.is_logging_enabled(ctx.guild.id) is False:
-            completed.set_footer(text="You can configure a logging channel using the <channels command")
-
-        if m:
-            await m.message.edit(embed=completed)
-        else:
-            await ctx.send(embed=completed)
-
-            mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
-            mchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), mchannels))
-
-            logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
-            warned = ", ".join([member.mention for member in users])
-            logging.description = f"Punishment submitted."
-            logging.add_field(name="Affected members", value=warned, inline=False)
-            logging.add_field(name="Reason", value=reason, inline=False)
-
-            for channel in mchannels:
-                try:
-                    await channel.send(embed=logging)
-                except discord.errors.Forbidden:
-                    pass
+        await moderation.log(self, ctx, reason, users, later, later_plural, outcome[1])
 
         return (True, users, reason, expires_at)
 

@@ -62,7 +62,7 @@ You can also roll dice."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.task = self.bot.loop.create_task(self.aio_init())
+        # self.task = self.bot.loop.create_task(self.aio_init())
 
     async def aio_init(self):
         self.session = aiohttp.ClientSession()

@@ -2,11 +2,67 @@
 
 import discord
 from discord import utils
-from lobstero.utils import db
+from lobstero.utils import db, misc
 
 
 class Holder():
     """Fuck you."""
+
+
+async def confirm(self, ctx, users, description, reason):
+    """Confirms moderation decisions."""
+    table = db.give_table()
+
+    if int(ctx.guild.id) not in list(table.keys()):
+        th = misc.populate({})
+    else:
+        th = misc.populate(table[ctx.guild.id])
+
+    if th["moderation_confirmation"]:
+        precautionary = discord.Embed(color=16202876, title="Operation summary")
+        warned = ", ".join([member.mention for member in users])
+        precautionary.description = description
+        precautionary.add_field(name="Affected members", value=warned, inline=False)
+        precautionary.add_field(name="Reason", value=reason, inline=False)
+        precautionary.set_footer(
+            text="You can disable this message by using the \"settings\" command.")
+
+        m = menus.ConfirmationMenu(precautionary)
+        await m.start(ctx, wait=True)
+        return (m.clicked, m.message)
+
+    return (True, None)
+
+
+async def log(self, ctx, reason, users, later, later_plural, msg):
+    """Logs stuff."""
+    completed = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
+    warned = ", ".join([member.mention for member in users])
+    completed.description = f"Punishment submitted."
+    completed.add_field(name="Affected members", value=warned, inline=False)
+    completed.add_field(name="Reason", value=reason, inline=False)
+    if db.is_logging_enabled(ctx.guild.id) is False:
+        completed.set_footer(text="You can configure a logging channel using the <channels command")
+
+    if msg:
+        await msg.edit(embed=completed)
+    else:
+        await ctx.send(embed=completed)
+
+    mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
+    mchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), mchannels))
+
+    logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
+    warned = ", ".join([member.mention for member in users])
+    logging.description = f"Punishment submitted."
+    logging.add_field(name="Affected members", value=warned, inline=False)
+    logging.add_field(name="Reason", value=reason, inline=False)
+
+    for channel in mchannels:
+        try:
+            await channel.send(embed=logging)
+        except discord.errors.Forbidden:
+            pass
 
 
 async def return_mute_role(ctx):
