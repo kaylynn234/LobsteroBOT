@@ -124,7 +124,7 @@ Multiple subcommands exist for more fine-grained viewing."""
 
     @records.command(name="summary", aliases=["viewall"])
     @handlers.blueprints_or()
-    async def records_summary(self, ctx, member=None):
+    async def records_summary(self, ctx, member):
         """Shows a count-based summary of the infractions a member has committed.
 Striked infractions are not counted."""
 
@@ -426,7 +426,7 @@ A deafen role is created and set up if it does not already exist."""
         completed.description = f"Punishment submitted."
         completed.add_field(name="Affected members", value=warned, inline=False)
         completed.add_field(name="Reason", value=reason, inline=False)
-        if db.is_logging_enabled(ctx.guild.id)[0] is False:
+        if db.is_logging_enabled(ctx.guild.id) is False:
             completed.set_footer(
                 text="You can configure a logging channel using the <channels command")
 
@@ -435,19 +435,20 @@ A deafen role is created and set up if it does not already exist."""
         else:
             await ctx.send(embed=completed)
 
-        logging = db.is_logging_enabled(ctx.guild.id)
-        if logging[0]:
-            for channel_id in logging[1]:
-                logging = discord.Embed(
-                    color=16202876, title=later_plural if len(users) > 1 else later)
-                warned = ", ".join([member.mention for member in users])
-                logging.description = f"Punishment submitted."
-                logging.add_field(name="Affected members", value=warned, inline=False)
-                logging.add_field(name="Reason", value=reason, inline=False)
+            mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
+            mchannels = filter(None, map(lambda k: self.bot.get_channel(k), mchannels))
 
-                channel = self.bot.get_channel(int(channel_id))
-                if channel:
+            logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
+            warned = ", ".join([member.mention for member in users])
+            logging.description = f"Punishment submitted."
+            logging.add_field(name="Affected members", value=warned, inline=False)
+            logging.add_field(name="Reason", value=reason, inline=False)
+
+            for channel in mchannels:
+                try:
                     await channel.send(embed=logging)
+                except discord.errors.Forbidden:
+                    pass
 
         return (True, users, reason, False)
 
@@ -517,7 +518,7 @@ A deafen role is created and set up if it does not already exist."""
         completed.description = f"Punishment submitted."
         completed.add_field(name="Affected members", value=warned, inline=False)
         completed.add_field(name="Reason", value=reason, inline=False)
-        if db.is_logging_enabled(ctx.guild.id)[0] is False:
+        if db.is_logging_enabled(ctx.guild.id) is False:
             completed.set_footer(text="You can configure a logging channel using the <channels command")
 
         if m:
@@ -525,19 +526,20 @@ A deafen role is created and set up if it does not already exist."""
         else:
             await ctx.send(embed=completed)
 
-        logging = db.is_logging_enabled(ctx.guild.id)
-        if logging[0]:
-            for channel_id in logging[1]:
-                logging = discord.Embed(
-                    color=16202876, title=later_plural if len(users) > 1 else later)
-                warned = ", ".join([member.mention for member in users])
-                logging.description = f"Punishment submitted."
-                logging.add_field(name="Affected members", value=warned, inline=False)
-                logging.add_field(name="Reason", value=reason, inline=False)
+            mchannels = db.find_settings_channels(ctx.guild.id, "moderation")
+            mchannels = filter(None, map(lambda k: self.bot.get_channel(k), mchannels))
 
-                channel = self.bot.get_channel(int(channel_id))
-                if channel:
+            logging = discord.Embed(color=16202876, title=later_plural if len(users) > 1 else later)
+            warned = ", ".join([member.mention for member in users])
+            logging.description = f"Punishment submitted."
+            logging.add_field(name="Affected members", value=warned, inline=False)
+            logging.add_field(name="Reason", value=reason, inline=False)
+
+            for channel in mchannels:
+                try:
                     await channel.send(embed=logging)
+                except discord.errors.Forbidden:
+                    pass
 
         return (True, users, reason, expires_at)
 
@@ -707,16 +709,11 @@ The above will delete the most recent 25 messages in this channel with images, e
     async def archive(self, ctx):
         """Archives pins for the current channel. No parameters are required."""
 
-        table = db.give_table()
-        if ctx.guild.id not in table:
-            return await embeds.simple_embed("There is no archive channel set on this server!", ctx)
-        if "archivechannel" not in table[ctx.guild.id]:
-            return await embeds.simple_embed("There is no archive channel set on this server!", ctx)
+        channel = self.bot.get_channel(db.find_settings_channels(ctx.guild.id, "archive")[0])
+        if not channel:
+            return await ctx.simple_embed("There is no archive channel set on this server!")
 
-        channel = table[ctx.guild.id]["archivechannel"]
-
-        embed_mesg = discord.Embed(
-            title="<a:loading:521107731940376576> Archiving pins...", color=16202876)
+        embed_mesg = discord.Embed(title="<a:loading:521107731940376576> Archiving pins...", color=16202876)
         mesg = await ctx.send(embed=embed_mesg)
 
         failures = 0

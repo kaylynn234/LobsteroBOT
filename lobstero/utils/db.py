@@ -741,6 +741,43 @@ def all_investment_subreddits(userid):
         return None
 
 
+def find_settings_channels(guildid, channeltype=None):
+    table = db["settings_channels"]
+    data = {"guild": guildid}
+    if channeltype:
+        data["type"] = channeltype
+
+    res = table.find(**data)
+    if res:
+        return list(res)
+    else:
+        return []
+
+
+def add_settings_channel(guildid, channelid, channeltype):
+    table = db["settings_channels"]
+    data = {"guild": guildid, "channel": channelid, "type": channeltype}
+    existing = find_settings_channels(guildid, channeltype)
+
+    if channeltype != "archives" and len(existing) <= 4 or channeltype == "archives" and len(existing) == 0:
+        table.upsert(data)
+        return True
+    else:
+        return False
+
+
+def remove_settings_channel(guildid, channelid, channeltype):
+    table = db["settings_channels"]
+    data = {"guild": guildid, "channel": channelid, "type": channeltype}
+    table.delete(data)
+
+
+def wipe_settings_channel(guildid, channeltype):
+    table = db["settings_channels"]
+    data = {"guild": guildid, "type": channeltype}
+    table.delete(data)
+
+
 def add_investment(userid, submissionid):
     pass
 

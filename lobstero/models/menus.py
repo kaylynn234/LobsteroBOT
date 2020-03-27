@@ -119,7 +119,7 @@ class MaizeMenu(menus.Menu):
 
         m = f"**{title}** "
         if preserve_instructions:
-            m += """Use the ⬅ ⬆ ➡ ⬇ reactions below to move botto. 
+            m += """Use the ⬅ ⬆ ➡ ⬇ reactions below to move botto.
                 Use the ⏹️ reaction to quit. Good luck!"""
         if preserve_maze:
             m += f"\n\n{self.maze.join()}"

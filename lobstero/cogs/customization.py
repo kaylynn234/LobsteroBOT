@@ -3,7 +3,9 @@ import asyncio
 import sys
 import json
 import inspect
+
 import discord
+import validators
 
 from discord.ext.menus import MenuPages
 from lobstero.utils import db, embeds, misc, text, strings
@@ -23,10 +25,10 @@ acceptable = [
 bp_numbered = {i: x for i, x in enumerate(valid_bp_responses, 1)}
 
 
-class Cog(commands.Cog, name="Settings and server customization"):
+class Cog(commands.Cog, name="Server customization and settings"):
     """A module that provides commands for managing Lobstero and your server.
-Welcome messages and command blueprints can configured in this module.
-General server settings and self-assignable roles can also be configured."""
+Welcome messages, command blueprints, custom reactions and assignable roles can configured in this module.
+This module is also used for the configuration of general server settings."""
     def __init__(self, bot):
         self.bot = bot
 
@@ -38,7 +40,6 @@ General server settings and self-assignable roles can also be configured."""
             return msg
         except asyncio.futures.TimeoutError:
             await ctx.send(embed=embeds.bp_not_fast_enough)
-
 
     @commands.command(aliases=["valueset", "changesetting", "valset"])
     @commands.guild_only()
@@ -63,9 +64,15 @@ Valid usage would be something along the lines of ``<settings respond_on_mention
     @commands.guild_only()
     @handlers.blueprints_or()
     async def wm(self, ctx):
-        """A base command for all welcome messages."""
+        """A base command for all welcome messages.
+If no subcommand is used, displays a list of all welcome messages on this server."""
 
-        pass
+        data = db.all_welcome_messages_for_guild(str(ctx.guild.id))
+        messages = [x["message"] for x in data]
+        source = menus.ListEmbedMenu(messages, "Welcome messages for this server", 10, True)
+        menu = MenuPages(source, timeout=30, clear_reactions_after=True)
+
+        await menu.start(ctx)
 
     @wm.command(name="add", aliases=["create"])
     @commands.guild_only()
@@ -84,10 +91,21 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
         if message is not None:
             db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
             db.add_welcome_message(str(ctx.guild.id), message)
-            await embeds.simple_embed("Welcome message added!", ctx)
+            await ctx.simple_embed("Welcome message added!")
         else:
-            await embeds.simple_embed(
-                "Please provide the message that you wish to add as a welcome message.", ctx)
+            await ctx.simple_embed("Please provide the message that you wish to add as a welcome message.")
+
+    @wm.command(name="delete", aliases=["remove"])
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def wm_del(self, ctx, *, message):
+        """Removes a welcome message from this server by content. """
+
+        res = db.remove_welcome_message(str(ctx.guild.id), message)
+        if res:
+            await ctx.simple_embed("Matching welcome messages deleted.")
+        else:
+            await ctx.simple_embed("Could not find a matching welcome message!")
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @handlers.blueprints_or()
@@ -96,116 +114,94 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
 Use ``<channels`` alone to display currently set values.
 ``<channels set`` is probably the subcommand you want to use."""
 
-        current = db.settings_value_for_guild(ctx.guild.id)
-        wm, pa, ml = "None", "None", "None"
-        if "wmessagechannel" in current:
-            if str(current["wmessagechannel"]) != "None":
-                wm = str(self.bot.get_channel(int(current["wmessagechannel"])).name)
-        if "archivechannel" in current:
-            if str(current["archivechannel"]) != "None":
-                pa = str(self.bot.get_channel(int(current["archivechannel"])).name)
-        if "moderationlogs" in current:
-            if str(current["moderationlogs"]) != "None":
-                loaded = json.loads(current["moderationlogs"])
-                [print(x) for x in loaded]
-                listed = [str(self.bot.get_channel(int(x)).name) for x in loaded]
-                ml = ", ".join(listed)
-
         embed = discord.Embed(title="Showing currently set channels", color=16202876)
-        embed.description = f"welcome_messages: ``{wm}``\narchives: ``{pa}``\nmoderation: ``{ml}``"
-
         await ctx.send(embed=embed)
 
     @channels.command(name="set")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
-    async def channels_set(self, ctx, name=None):
+    async def channels_set(self, ctx, channeltype, *, channel=None):
         """Allows you set the channels that are used for various Lobstero features.
-Use this command (with the value you want to change as an argument) in any channel to set the channel for that value.
-For example, using the below would set the pin archive channel to the channel it was used in:
+The following channel types exist:
 
-    <channels set archives
+``welcoming`` - This is where welcome messages will be sent.
+``archives`` - This is where pinned messages are sent when <archive is used. **You can only have one of these.**
+``moderation`` - This is where moderation logging goes.
+``conversation`` - This is where Lobstero will respond automatically if a message is sent.
 
-Multiple values exist, and each does something different.
-Usable values:
+For example, the following would add #general as a conversation channel:
 
-    ``welcome_messages`` - This is the channel where welcome messages will be sent.
-    ``archives`` - This is where pinned messages are sent when <archive is used.
-    ``moderation`` - This is where moderation logging goes. Use this in multiple channels to toggle each one as a logging channel."""
+``<channels set conversation general``.
+When specifying a channel, the channel mention, channel ID or channel name can be used."""
 
-        if not name:
-            return await embeds.simple_embed("No value was chosen to set!", ctx)
+        valid = ["welcoming", "archives", "conversation", "moderation"]
+        if channeltype.lower() not in valid:
+            return await ctx.simple_embed("That's not a valid channel type!")
 
-        if name.lower() == "welcome_messages":
-            db.edit_settings_value(ctx.guild.id, "wmessagechannel", ctx.channel.id)
-            await embeds.simple_embed("Welcome message channel set successfully!", ctx)
-        if name.lower() == "archives":
-            db.edit_settings_value(ctx.guild.id, "archivechannel", ctx.channel.id)
-            await embeds.simple_embed("Pin archive channel set successfully!", ctx)
-        if name.lower() == "moderation":
-            current = db.settings_value_for_guild(ctx.guild.id)
-            if not current:
-                db.edit_settings_value(
-                    ctx.guild.id, "moderationlogs", json.dumps([ctx.channel.id]))
-                await embeds.simple_embed("Moderation logging channel set successfully!", ctx)
+        c = commands.TextChannelConverter()
+        try:
+            found_channel = await c.convert(ctx, channel)
+        except commands.BadArgument:
+            return await ctx.simple_embed("That doesn't seem like a valid channel.")
 
-            elif current and "moderationlogs" not in current:
-                db.edit_settings_value(
-                    ctx.guild.id, "moderationlogs", json.dumps([ctx.channel.id]))
-                await embeds.simple_embed("Moderation logging channel set successfully!", ctx)
+        if found_channel.guild.id != ctx.guild.id:
+            return await ctx.simple_embed("That channel isn't on this server.")
 
-            elif current and "moderationlogs" in current:
-                try:
-                    loaded = json.loads(current["moderationlogs"])
-                except KeyError:
-                    loaded = []
-
-                if len(loaded) == 1:
-                    if int(loaded[0]) == ctx.channel.id:
-                        db.edit_settings_value(ctx.guild.id, "moderationlogs", None)
-                        await embeds.simple_embed(
-                            "Moderation logging channel successfully removed!", ctx)
-                    else:
-                        loaded.append(ctx.channel.id)
-                        db.edit_settings_value(
-                            ctx.guild.id, "moderationlogs", json.dumps(loaded))
-                        await embeds.simple_embed(
-                            "Moderation logging channel added successfully!", ctx)
-                else:
-                    if ctx.channel.id in [int(x) for x in loaded]:
-                        loaded.remove(ctx.channel.id)
-                        await embeds.simple_embed(
-                            "Moderation logging channel successfully removed!", ctx)
-                    else:
-                        loaded.append(ctx.channel.id)
-                        await embeds.simple_embed(
-                            "Moderation logging channel added successfully!", ctx)
-
-                    db.edit_settings_value(ctx.guild.id, "moderationlogs", json.dumps(loaded))
-
-    @wm.command(name="delete", aliases=["remove"])
-    @commands.guild_only()
-    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
-    async def wm_del(self, ctx, *, message):
-        """Removes a welcome message from this server by index. """
-
-        res = db.remove_welcome_message(str(ctx.guild.id), message)
+        res = db.add_settings_channel(ctx.guild.id, channel.id, channeltype.lower())
         if res:
-            await embeds.simple_embed("Matching welcome messages deleted.", ctx)
+            await ctx.simple_embed("Channel added!")
         else:
-            await embeds.simple_embed("Could not find a matching welcome message!", ctx)
+            await ctx.simple_embed("You've reached the maximum channels of that type!")
 
-    @wm.command(name="list")
-    @commands.guild_only()
-    @handlers.blueprints_or()
-    async def wm_list(self, ctx):
-        """Lists all welcome messages on this server. """
+    @channels.command(name="remove", aliases=["delete"])
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def channels_remove(self, ctx, channeltype, *, channel=None):
+        """Removes a channel from the list of configured channels.
+The following channel types exist:
 
-        data = db.all_welcome_messages_for_guild(str(ctx.guild.id))
-        messages = [x["message"] for x in data]
-        source = menus.ListEmbedMenu(messages, "Welcome messages for this server", 10, True)
-        menu = MenuPages(source, timeout=30, clear_reactions_after=True)
+``welcoming`` - This is where welcome messages will be sent.
+``archives`` - This is where pinned messages are sent when <archive is used. **You can only have one of these.**
+``moderation`` - This is where moderation logging goes.
+``conversation`` - This is where Lobstero will respond automatically if a message is sent.
 
-        await menu.start(ctx)
+For example, the following would remove #general as a conversation channel:
+
+``<channels remove conversation general``.
+When specifying a channel, the channel mention, channel ID or channel name can be used."""
+
+        valid = ["welcoming", "archives", "conversation", "moderation"]
+        if channeltype.lower() not in valid:
+            return await ctx.simple_embed("That's not a valid channel type!")
+
+        c = commands.TextChannelConverter()
+        try:
+            found_channel = await c.convert(ctx, channel)
+        except commands.BadArgument:
+            return await ctx.simple_embed("That doesn't seem like a valid channel.")
+
+        if found_channel.guild.id != ctx.guild.id:
+            return await ctx.simple_embed("That channel isn't on this server.")
+
+        db.remove_settings_channel(ctx.guild.id, channel.id, channeltype.lower())
+        await ctx.simple_embed("Channel removed.")
+
+    @channels.command(name="wipe")
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def channels_wipe(self, ctx, channeltype):
+        """Wipes all of a channel type from the list of configured channels.
+The following channel types exist:
+
+``welcoming`` - This is where welcome messages will be sent.
+``archives`` - This is where pinned messages are sent when <archive is used. **You can only have one of these.**
+``moderation`` - This is where moderation logging goes.
+``conversation`` - This is where Lobstero will respond automatically if a message is sent.
+"""
+
+        valid = ["welcoming", "archives", "conversation", "moderation"]
+        if channeltype.lower() not in valid:
+            return await ctx.simple_embed("That's not a valid channel type!")
+
+        db.wipe_settings_channel(ctx.guild.id, channeltype.lower())
+        await ctx.simple_embed("Channel removed.")
 
     @commands.command(aliases=["selfrole", "sr"])
     @commands.bot_has_permissions(manage_roles=True)
@@ -325,31 +321,6 @@ Usable values:
     async def changeprefix(self, ctx, *, new):
         db.add_prefix(ctx.guild.id, new)
         await embeds.simple_embed("Prefix updated!", ctx)
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-
-        table = db.give_table()
-        if member.guild.id not in table:
-            th = misc.populate({})
-        else:
-            th = misc.populate(table[member.guild.id])
-
-        if th["welcome_messages"] is True:
-            try:
-                th["wmessagechannel"]
-            except KeyError:
-                return
-
-            welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
-            welcmessage = random.choice([x["message"] for x in welcomemessagelist])
-
-            welcmessage = str(welcmessage).replace(r"%u", member.name)
-            welcmessage = str(welcmessage).replace(r"%+u", str(member))
-            welcmessage = str(welcmessage).replace(r"%@u", member.mention)
-            channel = self.bot.get_channel(th["wmessagechannel"])
-
-            await channel.send(welcmessage)
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
@@ -528,6 +499,263 @@ Walks you through adding a blueprint to a command."""
         embed = discord.Embed(color=16202876, title=f"Blueprints")
         embed.description = "Blueprint successfully added!"
         await m.message.edit(embed=embed)
+
+    @commands.group(invoke_without_command=True, ignore_extra=False, aliases=["customreacts", "reactions"])
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def cr(self, ctx):
+        """A base command for managing custom reactions.
+If no subcommand is used, lists all custom reactions on this server."""
+        reactions = db.return_server_reacts_list(str(ctx.guild.id))
+
+        if not reactions:
+            return await ctx.send(embed=embeds.cr_none_present)
+
+        s = {x["trigger"]: json.loads(x["response"]) for x in reactions}
+        data = {
+            trigger: (
+                f"**1 response**: {responses[0]}"
+                if len(responses) == 1
+                else f"**{len(responses)} responses** - see ``<crinfo (trigger)`` for details.")
+            for trigger, responses in s.items()}
+
+        menu = menus.TupleEmbedMenu(
+            list(data.items()), "Showing all custom reactions on this server",
+            5, footer=True)
+
+        pages = MenuPages(source=menu)
+        await pages.start(ctx)
+
+    @cr.command(name="add")
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def cr_add(self, ctx, trigger, *, response):
+        """Add a custom reaction."""
+        if db.find_matching_response(str(ctx.guild.id), trigger):
+            base = await ctx.send(embed=embeds.cr_confirmation)
+            try:
+                msg = await self.bot.wait_for(
+                    'message',
+                    timeout=10.0,
+                    check=lambda message: message.author == ctx.author)
+
+            except asyncio.futures.TimeoutError:
+                return await base.edit(embed=embeds.cr_timeout)
+
+            if not msg.content.lower() in ["overwrite", "add"]:
+                return await base.edit(embed=embeds.cr_formatted_incorrectly)
+
+            if msg.content.lower() == "overwrite":
+                await base.edit(embed=embeds.cr_triggertype)
+
+                try:
+                    msg2 = await self.bot.wait_for(
+                        'message',
+                        timeout=10.0,
+                        check=lambda message: message.author == ctx.author)
+
+                except asyncio.futures.TimeoutError:
+                    return await base.edit(embed=embeds.cr_timeout)
+
+                if msg2.content.lower() in ["full", "partial"]:
+                    db.remove_reaction(str(ctx.guild.id), trigger)
+                    db.add_reaction(
+                        str(ctx.guild.id),
+                        trigger,
+                        response,
+                        "full" if "full" in msg2.content.lower() else "partial")
+
+                    embed = discord.Embed(title="Reaction added!", color=16202876)
+                    return await base.edit(embed=embed)
+                else:
+                    return await base.edit(embed=embeds.cr_formatted_incorrectly)
+            else:
+                db.add_reaction(str(ctx.guild.id), trigger, response, )
+                embed = discord.Embed(title="Reaction added!", color=16202876)
+                return await base.edit(embed=embed)
+
+        else:
+            base = await ctx.send(embed=embeds.cr_triggertype)
+
+            try:
+                msg2 = await self.bot.wait_for(
+                    'message',
+                    timeout=10.0,
+                    check=lambda message: message.author == ctx.author)
+
+            except asyncio.futures.TimeoutError:
+                return await base.edit(embed=embeds.cr_timeout)
+
+            if msg2.content.lower() in ["full", "partial"]:
+                db.add_reaction(
+                    str(ctx.guild.id),
+                    trigger,
+                    response,
+                    "full" if "full" in msg2.content.lower() else "partial")
+
+                embed = discord.Embed(title="Reaction added!", color=16202876)
+                return await base.edit(embed=embed)
+            else:
+                return await base.edit(embed=embeds.cr_formatted_incorrectly)
+
+    @cr.command(name="del", aliases=["delete", "remove"])
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def cr_del(self, ctx, *, trigger):
+        """Deletes a custom reaction by trigger."""
+        if db.find_matching_response(str(ctx.guild.id), trigger):
+            db.remove_reaction(str(ctx.guild.id), trigger)
+            await ctx.simple_embed("Reaction removed.")
+        else:
+            await ctx.simple_embed("There isn't a custom reaction with that trigger!")
+
+    @cr.command(name="deny")
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def cr_deny(self, ctx):
+        """Deny the current channel access to custom reactions."""
+        if not db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
+            db.add_new_deny_channel(ctx.guild.id, str(ctx.channel.id))
+            await ctx.simple_embed("Custom reactions are now denied in this channel.")
+        else:
+            await ctx.simple_embed("Custom reactions are already denied in this channel!")
+
+    @cr.command(name="allow")
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def cr_allow(self, ctx):
+        """Allow the current channel access to custom reactions."""
+        if db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
+            db.remove_deny_channel(ctx.guild.id, str(ctx.channel.id))
+            await ctx.simple_embed("Custom reactions are now allowed in this channel.")
+
+        else:
+            await ctx.simple_embed("Custom reactions are already allowed in this channel!")
+
+    @cr.command(name="info")
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def cr_info(self, ctx, *, trigger):
+        """View info on a custom reaction with the provided trigger."""
+        reactions = db.return_server_reacts_list(str(ctx.guild.id))
+        if not reactions:
+            return await ctx.send(embed=embeds.cr_none_present)
+
+        if not db.find_matching_response(str(ctx.guild.id), trigger):
+            return await ctx.send(embed=embeds.cr_no_trigger)
+
+        reaction = db.raw_find_matching_response(str(ctx.guild.id), trigger)
+        responses = json.loads(reaction["response"])
+        mtype = reaction["type"]
+        desc = f"**Trigger type**: {mtype}\n**Total responses**: {str(len(responses))}"
+        embed = discord.Embed(title="Reaction info", description=desc, color=16202876)
+
+        for index, x in enumerate(responses):
+            embed.add_field(
+                name=f"Response {str(index + 1)}",
+                value=strings.clip(x),
+                inline=False)
+
+        return await ctx.send(embed=embed)
+
+    @cr.command(name="search")
+    @commands.guild_only()
+    @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
+    async def cr_search(self, ctx, *, query=None):
+        """Search for a custom reaction based on a query."""
+        fetched = []
+        reactions = db.return_server_reacts_list(str(ctx.guild.id))
+        if not reactions:
+            return await ctx.send(embed=embeds.cr_none_present)
+
+        for x in reactions:
+            response = [y.lower() for y in json.loads(x["response"])]
+            if query.lower() in response or query.lower() in x["trigger"]:
+                fetched.append(x["trigger"])
+
+        if not fetched:
+            desc = "No reactions matched your search query."
+        else:
+            desc = "".join([
+                "The following reactions matched your search query:\n\n",
+                strings.bblockjoin(fetched)])
+
+        embed = discord.Embed(title="Search results", description=desc, color=16202876)
+        return await ctx.send(embed=embed)
+
+    @commands.Cog.listener()
+    @commands.guild_only()
+    async def on_message(self, message):
+        """Called every message. Handles reactions."""
+        if message.author.bot is False and message.guild:
+            if db.is_denied(str(message.guild.id), str(message.channel.id)):
+                return
+
+            if message.content is None or message.content == "":
+                return
+
+            reacts = db.return_server_reacts_list(message.guild.id)
+            for reaction in reacts:
+                is_partial = (
+                    reaction["type"] == "partial" and
+                    reaction["trigger"].lower() in message.content.lower())
+
+                is_full = message.content.lower() == reaction["trigger"].lower()
+                if is_full or is_partial:
+                    response = random.choice(json.loads(reaction["response"]))
+
+                    if response.startswith(r"%r "):
+                        for x in response.split(r"%r ", )[-1].split(" "):
+                            return await message.add_reaction(x)
+
+                    is_image = any([
+                        response.lower().endswith(".png"), response.lower().endswith(".jpg"),
+                        response.lower().endswith(".jpeg"), response.lower().endswith(".webp"),
+                        response.lower().endswith(".bmp"), response.lower().endswith(".apng"),
+                        response.lower().endswith(".gif")])
+
+                    if validators.url(response) and is_image:
+                        embed = discord.Embed(title=reaction["trigger"], color=16202876)
+                        embed.set_image(url=response)
+                        return await message.channel.send(embed=embed)
+
+                    if r"%@u" in response:
+                        response = response.replace(r"%@u", message.author.mention)
+
+                    if r"%u" in response:
+                        response = response.replace(r"%u", message.author.name)
+
+                    if r"%+u" in response:
+                        response = response.replace(
+                            r"%+u",
+                            message.author.name + str(message.author.discriminator))
+
+                    return await message.channel.send(response)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+
+        table = db.give_table()
+        if member.guild.id not in table:
+            th = misc.populate({})
+        else:
+            th = misc.populate(table[member.guild.id])
+
+        if th["welcome_messages"] is True:
+            wchannels = db.find_settings_channels(member.guild.id, "welcoming")
+            wchannels = filter(None, map(lambda k: self.bot.get_channel(k), wchannels))
+            wchannels = filter(lambda c: c.guild.id == member.guild.id)
+
+            welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
+            welcmessage = random.choice([x["message"] for x in welcomemessagelist])
+            welcmessage = welcmessage.replace(r"%u", member.name).replace(r"%+u", str(member))
+            welcmessage = welcmessage.replace(r"%@u", member.mention)
+
+            for channel in wchannels:
+                try:
+                    await channel.send(welcmessage)
+                except discord.errors.Forbidden:
+                    pass
 
 
 def setup(bot):
