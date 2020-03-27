@@ -114,6 +114,5 @@ class LobsteroCredentials():
             "utility",
             "editing",
             "customization",
-            "eco",
-            "customreacts"
+            "eco"
         ]

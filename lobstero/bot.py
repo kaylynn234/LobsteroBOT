@@ -270,7 +270,7 @@ class LobsteroHELP(commands.HelpCommand):
         await self.context.send(embed=embed)
 
 
-class LobsteroEH():
+class LobsteroEH:
     """A very bad solution to error handling."""
 
     def __init__(self, bot):
@@ -318,64 +318,52 @@ class LobsteroEH():
 
         if isinstance(error, commands.MissingPermissions):
             handled, message = embeds.errorbed(
-                f"You are missing required permissions\n\n{strings.blockjoin(error.missing_perms)}")
+                f"You are missing required permissions\n\n{strings.blockjoin(error.missing_perms)}"
+            )
 
         if isinstance(error, commands.errors.MissingRequiredArgument):
-            handled, message = embeds.errorbed(
-                f"Missing required argument ``{error.param.name}``")
+            handled, message = embeds.errorbed(f"Missing required argument ``{error.param.name}``")
 
         if isinstance(error, commands.errors.TooManyArguments):
-            handled, message = embeds.errorbed(
-                "Too many arguments provided")
+            handled, message = embeds.errorbed("Too many arguments provided")
 
         if isinstance(error, commands.errors.BotMissingPermissions):
             handled, message = embeds.errorbed(
-                f"I am missing required permissions\n\n{strings.blockjoin(error.missing_perms)}")
+                f"I am missing required permissions\n\n{strings.blockjoin(error.missing_perms)}"
+            )
 
         if isinstance(error, commands.errors.NotOwner):
-            handled, message = embeds.errorbed(
-                "You are not the bot owner.")
+            handled, message = embeds.errorbed("You are not the bot owner.")
 
         if isinstance(error, OverflowError):
-            handled, message = embeds.errorbed(
-                "What the fuck no why would you even do that jesus christ")
+            handled, message = embeds.errorbed("What the fuck no why would you even do that jesus christ")
 
         if isinstance(error, commands.errors.CommandOnCooldown):
             handled, message = embeds.errorbed(
-                "This command is on cooldown! You can use it again in {:.2f}s!"
-                .format(error.retry_after))
+                "This command is on cooldown! You can use it again in {:.2f}s!".format(error.retry_after)
+            )
 
         if isinstance(error, cannot_send):
             handled = True
             try:
-                await ctx.author.send(
-                    "I could not reply to your command because I am missing permissions.")
+                await ctx.author.send("I could not reply to your command because I am missing permissions.")
             except discord.errors.Forbidden:
                 pass  # Nothing we can do about this one.
 
-        if isinstance(error, AttributeError):
-            handled = True
-            # Nothing we can do about this one. My code is just shit.
-
         if isinstance(error, commands.errors.MaxConcurrencyReached):
-            handled, message = embeds.errorbed(
-                "This command is already in use!")
+            handled, message = embeds.errorbed("This command is already in use!")
 
         if isinstance(error, commands.errors.BadArgument):
-            handled, message = embeds.errorbed(
-                "Bad argument provided! Check your capitalisation and spelling.")
+            handled, message = embeds.errorbed("Bad argument provided! Check your capitalisation and spelling.")
 
         if isinstance(error, commands.errors.DisabledCommand):
-            handled, message = embeds.errorbed(
-                "This command is currently disabled.")
+            handled, message = embeds.errorbed("This command is currently disabled.")
 
         if isinstance(error, discord.ext.menus.CannotAddReactions):
-            handled, message = embeds.errorbed(
-                "This command uses a reaction menu, but the bot cannot add reactions.")
+            handled, message = embeds.errorbed("This command uses a reaction menu, but the bot cannot add reactions.")
 
         if isinstance(error, BlueprintFailure):
-            handled, message = embeds.errorbed(
-                error.description)
+            handled, message = embeds.errorbed(error.description)
 
         if handled and message:
             misc.utclog(ctx, (
@@ -398,9 +386,9 @@ class LobsteroEH():
         if not handled:
             try:
                 await ctx.send(
-                    "Something went wrong, and the developer has been notified. "
-                    "Check my permissions in this channel.")
-            except:
+                    "Something went wrong, and the developer has been notified. Check my permissions in this channel."
+                )
+            except discord.errors.Forbidden:
                 pass  # whoop-di-doo
 
             await self.format_tb_and_send(additional=str((dir(error), error.args)))

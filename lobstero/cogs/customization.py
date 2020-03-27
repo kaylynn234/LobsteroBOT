@@ -119,7 +119,7 @@ Use ``<channels`` alone to display currently set values.
 
     @channels.command(name="set")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
-    async def channels_set(self, ctx, channeltype, *, channel=None):
+    async def channels_set(self, ctx, channeltype, *, channel):
         """Allows you set the channels that are used for various Lobstero features.
 The following channel types exist:
 
@@ -137,20 +137,25 @@ When specifying a channel, the channel mention, channel ID or channel name can b
         if channeltype.lower() not in valid:
             return await ctx.simple_embed("That's not a valid channel type!")
 
+        print("ye")
         c = commands.TextChannelConverter()
         try:
             found_channel = await c.convert(ctx, channel)
         except commands.BadArgument:
             return await ctx.simple_embed("That doesn't seem like a valid channel.")
 
+        print("ye")
         if found_channel.guild.id != ctx.guild.id:
             return await ctx.simple_embed("That channel isn't on this server.")
 
+        print("ye")
         res = db.add_settings_channel(ctx.guild.id, channel.id, channeltype.lower())
+        print("poog0-wkgw")
         if res:
             await ctx.simple_embed("Channel added!")
         else:
             await ctx.simple_embed("You've reached the maximum channels of that type!")
+        print("ye2")
 
     @channels.command(name="remove", aliases=["delete"])
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
@@ -417,6 +422,7 @@ Deletes all blueprints for a command.
 Walks you through adding a blueprint to a command."""
         if command is None:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
+
         command = self.bot.get_command(command)
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
@@ -492,11 +498,10 @@ Walks you through adding a blueprint to a command."""
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
         # add the blueprint to the database
-        db.add_blueprint(
-            str(ctx.guild.id), command.qualified_name, bp_numbered[m.selected_b], value, m2.choice)
+        db.add_blueprint(str(ctx.guild.id), command.qualified_name, bp_numbered[m.selected_b], value, m2.choice)
 
         # tell the user we didn't die in the process
-        embed = discord.Embed(color=16202876, title=f"Blueprints")
+        embed = discord.Embed(color=16202876, title="Blueprints")
         embed.description = "Blueprint successfully added!"
         await m.message.edit(embed=embed)
 
@@ -526,18 +531,33 @@ If no subcommand is used, lists all custom reactions on this server."""
         pages = MenuPages(source=menu)
         await pages.start(ctx)
 
+    async def process_add(self, ctx, trigger, response, base):
+        try:
+            msg = await self.bot.wait_for('message', timeout=10, check=lambda message: message.author == ctx.author)
+        except asyncio.futures.TimeoutError:
+            return await base.edit(embed=embeds.cr_timeout)
+
+        if msg.content.lower() not in ["full", "partial"]:
+            return await base.edit(embed=embeds.cr_formatted_incorrectly)
+        else:
+            db.remove_reaction(str(ctx.guild.id), trigger)
+            rtype = "full" if "full" in msg.content.lower() else "partial"
+            db.add_reaction(str(ctx.guild.id), trigger, response, rtype)
+            embed = discord.Embed(title="Reaction added!", color=16202876)
+            return await base.edit(embed=embed)
+
     @cr.command(name="add")
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cr_add(self, ctx, trigger, *, response):
         """Add a custom reaction."""
-        if db.find_matching_response(str(ctx.guild.id), trigger):
+        if not db.find_matching_response(str(ctx.guild.id), trigger):
+            base = await ctx.send(embed=embeds.cr_triggertype)
+            await self.process_add(ctx, trigger, response, base)
+        else:
             base = await ctx.send(embed=embeds.cr_confirmation)
             try:
-                msg = await self.bot.wait_for(
-                    'message',
-                    timeout=10.0,
-                    check=lambda message: message.author == ctx.author)
+                msg = await self.bot.wait_for('message', timeout=10, check=lambda message: message.author == ctx.author)
 
             except asyncio.futures.TimeoutError:
                 return await base.edit(embed=embeds.cr_timeout)
@@ -547,56 +567,11 @@ If no subcommand is used, lists all custom reactions on this server."""
 
             if msg.content.lower() == "overwrite":
                 await base.edit(embed=embeds.cr_triggertype)
-
-                try:
-                    msg2 = await self.bot.wait_for(
-                        'message',
-                        timeout=10.0,
-                        check=lambda message: message.author == ctx.author)
-
-                except asyncio.futures.TimeoutError:
-                    return await base.edit(embed=embeds.cr_timeout)
-
-                if msg2.content.lower() in ["full", "partial"]:
-                    db.remove_reaction(str(ctx.guild.id), trigger)
-                    db.add_reaction(
-                        str(ctx.guild.id),
-                        trigger,
-                        response,
-                        "full" if "full" in msg2.content.lower() else "partial")
-
-                    embed = discord.Embed(title="Reaction added!", color=16202876)
-                    return await base.edit(embed=embed)
-                else:
-                    return await base.edit(embed=embeds.cr_formatted_incorrectly)
+                await self.process_add(ctx, trigger, response, base)
             else:
                 db.add_reaction(str(ctx.guild.id), trigger, response, )
                 embed = discord.Embed(title="Reaction added!", color=16202876)
                 return await base.edit(embed=embed)
-
-        else:
-            base = await ctx.send(embed=embeds.cr_triggertype)
-
-            try:
-                msg2 = await self.bot.wait_for(
-                    'message',
-                    timeout=10.0,
-                    check=lambda message: message.author == ctx.author)
-
-            except asyncio.futures.TimeoutError:
-                return await base.edit(embed=embeds.cr_timeout)
-
-            if msg2.content.lower() in ["full", "partial"]:
-                db.add_reaction(
-                    str(ctx.guild.id),
-                    trigger,
-                    response,
-                    "full" if "full" in msg2.content.lower() else "partial")
-
-                embed = discord.Embed(title="Reaction added!", color=16202876)
-                return await base.edit(embed=embed)
-            else:
-                return await base.edit(embed=embeds.cr_formatted_incorrectly)
 
     @cr.command(name="del", aliases=["delete", "remove"])
     @commands.guild_only()
@@ -651,10 +626,7 @@ If no subcommand is used, lists all custom reactions on this server."""
         embed = discord.Embed(title="Reaction info", description=desc, color=16202876)
 
         for index, x in enumerate(responses):
-            embed.add_field(
-                name=f"Response {str(index + 1)}",
-                value=strings.clip(x),
-                inline=False)
+            embed.add_field(name=f"Response {str(index + 1)}", value=strings.clip(x), inline=False)
 
         return await ctx.send(embed=embed)
 
@@ -676,9 +648,7 @@ If no subcommand is used, lists all custom reactions on this server."""
         if not fetched:
             desc = "No reactions matched your search query."
         else:
-            desc = "".join([
-                "The following reactions matched your search query:\n\n",
-                strings.bblockjoin(fetched)])
+            desc = f"The following reactions matched your search query:\n\n{strings.bblockjoin(fetched)}"
 
         embed = discord.Embed(title="Search results", description=desc, color=16202876)
         return await ctx.send(embed=embed)
