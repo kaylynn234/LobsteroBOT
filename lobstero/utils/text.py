@@ -360,5 +360,5 @@ faq_pages = {
         """Use the ``<settings`` or ``<channels set`` commands.
         Use ``<help settings`` and ``<help channels set`` for more information.""",
     "Empty page":
-        """You feel a vague sort of unease while reading, almost as if asking more questions will reveal the contents of the seemignly blank page."""
+        """You feel a vague sort of unease while reading, almost as if asking more questions will reveal the contents of the seemingly blank page."""
 }
