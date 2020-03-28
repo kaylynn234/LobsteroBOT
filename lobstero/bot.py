@@ -238,7 +238,7 @@ class LobsteroHELP(commands.HelpCommand):
         embed = await self.check_and_jumble(embed)
 
         pages = menus.HelpPagesMenu([embed] + cog_pages)
-        menu = menus.HelpCustomizedMenuPages(pages, timeout=90, clear_reactions_after=True)
+        menu = menus.HelpCustomizedMenuPages(pages, timeout=90)
         await menu.start(self.context, wait=True)
 
         if menu.go_to_faq:
@@ -246,6 +246,7 @@ class LobsteroHELP(commands.HelpCommand):
             newpages = menus.EmbedMenu(embeds)
             newmenu = MenuPages(newpages, clear_reactions_after=True)
             newmenu.message = menu.message
+            await newmenu.message.edit(embed=embeds[0])
 
             await newmenu.start(self.context)
 
