@@ -722,7 +722,7 @@ If no subcommand is used, lists all custom reactions on this server."""
         if th["welcome_messages"] is True:
             wchannels = db.find_settings_channels(member.guild.id, "welcoming")
             wchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), wchannels))
-            wchannels = filter(lambda c: c.guild.id == member.guild.id)
+            wchannels = filter(lambda c: c.guild.id == member.guild.id, wchannels)
 
             welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
             welcmessage = random.choice([x["message"] for x in welcomemessagelist])
