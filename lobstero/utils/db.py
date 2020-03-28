@@ -756,14 +756,14 @@ def add_settings_channel(guildid, channelid, channeltype):
     if (channeltype != "archives" and len(existing) <= 4) or (channeltype == "archives" and len(existing) == 0):
         table.upsert(data, ["channel", "type"])
         return True
-    else:   
+    else:
         return False
 
 
 def remove_settings_channel(guildid, channelid, channeltype):
     table = db["settings_channels"]
     data = {"guild": guildid, "channel": channelid, "type": channeltype}
-    table.delete(data)
+    table.delete(**data)
 
 
 def wipe_settings_channel(guildid, channeltype):
