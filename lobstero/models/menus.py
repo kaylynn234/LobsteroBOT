@@ -399,3 +399,25 @@ class InvestmentBrowsingMenu(menus.ListPageSource):
         current.set_footer(text=f"This is asset {menu.current_page + 1} of {self.data_len}")
 
         return current
+
+
+class EmbedMenu(menus.ListPageSource):
+    """A simple menu class for the help command."""
+    def __init__(self, data):
+        super().__init__(data, per_page=1)
+        self.data_len = len(data)
+
+    async def format_page(self, menu, entries):
+        return entries
+
+
+class HelpCustomizedMenuPages(menus.MenuPages):
+
+    def __init__(self, source, **kwargs):
+        self.go_to_faq = False
+        super().__init__(source, **kwargs)
+
+    @menus.button("❓")
+    async def faq_button(self, payload):
+        self.go_to_faq = True
+        self.stop()

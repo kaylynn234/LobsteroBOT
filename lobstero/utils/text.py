@@ -332,3 +332,33 @@ really_awful_meme_subs = [
     "funny",
     "im14andthisisdeep"
 ]
+
+faq_pages = {
+    "How do I use welcome messages?":
+        """Run the following command: ``<settings welcome_messages True`` - it turns welcome messages on for your server.
+        Make sure to use ``<channels set ...`` (replacing ``...`` with a channel #mention) to tell Lobstero where welcome messages should go.
+        After that, you can add welcome messages as you please with ``<wm add ...``.
+
+        You can use ``<help channels set`` and ``<help wm add`` for more information on both of these commands.""",
+    "How do I make Lobstero talk to me?":
+        """There are a few ways of doing this.
+        Using ``<settings respond_on_mention True`` will make sure that Lobstero responds to @mentions.
+        Using ``<settings random_messages True`` will allow Lobstero to comment randomly.
+        If you name a channel ``crabversation``, Lobstero will respond to all messages sent there.
+        If you use ``<channels set ...`` (replacing ``...`` with a channel #mention), Lobstero will also respond to all messages sent there.
+
+        You can use ``<help settings`` and ``<help channels set`` for more information on both of these commands.""",
+    "How do I use custom reactions?":
+        """To start, use the ``<cr add`` command. Use ``<help cr add`` for information on how to use it.
+        After that, you can deny specific channels access to custom reactions by using ``<cr deny`` in the channel you want to block.
+        ``<cr allow`` does the reverse, and will allow a blocked channel access to custom reactions.
+        To "use" a custom reaction, use the reaction's trigger (which you set when making the reaction) in any non-blocked channel.
+
+        For more information on these commands, you can use ``<help cr add``, ``<help cr deny``, and ``<help cr allow``.
+        """,
+    "How do I change other settings?":
+        """Use the ``<settings`` or ``<channels set`` commands.
+        Use ``<help settings`` and ``<help channels set`` for more information.""",
+    "Empty page":
+        """You feel a vague sort of unease while reading, almost as if asking more questions will reveal the contents of the seemignly blank page."""
+}

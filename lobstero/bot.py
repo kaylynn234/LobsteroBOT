@@ -15,7 +15,7 @@ from typing import Any, Type
 
 from urllib3.exceptions import InsecureRequestWarning
 from discord.ext import commands
-from discord.ext.menus import MenuPages
+from discord.ext.menus import MenuPages, button
 from chattymarkov import ChattyMarkovAsync
 from lobstero.utils import db, misc, text, embeds, strings
 from lobstero.models import menus
@@ -238,8 +238,16 @@ class LobsteroHELP(commands.HelpCommand):
         embed = await self.check_and_jumble(embed)
 
         pages = menus.HelpPagesMenu([embed] + cog_pages)
-        menu = MenuPages(pages, timeout=90, clear_reactions_after=True)
-        await menu.start(self.context)
+        menu = menus.HelpCustomizedMenuPages(pages, timeout=90, clear_reactions_after=True)
+        await menu.start(self.context, wait=True)
+
+        if menu.go_to_faq:
+            embeds = [discord.Embed(title=k, description=v, color=16202876) for k, v in text.faq_pages.items()]
+            newpages = menus.EmbedMenu(embeds)
+            newmenu = MenuPages(newpages, clear_reactions_after=True)
+            newmenu.message = menu.message
+
+            await newmenu.start(self.context)
 
     async def command_not_found(self, string):
         self.not_found = string
