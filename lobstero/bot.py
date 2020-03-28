@@ -543,7 +543,7 @@ class LobsteroBOT(commands.AutoShardedBot):
             elif message.channel.name == "crabversation":
                 should_continue = True
 
-            elif message.channel.id in cchannels:
+            elif message.channel.id in [int(c["channel"]) for c in cchannels]:
                 should_continue = True
 
         else:
