@@ -756,7 +756,7 @@ def add_settings_channel(guildid, channelid, channeltype):
     if (channeltype != "archives" and len(existing) <= 4) or (channeltype == "archives" and len(existing) == 0):
         table.upsert(data, ["channel", "type"])
         return True
-    else:
+    else:   
         return False
 
 

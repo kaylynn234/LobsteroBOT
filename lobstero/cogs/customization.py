@@ -194,7 +194,7 @@ When specifying a channel, the channel mention, channel ID or channel name can b
         if found_channel.guild.id != ctx.guild.id:
             return await ctx.simple_embed("That channel isn't on this server.")
 
-        db.remove_settings_channel(ctx.guild.id, channel.id, channeltype.lower())
+        db.remove_settings_channel(ctx.guild.id, found_channel.id, channeltype.lower())
         await ctx.simple_embed("Channel removed.")
 
     @channels.command(name="wipe")
