@@ -725,10 +725,11 @@ If no subcommand is used, lists all custom reactions on this server."""
             wchannels = filter(lambda c: c.guild.id == member.guild.id, wchannels)
 
             welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
-            if not welcomemessagelist:
+            collated = [x["message"] for x in welcomemessagelist]
+            if len(collated) == 0:
                 return
 
-            welcmessage = random.choice([x["message"] for x in welcomemessagelist])
+            welcmessage = random.choice(collated)
             welcmessage = welcmessage.replace(r"%u", member.name).replace(r"%+u", str(member))
             welcmessage = welcmessage.replace(r"%@u", member.mention)
 
