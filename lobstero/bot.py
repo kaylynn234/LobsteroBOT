@@ -15,7 +15,7 @@ from typing import Any, Type
 
 from urllib3.exceptions import InsecureRequestWarning
 from discord.ext import commands
-from discord.ext.menus import MenuPages, button
+from discord.ext.menus import MenuPages
 from chattymarkov import ChattyMarkovAsync
 from lobstero.utils import db, misc, text, embeds, strings
 from lobstero.models import menus
@@ -56,6 +56,60 @@ if failed:
     logger.fatal("One or more config values was of the incorrect type. Execution cannot continue.")
     input("Press any key to exit.")
     exit(1)
+
+
+# monkey patch Messageable.send to strip token
+async def monkey_send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
+    channel = await self._get_channel()
+    state = self._state
+    content = str(content) if content is not None else None
+    if embed is not None:
+        embed = embed.to_dict()
+        for k, v in embed.items():
+            if lc.auth.token.lower() in str(k).lower() or lc.auth.token.lower() in str(v).lower():
+                embed = None
+                break
+
+    if content:
+        if lc.auth.token.lower() in content.lower():
+            content = "[eat glass]"
+
+    if file is not None and files is not None:
+        raise commands.InvalidArgument('cannot pass both file and files parameter to send()')
+
+    if file is not None:
+        if not isinstance(file, discord.File):
+            raise commands.InvalidArgument('file parameter must be File')
+
+        try:
+            data = await state.http.send_files(channel.id, files=[file],
+                                               content=content, tts=tts, embed=embed, nonce=nonce)
+        finally:
+            file.close()
+
+    elif files is not None:
+        if len(files) > 10:
+            raise commands.InvalidArgument('files parameter must be a list of up to 10 elements')
+        elif not all(isinstance(file, discord.File) for file in files):
+            raise commands.InvalidArgument('files parameter must be a list of File')
+
+        try:
+            data = await state.http.send_files(channel.id, files=files, content=content, tts=tts,
+                                               embed=embed, nonce=nonce)
+        finally:
+            for f in files:
+                f.close()
+    else:
+        data = await state.http.send_message(channel.id, content, tts=tts, embed=embed, nonce=nonce)
+
+    ret = state.create_message(channel=channel, data=data)
+    if delete_after is not None:
+        await ret.delete(delay=delete_after)
+    return ret
+
+
+# help
+discord.abc.Messageable.send = monkey_send
 
 
 class LobsteroCONTEXT(commands.Context):
