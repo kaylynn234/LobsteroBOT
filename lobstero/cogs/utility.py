@@ -200,7 +200,7 @@ If no user is specified, displays your profile."""
         await self.bot.loop.run_in_executor(None, to_run)
 
         saved = Image.open(f"{root_directory}/lobstero/data/downloaded/profileraw.png")
-        finished = saved.crop((0, 0, 818, 662))
+        finished = saved.crop((0, 0, 1279, 481))
 
         buffer = BytesIO()
         finished.save(buffer, "png")
