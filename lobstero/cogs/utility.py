@@ -190,6 +190,7 @@ If no user is specified, displays your profile."""
         lobstero_profile = lobstero_profile.replace("hg_l", "5")
         lobstero_profile = lobstero_profile.replace("until_next", until_next)
         lobstero_profile = lobstero_profile.replace("user_pfp", str(user.avatar_url_as(format="png", size=512)))
+        lobstero_profile = lobstero_profile.replace('<script src="', f'<script src="{root_directory}')
 
         to_run = functools.partial(
             imgkit.from_string, lobstero_profile,
