@@ -159,7 +159,10 @@ If no user is specified, displays your profile."""
         if not filtered_inv:
             hugcount = 0
         else:
-            hugcount = int(list(list(filtered_inv)[0].values())[0])
+            try:
+                hugcount = int(list(list(filtered_inv)[0].values())[0])
+            except IndexError:
+                hugcount = 0
 
         badge_reqs = [10, 100, 500, 1750, 4000]
         badges = [locked, locked, locked, locked, locked]
