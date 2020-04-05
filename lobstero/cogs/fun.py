@@ -1,5 +1,6 @@
 import random
 import os
+import collections
 import urllib
 import urllib.request
 import urllib.parse
@@ -33,6 +34,8 @@ if lc.config.wkhtmltoimage_path != "None":
     config = imgkit.config(wkhtmltoimage=lc.config.wkhtmltoimage_path)
 
 unogames = games.uno_game_collector()
+team_data = ["wus", "credit_cert", "name", "rank", "credit", "team", "wus_cert"]
+FoldingStats = collections.namedtuple("FoldingStats", team_data)
 
 
 def rverb():
@@ -609,6 +612,37 @@ Use the inventory command to see the fish you own."""
     async def ooeric(self, ctx):
         """Count with the fruit of god."""
         await ctx.send(f"{db.ooeric()} ooeric. More.")
+
+    async def folding_request(self, *, team: bool, utid=None, utname=None):
+        base = "https://stats.foldingathome.org/api/"
+        if utid and team:
+            url = f"{base}teams/{utid}"
+        elif utname:
+            t = "teams" if team else "donors"
+            url = f"{base}{t}?name={utname}&search_type=exact&passkey=&team=&month=&year"
+
+        async with self.session.get(url) as resp:
+            data = await resp.json()
+
+        if data.get("error"):
+            raise ValueError(f"Could not find {utid or utname}!")
+
+        if data.get("results") or data.get("donors"):
+            packaged = []
+            for item in (data.get("results") or data.get("donors")):
+                packaged.append(FoldingStats(**item))
+        else:  # single 
+            pass
+
+    @commands.command(name="foldingathome", aliases=["fah", "f@h"], enabled=False)
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def folding(self, ctx):
+        """A base command for showing folding@home stats.
+Shows top teams if no subcommand is used."""
+
+        escaped = urllib.parse.quote(team_name)
+
 
     @commands.Cog.listener()
     async def on_message(self, message):

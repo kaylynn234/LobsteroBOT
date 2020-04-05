@@ -1,25 +1,32 @@
-import os
 import sys
-import pickle
-import requests
+import functools
+
 import discord
 import humanize
 import dateparser
 import pendulum
+import imgkit
 
-from lobstero.utils import embeds, db, strings, misc
-from lobstero.models import menus, handlers
-from discord.ext.menus import MenuPages
+from io import BytesIO
 from datetime import timedelta
+
+from lobstero.utils import embeds, db, strings
+from lobstero.models import menus, handlers
+from lobstero import lobstero_config 
+from discord.ext.menus import MenuPages
 from natural import date
-from io import open as iopen
 from py_expression_eval import Parser
 from discord.ext import commands, tasks
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image
 
 afks = []
 whitelist = [487374098864013352, 369883232767836161]
 root_directory = sys.path[0] + "/"
+lc = lobstero_config.LobsteroCredentials()
+
+
+if lc.config.wkhtmltoimage_path != "None":
+    config = imgkit.config(wkhtmltoimage=lc.config.wkhtmltoimage_path)
 
 
 class afkh:
@@ -125,83 +132,82 @@ Use the command without an argument to reset it."""
     @commands.command(enabled=False)
     @handlers.blueprints_or()
     async def profile(self, ctx, *, user: discord.Member = None):
-        """View the lobstero profile of a user - including earned badges, hugs given, and role colour."""
+        """View the lobstero profile of a user.
+If no user is specified, displays your profile."""
 
         if user is None:
             user = ctx.message.author
-        
-        bglayer = Image.new("RGBA", (630, 270), (255, 255, 255, 255))
-        file_url = user.avatar_url_as(format="png", size=128)
 
-        i = requests.get(file_url)
-        with iopen(root_directory + "data/downloaded" + str(user.id) + ".png", 'wb') as mfile:
-            mfile.write(i.content)
-        
-        userpfp = Image.open(root_directory + "image_downloads/profile" + str(user.id) + ".png")
-        fitted = ImageOps.fit(userpfp, (68, 68), Image.ANTIALIAS, 0)
-        fitted = fitted.convert("RGBA")
-
-        bglayer.paste(fitted, (30, 28), fitted)
-
-        sharptext = Image.new("RGBA", (1100, 150), (255, 255, 255, 0))
-        draw = ImageDraw.Draw(sharptext)
-        font = ImageFont.truetype(root_directory + "data/regular.otf", 50)
-
-        draw.text((0, 0), f"{user.name}#{user.discriminator}", (0, 0, 0, 255), font=font)
-
-        sharptext.save("C:/Users/kaylynn/Pictures/PDN monstrosities/exported_h.png")
-
-        sharptext = sharptext.resize((int(sharptext.width / 2), int(sharptext.height / 2)))
-
-        template = Image.open("C:/Users/kaylynn/Pictures/PDN monstrosities/lobstero_profile_detail.png")
-        template = template.convert("RGBA")
-        template.paste(sharptext, (116, 43), sharptext)
-
-        bglayer.paste(template, mask=template)
-
-        draw = ImageDraw.Draw(bglayer)
-        font = ImageFont.truetype(root_directory + "data/regular.otf", 35)
-
-        if os.path.isfile(root_directory + "data/hugstats/" + str(user.id) + ".pickle"):
-            with open(root_directory + "data/hugstats/" + str(user.id) + ".pickle", "rb") as f:
-                hugcounter = pickle.load(f)
+        if lc.config.wkhtmltoimage_path != "None":
+            conf = {"config": config}
         else:
-            hugcounter = 0
+            conf = {}
+            options = {"options": {"xvfb": ""}}
 
-        draw.text((135, 172), str(hugcounter), (0, 0, 0, 255), font=font)
+        with open(f"{root_directory}/lobstero/data/static/profile/profile.html", "r", encoding="utf-8") as profile_in:
+            lobstero_profile = profile_in.read()
 
-        locked = Image.open(f"{root_directory}data/images/hugs/locked.png").convert("RGBA").resize((30, 30), Image.ANTIALIAS)
-        wood = Image.open(f"{root_directory}data/images/hugs/wood.png").convert("RGBA").resize((30, 30), Image.ANTIALIAS)
-        bronze = Image.open(f"{root_directory}data/images/hugs/bronze.png").convert("RGBA").resize((30, 30), Image.ANTIALIAS)
-        silver = Image.open(f"{root_directory}data/images/hugs/silver.png").convert("RGBA").resize((30, 30), Image.ANTIALIAS)
-        gold = Image.open(f"{root_directory}data/images/hugs/gold.png").convert("RGBA").resize((30, 30), Image.ANTIALIAS)
-        diamond = Image.open(f"{root_directory}data/images/hugs/diamond.png").convert("RGBA").resize((30, 30), Image.ANTIALIAS)
+        locked = "https://cdn.discordapp.com/emojis/571264807119093769.png?v=1"
+        wood = "https://cdn.discordapp.com/emojis/571264854376185867.png?v=1"
+        bronze = "https://cdn.discordapp.com/emojis/571264868930420746.png?v=1"
+        silver = "https://cdn.discordapp.com/emojis/571264858520289290.png?v=1"
+        gold = "https://cdn.discordapp.com/emojis/571264849179443200.png?v=1"
+        diamond = "https://cdn.discordapp.com/emojis/571264832565673984.png?v=1"
 
-        badgestr = [locked, locked, locked, locked, locked]
-        if hugcounter >= 10:
-            badgestr = [wood, locked, locked, locked, locked]
-        if hugcounter >= 100:
-            badgestr = [wood, bronze, locked, locked, locked]
-        if hugcounter >= 500:
-            badgestr = [wood, bronze, silver, locked, locked]
-        if hugcounter >= 1750:
-            badgestr = [wood, bronze, silver, gold, locked]
-        if hugcounter >= 4000:
-            badgestr = [wood, bronze, silver, gold, diamond]
+        inv = db.find_inventory(str(user.id))
+        filtered_inv = filter(lambda k: list(k.keys())[0] == "Token of love & friendship", inv)
+        if not filtered_inv:
+            hugcount = 0
+        else:
+            hugcount = int(list(list(filtered_inv)[0].values())[0])
 
-        for index, x in enumerate(badgestr):
+        badge_reqs = [10, 100, 500, 1750, 4000]
+        badges = [locked, locked, locked, locked, locked]
+        if hugcount >= 10:
+            badges = [wood, locked, locked, locked, locked]
+        elif hugcount >= 100:
+            badges = [wood, bronze, locked, locked, locked]
+        elif hugcount >= 500:
+            badges = [wood, bronze, silver, locked, locked]
+        elif hugcount >= 1750:
+            badges = [wood, bronze, silver, gold, locked]
+        elif hugcount >= 4000:
+            badges = [wood, bronze, silver, gold, diamond]
 
-            bglayer.paste(x, (362 + 7 + 7 + (37 * index), 151 + 7), x)
+        for i, url in enumerate(badges):
+            lobstero_profile = lobstero_profile.replace(f"bdg_{i + 1}", url)
 
-        h = str(user.color).replace("#", "")
-        rgbt = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+        unachieved_badges = list(filter(lambda k: k >= hugcount, badge_reqs))
+        achieved = 5 - len(unachieved_badges)
+        if unachieved_badges:
+            until_next = f"{unachieved_badges[0] - hugcount} hugs until next badge. Keep going!"
+        else:
+            until_next = "Looks like you've got all of the badges! This wasn't supposed to happen."
 
-        draw = ImageDraw.Draw(bglayer)
-        draw.ellipse((362 + 7 + 7, 151 + 44, 392 + 7 + 7, 151 + 74), fill=rgbt)
+        lobstero_profile = lobstero_profile.replace("name_and_tag", str(user))
+        lobstero_profile = lobstero_profile.replace("hug_total", str(hugcount))
+        lobstero_profile = lobstero_profile.replace("hg_s", str(achieved))
+        lobstero_profile = lobstero_profile.replace("hg_l", "5")
+        lobstero_profile = lobstero_profile.replace("until_next", until_next)
+        lobstero_profile = lobstero_profile.replace("user_pfp", str(user.avatar_url_as(format="png", size=512)))
 
-        bglayer.save(f"{root_directory}image_downloads/profile_result/{str(user.id)}.png")
-        to_send = discord.File(f"{root_directory}image_downloads/profile_result/{str(user.id)}.png")
-        await ctx.send(file=to_send)
+        to_run = functools.partial(
+            imgkit.from_string, lobstero_profile,
+            f"{root_directory}/lobstero/data/downloaded/profileraw.png", **conf, **options)
+
+        await self.bot.loop.run_in_executor(None, to_run)
+
+        saved = Image.open(f"{root_directory}/lobstero/data/downloaded/profileraw.png")
+        finished = saved.crop((0, 0, 818, 662))
+
+        buffer = BytesIO()
+        finished.save(buffer, "png")
+        buffer.seek(0)
+        img = discord.File(fp=buffer, filename="profile.png")
+
+        embed = discord.Embed(color=16202876)
+        embed.set_image(url="attachment://profile.png")
+        await ctx.send(file=img, embed=embed)
 
     @commands.command(aliases=["w", "wi", "who", "userinfo"])
     @handlers.blueprints_or()
