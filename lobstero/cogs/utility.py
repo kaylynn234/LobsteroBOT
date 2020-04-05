@@ -190,7 +190,7 @@ If no user is specified, displays your profile."""
         lobstero_profile = lobstero_profile.replace("hg_l", "5")
         lobstero_profile = lobstero_profile.replace("until_next", until_next)
         lobstero_profile = lobstero_profile.replace("user_pfp", str(user.avatar_url_as(format="png", size=512)))
-        with open(f"{root_directory}/lobstero/data/static/profile/profile_c.html", "r", encoding="utf-8") as out:
+        with open(f"{root_directory}/lobstero/data/static/profile/profile_c.html", "w+", encoding="utf-8") as out:
             out.write(lobstero_profile)
 
         to_run = functools.partial(
