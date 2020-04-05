@@ -129,7 +129,7 @@ Use the command without an argument to reset it."""
         messagelist = [m async for m in ctx.channel.history(limit=10) if m.author == ctx.guild.me]
         await ctx.channel.delete_messages(messagelist)
 
-    @commands.command(enabled=False)
+    @commands.command()
     @handlers.blueprints_or()
     async def profile(self, ctx, *, user: discord.Member = None):
         """View the lobstero profile of a user.
@@ -200,7 +200,7 @@ If no user is specified, displays your profile."""
         await self.bot.loop.run_in_executor(None, to_run)
 
         saved = Image.open(f"{root_directory}/lobstero/data/downloaded/profileraw.png")
-        finished = saved.crop((0, 0, 1279, 481))
+        finished = saved.crop((0, 0, 1023, 481))
 
         buffer = BytesIO()
         finished.save(buffer, "png")
