@@ -190,10 +190,11 @@ If no user is specified, displays your profile."""
         lobstero_profile = lobstero_profile.replace("hg_l", "5")
         lobstero_profile = lobstero_profile.replace("until_next", until_next)
         lobstero_profile = lobstero_profile.replace("user_pfp", str(user.avatar_url_as(format="png", size=512)))
-        lobstero_profile = lobstero_profile.replace('<script src="', f'<script src="{root_directory}')
+        with open(f"{root_directory}/lobstero/data/static/profile/profile_c.html", "r", encoding="utf-8") as out:
+            out.write(lobstero_profile)
 
         to_run = functools.partial(
-            imgkit.from_string, lobstero_profile,
+            imgkit.from_file, f"{root_directory}/lobstero/data/static/profile/profile_c.html",
             f"{root_directory}/lobstero/data/downloaded/profileraw.png", **conf, **options)
 
         await self.bot.loop.run_in_executor(None, to_run)
