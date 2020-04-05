@@ -15,3 +15,5 @@ lobstero/data/static/gnomes/bootstrap.min.css
 .vscode/settings.json
 testcode/uno.py
 lobstero/lobstero_config.py
+lobstero/data/static/profile/_pgbackup/pinegrow_1586071723.json
+lobstero/data/static/profile/_pgbackup/profile_1586071723.html
