@@ -390,8 +390,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     def produce_video(self, frames):
         writer = cv2.VideoWriter(
-            f"{root_directory}lobstero/data/generated/wheelofban.webm",
-            cv2.VideoWriter_fourcc(*"VP90"), 30, (640, 640))
+            f"{root_directory}lobstero/data/generated/wheelofban.mp4",
+            cv2.VideoWriter_fourcc(*"H264"), 30, (640, 640))
 
         for frame in frames:
             writer.write(frame)
@@ -433,7 +433,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.bot.loop.run_in_executor(None, to_run)
 
         done = discord.Embed(title="Judgement comes!", color=16202876)
-        await ctx.send(file=discord.File(f"{root_directory}lobstero/data/generated/wheelofban.webm"))
+        await ctx.send(file=discord.File(f"{root_directory}lobstero/data/generated/wheelofban.mp4"))
         await snt.edit(embed=done)
 
     def smooth_resize(self, img, basewidth=1000, method=Image.LANCZOS):
