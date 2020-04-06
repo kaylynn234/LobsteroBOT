@@ -391,14 +391,14 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     def produce_video(self, frames):
         writer = cv2.VideoWriter(
             f"{root_directory}lobstero/data/generated/wheelofban.webm",
-            cv2.VideoWriter_fourcc(*"VP90"), 60, (640, 640))
+            cv2.VideoWriter_fourcc(*"VP90"), 30, (640, 640))
 
         for frame in frames:
             writer.write(frame)
 
         writer.release()
 
-    @commands.command(enabled=False)
+    @commands.command()
     async def wheelofban(self, ctx):
         """Spin the wheel of ban!"""
 
