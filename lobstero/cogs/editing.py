@@ -1,9 +1,10 @@
-import os
 import functools
 import random
 import sys
-import glob
 import io
+
+import cv2
+import numpy as np
 import discord
 import PIL
 import aiohttp
@@ -171,7 +172,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     async def save_and_send(self, p_ctx, output, name, *args, **kwargs):
         # Saves an Image into a BytesIO buffer and sends it.
-        # Extra args/ kwargs are passed to send.
+        # Extra args/ kwargs are passed to save.
         file_f = name.split('.')[1]
         buffer = BytesIO()        
         output.save(buffer, file_f, *args, **kwargs)
@@ -371,62 +372,68 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             return "0" + str(num)
         return str(num)
 
+    def package_for_opencv(self, wheel, degrees, ban, ban_mask, banhandler):
+        whl = wheel.rotate(degrees)
+        whl.paste(ban, None, ban)
+        out = banhandler.generate_frame(ban_mask)
+        out.paste(whl, (63, 63), whl)
+
+        buffer = BytesIO()        
+        out.save(buffer, "png")
+        buffer.seek(0)
+
+        imgstr = buffer.read()
+        nparr = np.fromstring(imgstr, np.uint8)
+        converted = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+        return converted
+
+    def produce_video(self, frames):
+        writer = cv2.VideoWriter(
+            f"{root_directory}lobstero/data/generated/wheelofban.webm",
+            cv2.VideoWriter_fourcc(*"VP90"), 60, (640, 640))
+
+        for frame in frames:
+            writer.write(frame)
+
+        writer.release()
+
     @commands.command(enabled=False)
     async def wheelofban(self, ctx):
         """Spin the wheel of ban!"""
 
         waiting = discord.Embed(title="Spinning the wheel...", color=16202876)
         snt = await ctx.send(embed=waiting)
-        files = glob.glob(f"{root_directory}image_downloads/wheel/*.png")
 
         banhandler = ban_conglomerate()
-
-        for x in files:
-            os.remove(x)
-
-        wheel = Image.open(f"{root_directory}lobstero/data/static/wheel_of_ban.png").convert("RGBA").resize((512, 512), Image.ANTIALIAS)
-        ban = Image.open(f"{root_directory}lobstero/data/static/ban_spin_top.png").convert("RGBA").resize((512, 512), Image.ANTIALIAS)
+        wheel = Image.open(f"{root_directory}lobstero/data/static/wheel_of_ban.png")
+        wheel = wheel.convert("RGBA").resize((512, 512), Image.ANTIALIAS)
+        ban = Image.open(f"{root_directory}lobstero/data/static/ban_spin_top.png")
+        ban = ban.convert("RGBA").resize((512, 512), Image.ANTIALIAS)
         ban_mask = Image.open(f"{root_directory}lobstero/data/static/transparentban.png").convert("RGBA")
         degrees, to_spin, frameid = 0, 9.9, 0
+        frames = []  # what could possibly go wrong
 
         for _ in range(random.randint(25, 175)):
             frameid += 1
             degrees += to_spin
-            whl = wheel.rotate(degrees)
-            whl.paste(ban, None, ban)
-            out = banhandler.generate_frame(ban_mask)
-            out.paste(whl, (63, 63), whl)
-            out.save(f"{root_directory}image_downloads/wheel/img{self.addzero(frameid)}.png")
-        for _ in range(70):
+            frames.append(self.package_for_opencv(wheel, degrees, ban, ban_mask, banhandler))
 
+        for _ in range(70):
             frameid += 1
             to_spin = to_spin * 0.95
             degrees += to_spin
-            whl = wheel.rotate(degrees)
-            whl.paste(ban, None, ban)
-            out = banhandler.generate_frame(ban_mask)
-            out.paste(whl, (63, 63), whl)
-            out.save(f"{root_directory}image_downloads/wheel/img{self.addzero(frameid)}.png")
+            frames.append(self.package_for_opencv(wheel, degrees, ban, ban_mask, banhandler))
+
         for _ in range(20):
             frameid += 1
-            whl = wheel.rotate(degrees)
-            whl.paste(ban, None, ban)
-            out = banhandler.generate_frame(ban_mask)
-            out.paste(whl, (63, 63), whl)
-            out.save(f"{root_directory}image_downloads/wheel/img{self.addzero(frameid)}.png")
-        
-        files = glob.glob(f"{root_directory}image_downloads/wheel/*.png")
+            frames.append(self.package_for_opencv(wheel, degrees, ban, ban_mask, banhandler))
 
-        with open(f"{root_directory}image_downloads/wheel/fileoutputs.txt", "w+") as writef:
-            for x in files:
-                path = "file '" + "img" + x.split("\img")[1] + "'\n"
-                writef.write(path)
-
-        os.system(r"C:\ffmpeg\bin\ffmpeg.exe" + r""" -y -r 30 -f concat -safe 0 -i """ + '"' + f"{root_directory}data/static/fileoutputs.txt" + '"' """ -c:v libx264 -vf "fps=30,format=yuv420p" """ + '"' +  root_directory + 'image_downloads/wheel/result.mp4"')
+        to_run = functools.partial(self.produce_video, frames)
+        await self.bot.loop.run_in_executor(None, to_run)
 
         done = discord.Embed(title="Judgement comes!", color=16202876)
-
-        await ctx.send(file=discord.File(f"{root_directory}image_downloads/wheel/result.mp4"))
+        await ctx.send(file=discord.File(f"{root_directory}lobstero/data/generated/wheelofban.webm"))
         await snt.edit(embed=done)
 
     def smooth_resize(self, img, basewidth=1000, method=Image.LANCZOS):
