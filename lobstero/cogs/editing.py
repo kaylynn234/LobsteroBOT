@@ -586,7 +586,13 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         arr = numpy.array(im, dtype=numpy.int8)
         new = []
         for i in range(arr.shape[1]):
-            new.extend(list(arr[i]))
+            try:
+                new.extend(list(arr[i]))
+            except IndexError:
+                break
+                # in theory this /should/ be fine, but there's some strangeness with PIL / numpy / my code
+                # that breaks the last item if the file is of a certain type, not sure why
+                # shit's wack yo
 
         to_write = numpy.array(new, dtype=numpy.int8)
         wavfile.write(buffer, 10000, to_write)
