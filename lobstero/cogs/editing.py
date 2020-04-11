@@ -3,16 +3,18 @@ import random
 import sys
 import io
 
+import numpy
 import cv2
 import numpy as np
 import discord
 import PIL
 import aiohttp
 
+from scipy.io import wavfile
 from unittest import mock
 from io import BytesIO
 from lobstero import lobstero_config
-from lobstero.utils import strings
+from lobstero.utils import strings, handlers
 from lobstero.external import asciify, kromo, halftone
 from urllib.parse import urlsplit
 from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance
@@ -185,6 +187,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await p_ctx.send(file=constructed_file, embed=embed)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def blur(self, ctx, url=None):
         """Blur an image. Everyone has to start somewhwere."""
 
@@ -199,6 +202,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, output, "blur.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def gay(self, ctx, url=None):
         """Unleash the powers of homosexuality on any image."""
 
@@ -218,6 +222,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, output, "gay.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def fry(self, ctx, url=None):
         """Deep-frying, except not really."""
 
@@ -232,6 +237,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, output, "gay.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def nom(self, ctx, url=None):
         """Eating is a fun and enjoyable activity."""
 
@@ -259,6 +265,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, c_owobase, "nom.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def bless(self, ctx, url=None):
         """🛐🛐🛐"""
 
@@ -276,6 +283,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, c_im, "bless.png")
 
     @commands.command(name="asciify")
+    @handlers.blueprints_or()
     async def asciify_command(self, ctx, url=None):
         """Turn an image into some spicy dots."""
 
@@ -296,6 +304,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, asciified, "ascii.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def xokify(self, ctx, url=None):
         """xok"""
 
@@ -319,6 +328,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, masked, "xokify.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def jpeg(self, ctx, url=None):
         """Ever wanted to make an image look terrible?"""
 
@@ -331,6 +341,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, d_im, "jpegify.jpeg", quality=1)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def chromatic(self, ctx, url=None):
         """Fancy lens things!"""
 
@@ -353,6 +364,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, final_im, "chromatic.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def halftone(self, ctx, url=None):
         """Fancy depressive dots."""
 
@@ -399,6 +411,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         writer.release()
 
     @commands.command()
+    @handlers.blueprints_or()
     async def wheelofban(self, ctx):
         """Spin the wheel of ban!"""
 
@@ -442,6 +455,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return img.resize((basewidth, hsize), method)
 
     @commands.command()
+    @handlers.blueprints_or()
     async def mosaic(self, ctx, url=None):
         """Sqaure dance!"""
 
@@ -466,6 +480,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await self.save_and_send(ctx, final, "mosaic.png")
 
     @commands.command()
+    @handlers.blueprints_or()
     async def quilt(self, ctx, url=None):
         """Jumbled squares."""
 
@@ -534,8 +549,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         draw = ImageDraw.Draw(img)
         for x_p in range(-15, 15, 5):
             for y_p in range(-15, 15, 5):
-                draw.text((topTextPositionX + x_p, topTextPositionY + y_p), topString, (0,0,0), font=font)
-                draw.text((bottomTextPositionX + x_p, bottomTextPositionY + y_p), topString, (0,0,0), font=font)
+                draw.text((topTextPositionX + x_p, topTextPositionY + y_p), topString, (0, 0, 0), font=font)
+                draw.text((bottomTextPositionX + x_p, bottomTextPositionY + y_p), topString, (0, 0, 0), font=font)
 
         draw.text(topTextPosition, topString, (255, 255, 255), font=font)
         draw.text(bottomTextPosition, bottomString, (255, 255, 255), font=font)
@@ -543,6 +558,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return img
 
     @commands.command()
+    @handlers.blueprints_or()
     async def shitpost(self, ctx, url=None):
         """It's humour from the future!"""
 
@@ -554,6 +570,23 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         meme = self.make_meme(markov, markov, result.data)
 
         await self.save_and_send(ctx, meme, "shitpost.png")
+
+    @commands.command()
+    @handlers.blueprints_or()
+    async def audioimage(self, ctx, url=None):
+        """Turn an image into audio."""
+
+        result = await self.processfile(ctx, url)
+        if result is None:
+            return
+
+        im = Image.open(result.data).convert("L")
+        buffer = BytesIO()
+        to_write = numpy.array(im)
+        wavfile.write(buffer, 10000, to_write)
+        constructed_file = discord.File(fp=buffer, filename="audioimage.wav")
+
+        await ctx.send(file=constructed_file)
 
 
 def setup(bot):
