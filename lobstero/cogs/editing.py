@@ -582,6 +582,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             return
 
         im = Image.open(result.data).convert("L")
+        im.thumbnail((1000, 1000))
         buffer = BytesIO()
         arr = numpy.array(im, dtype=numpy.int8)
         new = []
