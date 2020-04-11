@@ -583,9 +583,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         im = Image.open(result.data).convert("L")
         buffer = BytesIO()
-        to_write = numpy.array(im, dtype=numpy.int8)
+        arr = numpy.array(im, dtype=numpy.int8)
+        to_write = numpy.array([int(item, 16) for item in arr[0]])
         await ctx.send(to_write.shape)
-        wavfile.write(buffer, 10000, to_write)
+        wavfile.write(buffer, 10000, )
         constructed_file = discord.File(fp=buffer, filename="audioimage.wav")
 
         await ctx.send(file=constructed_file)
