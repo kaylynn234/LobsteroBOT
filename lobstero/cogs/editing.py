@@ -626,6 +626,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
+                color1 = tuple(color1)  # fuck numpy
+                color2 = tuple(color2)  # PIL too
+
                 draw.polygon(
                     (
                         (row_index * 10, column_index * 10 + 10),  # bottom left
