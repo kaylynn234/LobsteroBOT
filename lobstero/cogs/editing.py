@@ -627,16 +627,20 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
                 draw.polygon(
-                    (row_index * 10, column_index * 10 + 10),  # bottom left
-                    (row_index * 10, column_index * 10),  # top left
-                    (row_index * 10 + 10, column_index * 10),  # top right
-                    color1)
+                    (
+                        (row_index * 10, column_index * 10 + 10),  # bottom left
+                        (row_index * 10, column_index * 10),  # top left
+                        (row_index * 10 + 10, column_index * 10)  # top right
+                    ),
+                    fill=color1)
 
                 draw.polygon(
-                    (row_index * 10, column_index * 10 + 10),  # bottom left
-                    (row_index * 10 + 10, column_index * 10 + 10),  # bottom right
-                    (row_index * 10 + 10, column_index * 10),  # top right
-                    color2)
+                    (
+                        (row_index * 10, column_index * 10 + 10),  # bottom left
+                        (row_index * 10 + 10, column_index * 10 + 10),  # bottom right
+                        (row_index * 10 + 10, column_index * 10)  # top right
+                    ),
+                    fill=color2)
 
         await self.save_and_send(ctx, canvas, "triangulate.png")
 
