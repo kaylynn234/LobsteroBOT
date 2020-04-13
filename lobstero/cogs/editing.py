@@ -617,7 +617,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         im.thumbnail((20, 20))
         width, height = im.size
-        canvas = Image.new("RGBA", (width * 10, height * 10), (0, 0, 0, 0))
+        canvas = Image.new("RGBA", (width * 20, height * 20), (0, 0, 0, 0))
         arr = numpy.array(im)
         draw = ImageDraw.Draw(canvas)
 
@@ -631,21 +631,22 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
                 draw.polygon(
                     (
-                        (row_index * 10, column_index * 10 + 10),  # bottom left
-                        (row_index * 10, column_index * 10),  # top left
-                        (row_index * 10 + 10, column_index * 10)  # top right
+                        (row_index * 20, column_index * 20 + 20),  # bottom left
+                        (row_index * 20, column_index * 20),  # top left
+                        (row_index * 20 + 20, column_index * 20)  # top right
                     ),
                     fill=color1)
 
                 draw.polygon(
                     (
-                        (row_index * 10, column_index * 10 + 10),  # bottom left
-                        (row_index * 10 + 10, column_index * 10 + 10),  # bottom right
-                        (row_index * 10 + 10, column_index * 10)  # top right
+                        (row_index * 20, column_index * 20 + 20),  # bottom left
+                        (row_index * 20 + 20, column_index * 20 + 20),  # bottom right
+                        (row_index * 20 + 20, column_index * 20)  # top right
                     ),
                     fill=color2)
 
-        await self.save_and_send(ctx, canvas, "triangulate.png")
+        final = canvas.rotate(90)
+        await self.save_and_send(ctx, final, "triangulate.png")
 
 
 def setup(bot):
