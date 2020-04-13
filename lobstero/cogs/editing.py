@@ -640,5 +640,6 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         await self.save_and_send(ctx, canvas, "triangulate.png")
 
+
 def setup(bot):
     bot.add_cog(Cog(bot))
