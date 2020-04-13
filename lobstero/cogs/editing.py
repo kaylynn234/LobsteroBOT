@@ -664,7 +664,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             starting_position = random.randint(1, im.size[1] - 1)
 
             for i in range(random.randint(12, 20)):
-                im.paste(sliced, (0, starting_position))
+                im.paste(sliced, (0, starting_position + i))
 
         await self.save_and_send(ctx, im, "melt.png")
 
