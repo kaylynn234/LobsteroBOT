@@ -645,7 +645,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                     ),
                     fill=color2)
 
-        final = canvas.rotate(-90)
+        final = canvas.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
         await self.save_and_send(ctx, final, "triangulate.png")
 
 
