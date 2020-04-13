@@ -658,14 +658,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             return
 
         im = Image.open(result.data).convert("RGBA")
-        arr = numpy.array(im)
-
         for _ in range(random.randint(10, 21)):
-            random_slice = random.randint(1, arr.shape[0] - 1)
-            sliced = Image.fromarray(arr[random_slice])
-            starting_position = random.randint(0, arr.shape[0] - 1)
+            random_slice_y = random.randint(1, im.size[1] - 1)
+            sliced = Image.crop((0, random_slice_y, im.size[0], random_slice_y + 1))
+            starting_position = random.randint(1, im.size[1] - 1)
 
-            for i in range(random.randint(4, 12)):
+            for i in range(random.randint(12, 20)):
                 im.paste(sliced, (0, starting_position))
 
         await self.save_and_send(ctx, im, "melt.png")
