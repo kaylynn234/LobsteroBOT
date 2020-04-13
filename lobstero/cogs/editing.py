@@ -648,6 +648,28 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         final = canvas.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
         await self.save_and_send(ctx, final, "triangulate.png")
 
+    @commands.command()
+    @handlers.blueprints_or()
+    async def melt(self, ctx, url=None):
+        """Makes an image look melt-y"""
+
+        result = await self.processfile(ctx, url)
+        if result is None:
+            return
+
+        im = Image.open(result.data).convert("RGBA")
+        arr = numpy.array(im)
+
+        for _ in range(random.randint(10, 21)):
+            random_slice = random.randint(1, arr.shape[0] - 1)
+            sliced = Image.fromarray(arr[random_slice])
+            starting_position = random.randint(0, arr.shape[0] - 1)
+
+            for i in range(random.randint(4, 12)):
+                im.paste(sliced, (0, starting_position))
+
+        await self.save_and_send(ctx, im, "melt.png")
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
