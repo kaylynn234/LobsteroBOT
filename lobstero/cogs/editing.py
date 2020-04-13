@@ -451,8 +451,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         await snt.edit(embed=done)
 
     def smooth_resize(self, img, basewidth=1000, method=Image.LANCZOS):
-        wpercent = (basewidth/float(img.size[0]))
-        hsize = int((float(img.size[1])*float(wpercent)))
+        wpercent = (basewidth / float(img.size[0]))
+        hsize = int((float(img.size[1]) * float(wpercent)))
+
         return img.resize((basewidth, hsize), method)
 
     @commands.command()
@@ -601,6 +602,43 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         await ctx.send(file=constructed_file)
 
+    @commands.command()
+    @handlers.blueprints_or()
+    async def triangulate(self, ctx, url=None):
+        """Fits an image into a cool-looking pattern"""
+
+        result = await self.processfile(ctx, url)
+        if result is None:
+            return
+
+        im = Image.open(result.data).convert("RGBA")
+        if im.size[0] < 20 or im.size[1] < 20:
+            return await ctx.send("Image is too small!")
+
+        im.thumbnail((20, 20))
+        width, height = im.size
+        canvas = Image.new("RGBA", (width * 10, height * 10), (0, 0, 0, 0))
+        arr = numpy.array(im)
+        draw = ImageDraw.Draw(canvas)
+
+        every_first = arr[::1, ::1]
+        every_second = arr[1::1, 1::1]
+
+        for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
+            for column_index, (color1, color2) in enumerate(zip(row1, row2)):
+                draw.polygon(
+                    (row_index * 10, column_index * 10 + 10),  # bottom left
+                    (row_index * 10, column_index * 10),  # top left
+                    (row_index * 10 + 10, column_index * 10),  # top right
+                    color1)
+
+                draw.polygon(
+                    (row_index * 10, column_index * 10 + 10),  # bottom left
+                    (row_index * 10 + 10, column_index * 10 + 10),  # bottom right
+                    (row_index * 10 + 10, column_index * 10),  # top right
+                    color2)
+
+        await self.save_and_send(ctx, canvas, "triangulate.png")
 
 def setup(bot):
     bot.add_cog(Cog(bot))
