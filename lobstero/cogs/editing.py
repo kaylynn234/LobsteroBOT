@@ -685,8 +685,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
             to_stamp = im.resize((new_x, new_y))
             position = (
-                (im.size[0] / 2 - int(to_stamp.size[0] / 2)) + random.randint(-3, 3),
-                (im.size[1] / 2 - int(to_stamp.size[1] / 2)) + random.randint(-3, 3))
+                int(im.size[0] / 2 - to_stamp.size[0] / 2) + random.randint(-3, 3),
+                int(im.size[1] / 2 - to_stamp.size[1] / 2) + random.randint(-3, 3)
+            )
 
             im.paste(to_stamp, position)
 
