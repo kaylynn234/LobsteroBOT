@@ -668,6 +668,30 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         await self.save_and_send(ctx, im, "melt.png")
 
+    @commands.command()
+    @handlers.blueprints_or()
+    async def tunnelvision(self, ctx, url=None):
+        """Far away!"""
+
+        result = await self.processfile(ctx, url)
+        if result is None:
+            return
+
+        im = Image.open(result.data).convert("RGB")
+        for i, _ in enumerate(range(random.randint(30, 60))):
+            m = float(f"0.{100 - i}")
+            new_x = int(im.size[0] * m)
+            new_y = int(im.size[1] * m)
+
+            to_stamp = im.resize((new_x, new_y))
+            position = (
+                int(to_stamp.size[0] / 2) + random.randint(-3, 3),
+                int(to_stamp.size[1] / 2) + random.randint(-3, 3))
+
+            im.paste(to_stamp, position)
+
+        await self.save_and_send(ctx, im, "tunnel.png")
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
