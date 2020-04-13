@@ -650,15 +650,15 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @commands.command()
     @handlers.blueprints_or()
-    async def melt(self, ctx, url=None):
-        """Makes an image look melt-y"""
+    async def glitch(self, ctx, url=None):
+        """Ruin an image"""
 
         result = await self.processfile(ctx, url)
         if result is None:
             return
 
-        im = Image.open(result.data).convert("RGBA")
-        for _ in range(random.randint(10, 21)):
+        im = Image.open(result.data).convert("RGB")
+        for _ in range(random.randint(20, 40)):
             random_slice_y = random.randint(1, im.size[1] - 1)
             sliced = im.crop((0, random_slice_y, im.size[0], random_slice_y + 1))
             starting_position = random.randint(1, im.size[1] - 1)
