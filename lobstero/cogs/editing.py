@@ -284,7 +284,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             if function_args.strip():
                 try:
                     arguments = {arg.split(":")[0]: arg.split(":")[1] for arg in function_args.split(",")}
-                except ValueError:
+                except (ValueError, IndexError):
                     raise MissingColonException("No colon to denote argument value!", current_step)
             else:
                 arguments = {}
@@ -836,7 +836,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             if len(e.args) > 1:  # TODO: not this
                 embed.description += f"This happened during line/ operation {e.args[1]}.\n"
 
-            embed.description += f"""
+            embed.description += f"""Looks like something went wrong!
             Lobstero's ImageScript is still in beta, so no documentation for this error is currently available.
             In the future, full documentation for language design, available functions and more will be available.
             Sit tight!"""
