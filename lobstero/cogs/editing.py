@@ -225,7 +225,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     async def save_for_next_step(self, p_ctx, output, name, *args, **kwargs):
         # Saves an Image into a BytesIO buffer. This is an intermediary thing.
         # Extra args/ kwargs are passed to save.
-        file_f, file_name = name.split('.')
+        file_name, file_f = name.split('.')
         buffer = BytesIO()
         output.save(buffer, file_f, *args, **kwargs)
         buffer.seek(0)
@@ -263,10 +263,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         start = time.time()
         current_image = provided_image
         chunked_code = input_code.strip("\r\n\u200b.}{][").split(";")
-        if len(chunked_code) > 15:
-            raise TooMuchToDoException(f"Only 15 operations are allowed at once. You tried to do {len(chunked_code)}")
+        cleaned_chunks = list(filter(None, chunked_code))
 
-        for current_step, chunk in enumerate(chunked_code, start=1):
+        if len(cleaned_chunks) > 15:
+            raise TooMuchToDoException(f"Only 15 operations are allowed at once. You tried to do {len(cleaned_chunks)}")
+
+        for current_step, chunk in enumerate(cleaned_chunks, start=1):
             if not ("(" in chunk or ")" in chunk):
                 raise MissingBracketsException("No brackets present!", current_step)
 
@@ -279,7 +281,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             if op_to_run is None:
                 raise UnknownOperationException(f"Operation {function_body} does not exist!", current_step)
 
-            if function_args:
+            if function_args.strip():
                 try:
                     arguments = {arg.split(":")[0]: arg.split(":")[1] for arg in function_args.split(",")}
                 except ValueError:
@@ -301,11 +303,11 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             if len(processed) == 2:
                 processed.append({})
 
-            if current_step != len(chunked_code):
+            if current_step != len(cleaned_chunks):
                 current_image = await self.save_for_next_step(ctx, processed[0], processed[1], **processed[2])
             else:
                 completion = time.time()
-                time_taken = f"Completed {len(chunked_code)} operation(s) in {round(completion - start, 2)} seconds."
+                time_taken = f"Completed {len(cleaned_chunks)} operation(s) in {round(completion - start, 2)} seconds."
                 await self.save_and_send(ctx, processed[0], processed[1], elapsed=time_taken, **processed[2])
 
     @executor_function
