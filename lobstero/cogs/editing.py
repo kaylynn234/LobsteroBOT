@@ -1,4 +1,5 @@
 import functools
+import inspect
 import random
 import sys
 import io
@@ -28,35 +29,69 @@ lc = lobstero_config.LobsteroCredentials()
 
 
 class ImageScriptException(Exception):
-    pass
+    """The base error for all Imagescript-related errors.
+    You should never see this. Hopefully."""
 
 
 class UnknownOperationException(ImageScriptException):
-    pass
+    """An UnknownOperationException error is raised when you attempt to do something that Lobstero doesn't understand.
+    For example, the Imagescript code ``blurr();`` would produce this error, as there is no ``blurr`` operation.
+
+    Check your spelling!
+    The Imagescript manual has more in-depth information on the basics."""
 
 
 class BadInputException(ImageScriptException):
-    pass
+    """A BadInputException error is raised when you try to perform an operation with the wrong kind of data.
+    It can be raised if:
+    - The image you provide is too small.
+    - You use an argument with a word or letter instead of a number.
+    - You try to use an argument that an operation does not support.
+
+    For example:
+    - the Imagescript code ``blur(amount: hello world);`` would produce this error, because the ``amount`` argument should be a number.
+    - the Imagescript code ``blur(strength: 10);`` would produce this error, because the ``blur`` operation has no ``strength`` argument.
+
+    Double-check what you're doing!"""
 
 
 class TooMuchToDoException(ImageScriptException):
-    pass
+    """A TooMuchToDoException error should be fairly self-explanatory.
+    Try doing less things at once!"""
 
 
 class BadSyntaxException(ImageScriptException):
-    pass
+    """A BadSyntaxException error is raised when Lobstero doesn't understand the code you try to run.
+    This can be raised if:
+    - You put too many brackets in your code.
+    - You forget a semicolon between operations.
+
+    Double-check what you're doing!
+    The Imagescript manual has more in-depth information on the basics."""
 
 
 class MissingBracketsException(BadSyntaxException):
-    pass
+    """A MissingBracketsException error is raised when your code has no brackets.
+    Brackets are needed after each operation - this is so that potential arguments can be specified within them.
+    You still need a pair of brackets after an operation, even if the operation takes no arguments.
+
+    Double-check what you're doing!"""
 
 
 class MissingColonException(BadSyntaxException):
-    pass
+    """A MissingColonException error should be fairly self-explanatory.
+    When giving arguments to an operation, make sure that they're arranged in ``argument: value`` pairs.
+
+    Double-check what you're doing!
+    The Imagescript manual has more in-depth information on the basics."""
 
 
 class MissingSemicolonException(BadSyntaxException):
-    pass
+    """A MissingBracketsException error is raised when your code has no semicolons.
+    A semicolon is needed after each operation - this is to concisely break them up so that they aren't clustered together.
+
+    Double-check what you're doing!
+    The Imagescript manual has more in-depth information on the basics."""
 
 
 class ban_loc():
@@ -441,7 +476,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         out = banhandler.generate_frame(ban_mask)
         out.paste(whl, (63, 63), whl)
 
-        buffer = BytesIO()        
+        buffer = BytesIO()
         out.save(buffer, "png")
         buffer.seek(0)
 
@@ -528,7 +563,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         hsize = int((float(img.size[1])*float(wpercent)))
         img = img.resize((2048, hsize), Image.ANTIALIAS)
 
-        imageSize = img.size    
+        imageSize = img.size
 
         # find biggest font size that works
         fontSize = int(imageSize[1]/5)
@@ -845,11 +880,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             if len(e.args) > 1:  # TODO: not this
                 embed.description += f"This happened during line/ operation {e.args[1]}.\n"
 
-            embed.description += f"""Looks like something went wrong!
-            Lobstero's ImageScript is still in beta, so no documentation for this error is currently available.
-            In the future, full documentation for language design, available functions and more will be available.
-            Sit tight!"""
-
+            embed.description += inspect.getdoc(e)
             await ctx.send(embed=embed)
 
 
