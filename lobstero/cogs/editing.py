@@ -875,6 +875,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             image = await self.processfile(ctx, url)
         except (commands.BadArgument, IndexError):  # conversion failed
             code = url_and_code
+            await ctx.simple_embed(f"No images matching \"{url}\" were found.")
 
         if image is None:
             return
