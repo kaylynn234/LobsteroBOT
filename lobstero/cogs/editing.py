@@ -2,6 +2,7 @@ import functools
 import random
 import sys
 import io
+import time
 
 import numpy
 import cv2
@@ -242,7 +243,11 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         to_do = getattr(self, f"do_{op}")
 
         # ugly, will fix later
-        processed = list(await to_do(result))
+        try:
+            processed = list(await to_do(result))
+        except ImageScriptException as e:
+            return await ctx.send(str(e))
+
         if len(processed) == 2:
             processed.append({})
 
@@ -313,9 +318,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @executor_function
     def do_gay(self, result):
-        gimage = await self.package(f"{root_directory}lobstero/data/static/gay.jpg", False)
         simage = Image.open(result.data)
-        gim = Image.open(gimage.data).convert("RGBA")
+        gim = Image.open(f"{root_directory}lobstero/data/static/gay.jpg").convert("RGBA")
         im = simage.convert("RGBA")
 
         width, height = im.size
@@ -335,10 +339,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @executor_function
     def do_nom(self, result):
         d_im = Image.open(result.data).convert("RGBA")
-        owobase = await self.package(f"{root_directory}lobstero/data/static/blobowo.png", False)
-        owotop = await self.package(f"{root_directory}lobstero/data/static/owoverlay.png", False)
-        c_owobase = Image.open(owobase.data).convert("RGBA")
-        c_owotop = Image.open(owotop.data).convert("RGBA")
+
+        c_owobase = Image.open(f"{root_directory}lobstero/data/static/blobowo.png").convert("RGBA")
+        c_owotop = Image.open(f"{root_directory}lobstero/data/static/owoverlay.png").convert("RGBA")
 
         wpercent = (420 / float(d_im.size[0]))
         hsize = int((float(d_im.size[1]) * float(wpercent)))
@@ -355,10 +358,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @executor_function
     def do_bless(self, result):
-        blesstop = await self.package(f"{root_directory}lobstero/data/static/bless.png", False)
         im = Image.open(result.data).convert("RGBA")
         c_im = im.resize((1024, 1024), PIL.Image.ANTIALIAS)
-        c_blesstop = Image.open(blesstop.data).convert("RGBA")
+        c_blesstop = Image.open(f"{root_directory}lobstero/data/static/bless.png").convert("RGBA")
 
         c_im.paste(c_blesstop, (0, 0, 1024, 1024), c_blesstop)
 
@@ -383,10 +385,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         im = Image.open(result.data).convert("RGBA")
         c_im = im.resize((1024, 1024), PIL.Image.ANTIALIAS)
         converter = ImageEnhance.Color(c_im)
-        mask = await self.package(f"{root_directory}lobstero/data/static/xok_mask.png", False)
-        xok = await self.package(f"{root_directory}lobstero/data/static/xok.png", False)
-        c_mask = Image.open(mask.data).convert("RGBA")
-        c_xok = Image.open(xok.data).convert("RGBA")
+        c_mask = Image.open(f"{root_directory}lobstero/data/static/xok_mask.png").convert("RGBA")
+        c_xok = Image.open(f"{root_directory}lobstero/data/static/xok.png").convert("RGBA")
 
         converted = converter.enhance(1.75)
         blended = Image.blend(c_xok, converted, 0.3)
@@ -490,7 +490,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         im.thumbnail((4000, 4000))
         width, height = im.size
         if width <= 50 or height <= 50:
-            return await ctx.simple_embed("Image too small!")
+            raise BadInputException("Image too small!")
 
         if squares == "random":
             divisor = random.choice([2, 4, 5, 10])
@@ -565,7 +565,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     def do_triangulate(self, result):
         im = Image.open(result.data).convert("RGBA")
         if im.size[0] < 20 or im.size[1] < 20:
-            return await ctx.send("Image is too small!")
+            raise BadInputException("Image too small!")
 
         im.thumbnail((20, 20))
         width, height = im.size
