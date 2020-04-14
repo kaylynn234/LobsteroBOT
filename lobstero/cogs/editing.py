@@ -828,10 +828,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         code = url_and_code
 
         if " " in url_and_code:
-            split = url_and_code.split(" ")
+            split = url_and_code.split()
             if ";" not in split[0]:
                 url = split[0]
-                code = split[1:]
+                code = " ".join(split[1:])
 
         image = await self.processfile(ctx, url)
         if image is None:
