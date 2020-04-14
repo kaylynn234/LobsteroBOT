@@ -836,7 +836,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             if len(e.args) > 1:  # TODO: not this
                 embed.description += f"This happened during line/ operation {e.args[1]}.\n"
 
-            embed.description += f"""\n
+            embed.description += f"""
             Lobstero's ImageScript is still in beta, so no documentation for this error is currently available.
             In the future, full documentation for language design, available functions and more will be available.
             Sit tight!"""
