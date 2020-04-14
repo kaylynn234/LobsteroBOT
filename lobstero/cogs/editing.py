@@ -306,6 +306,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         for current_step, chunk in enumerate(cleaned_chunks, start=1):
             if not ("(" in chunk or ")" in chunk):
                 raise MissingBracketsException("No brackets present!", current_step)
+            if ");" not in chunk.strip():
+                raise MissingSemicolonException("No semicolon!", current_step)
 
             try:
                 function_body, function_args = chunk.strip(") ").split("(")
@@ -868,7 +870,11 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 url = split[0]
                 code = " ".join(split[1:])
 
-        image = await self.processfile(ctx, url)
+        try:
+            image = await self.processfile(ctx, url)
+        except commands.BadArgument:
+            code = url_and_code
+
         if image is None:
             return
 
