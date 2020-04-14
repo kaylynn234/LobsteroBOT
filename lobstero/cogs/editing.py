@@ -872,7 +872,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         try:
             image = await self.processfile(ctx, url)
-        except commands.BadArgument:
+        except (commands.BadArgument, IndexError):  # conversion failed
             code = url_and_code
 
         if image is None:
