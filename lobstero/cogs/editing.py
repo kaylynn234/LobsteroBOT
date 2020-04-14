@@ -831,8 +831,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         except ImageScriptException as e:
             embed = discord.Embed(color=16202876, title="Something went wrong")
             embed.description = f"```{e.__repr__()}```\n"
-            if e.args:  # TODO: not this
-                embed.description += f"This happened during line/ operation {e.args[0]}.\n"
+            if len(e.args) > 1:  # TODO: not this
+                embed.description += f"This happened during line/ operation {e.args[1]}.\n"
 
             embed.description += f"""\n
             Lobstero's ImageScript is still in beta, so no documentation for this error is currently available.
