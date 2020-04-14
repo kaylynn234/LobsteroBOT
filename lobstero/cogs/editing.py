@@ -863,6 +863,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         At the moment, this is very poorly documented and still a WIP. It will be expanded upon later."""
         url = None
         code = url_and_code
+        image = None
 
         if " " in url_and_code:
             split = url_and_code.split()
