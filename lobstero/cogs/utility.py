@@ -76,15 +76,12 @@ Also features commands for setting AFk statuses and similar."""
 
     @commands.command(aliases=["a", "pfp"])
     @handlers.blueprints_or()
-    async def avatar(self, ctx, user: str = None):
+    async def avatar(self, ctx, user: discord.User = None):
         """Grabs the avatar of a member. Will send yours if no arguments are prvoided."""
 
-        if user is None:
-            member = ctx.message.mentions[0]
-        else:
-            member = ctx.author
-        embed_mesg = discord.Embed(title="Profile picture for " + str(member) + ".", color=16202876)
-        embed_mesg.set_image(url=member.avatar_url_as(static_format="png", size=2048))
+        user = user or ctx.author
+        embed_mesg = discord.Embed(title=f"Profile picture for {user}.", color=16202876)
+        embed_mesg.set_image(url=user.avatar_url_as(static_format="png", size=2048))
         await ctx.send(embed=embed_mesg)
 
     @commands.command()
