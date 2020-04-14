@@ -413,8 +413,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             d_im = d_im.crop((0, 0, d_im.size[0], d_im.size[1] - 1))
             d_im.load()
 
-        to_run = functools.partial(kromo.add_chromatic, d_im, strength=strength, no_blur=True)
-        final_im = await self.bot.loop.run_in_executor(None, to_run)
+        final_im = kromo.add_chromatic(d_im, strength=strength, no_blur=True)
 
         return final_im, "chromatic.png"
 
