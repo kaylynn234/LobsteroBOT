@@ -821,10 +821,19 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @commands.command()
     @handlers.blueprints_or()
-    async def imagescript(self, ctx, *, code):
+    async def imagescript(self, ctx, *, url_and_code):
         """Runs code for Lobstero's Imagescript scripting language.
         At the moment, this is very poorly documented and still a WIP. It will be expanded upon later."""
-        image = await self.processfile(ctx, None)
+        url = None
+        code = url_and_code
+
+        if " " in url_and_code:
+            split = url_and_code.split(" ")
+            if ";" not in split[0]:
+                url = split[0]
+                code = split[1:]
+
+        image = await self.processfile(ctx, url)
         if image is None:
             return
 
