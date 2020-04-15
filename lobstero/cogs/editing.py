@@ -23,8 +23,6 @@ from urllib.parse import urlsplit
 from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance
 from discord.ext import commands
 from jishaku.functools import executor_function
-from jishaku.codeblocks import codeblock_converter
-
 
 root_directory = sys.path[0] + "/"
 lc = lobstero_config.LobsteroCredentials()
@@ -308,8 +306,6 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         for current_step, chunk in enumerate(cleaned_chunks, start=1):
             if not ("(" in chunk or ")" in chunk):
                 raise MissingBracketsException("No brackets present!", current_step)
-            if ");" not in chunk.strip():
-                raise MissingSemicolonException("No semicolon!", current_step)
 
             try:
                 function_body, function_args = chunk.strip(") ").split("(")
@@ -860,15 +856,24 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @commands.command()
     @handlers.blueprints_or()
-    async def imagescript(self, ctx, *, code):
+    async def imagescript(self, ctx, *, url_and_code):
         """Runs code for Lobstero's Imagescript scripting language.
         At the moment, this is very poorly documented and still a WIP. It will be expanded upon later."""
+        url = None
+        code = url_and_code
         image = None
 
+        if " " in url_and_code:
+            split = url_and_code.split()
+            if ";" not in split[0]:
+                url = split[0]
+                code = " ".join(split[1:])
+
         try:
-            image = await self.processfile(ctx, None)
+            image = await self.processfile(ctx, url)
         except (commands.BadArgument, IndexError):  # conversion failed
-            await ctx.simple_embed(f"No images were found.")
+            code = url_and_code
+            await ctx.simple_embed(f"No images matching \"{url}\" were found.")
 
         if image is None:
             return
