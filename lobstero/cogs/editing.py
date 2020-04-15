@@ -23,6 +23,7 @@ from urllib.parse import urlsplit
 from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance
 from discord.ext import commands
 from jishaku.functools import executor_function
+from jishaku.codeblocks import codeblock_converter
 
 root_directory = sys.path[0] + "/"
 lc = lobstero_config.LobsteroCredentials()
@@ -878,8 +879,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         if image is None:
             return
 
+        cleaned = codeblock_converter(code)
+
         try:
-            await self.imagescript_run(ctx, code, image)
+            await self.imagescript_run(ctx, cleaned.content, image)
         except ImageScriptException as e:
             embed = discord.Embed(color=16202876, title="Something went wrong")
             embed.description = f"```{type(e).__name__}: {e.args[0]}```\n"
