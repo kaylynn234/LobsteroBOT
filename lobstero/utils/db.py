@@ -375,7 +375,7 @@ def grant_item(userid: str, item: str, count: int) -> None:
     current = find_inventory(userid)
     reconstructed, appended = [], False
     for pair in current:
-        inv_item, amount = list(pair.items())[0]
+        inv_item, amount = next(pair.items())
         if inv_item.lower() == item.lower():
             reconstructed.append({item: int(amount) + abs(count)})
             appended = True
@@ -395,7 +395,7 @@ def remove_item(userid: str, item: str, count: int) -> bool:
     current = find_inventory(userid)
     reconstructed, removed = [], False
     for pair in current:
-        inv_item, amount = list(pair.items())[0]
+        inv_item, amount = next(pair.items())
         if inv_item.lower() == item.lower():
             if amount > count:
                 reconstructed.append({item: int(amount) - abs(count)})
@@ -672,7 +672,7 @@ def blueprint_by_id(_id: str):
     data = {"id": _id}
     res = table.find(**data)
     if res:
-        return list(res)[0]
+        return next(res)
     else:
         return None
 
@@ -699,7 +699,7 @@ def retrieve_ooeric():
     data = {"ooer": "ooer"}
     res = table.find(**data)
     if res:
-        return int(list(res)[0]["amount"])
+        return int(next(res)["amount"])
     else:
         return 0
 

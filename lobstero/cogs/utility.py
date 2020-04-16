@@ -152,12 +152,12 @@ If no user is specified, displays your profile."""
         diamond = "https://cdn.discordapp.com/emojis/571264832565673984.png?v=1"
 
         inv = db.find_inventory(str(user.id))
-        filtered_inv = filter(lambda k: list(k.keys())[0] == "Token of love & friendship", inv)
+        filtered_inv = filter(lambda k: next(k.keys()) == "Token of love & friendship", inv)
         if not filtered_inv:
             hugcount = 0
         else:
             try:
-                hugcount = int(list(list(filtered_inv)[0].values())[0])
+                hugcount = int(next(next(filtered_inv).values()))
             except IndexError:
                 hugcount = 0
 

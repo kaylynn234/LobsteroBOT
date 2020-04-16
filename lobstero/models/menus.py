@@ -286,7 +286,7 @@ class MaizeMenu(menus.Menu):
 
 class ConfirmationMenu(menus.Menu):
     """Makes sure of things."""
-    
+
     def __init__(self, embed):
         super().__init__(timeout=20, clear_reactions_after=True)    
         self.embed = embed
