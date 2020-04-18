@@ -890,11 +890,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             await ctx.send(embed=embed)
 
     @commands.command(aliases=["tti", "t2i", "texttoimage"])
+    @commands.cooldown(3, 60, commands.BucketType.user)
     @handlers.blueprints_or()
     async def text2image(self, ctx, *, text):
         """Turn some text into an image with the power of AI."""
         data = {"text": text}
-        headers = {"api-key": "tryit-39829218323-df262f6c689648f1fff42fad336710da"}
+        headers = {"api-key": lc.auth.deepai_key}
         async with self.session.post("https://api.deepai.org/api/text2img", data=data, headers=headers) as resp:
             response_json = await resp.json()
 

@@ -101,6 +101,9 @@ class LobsteroCredentials():
         self.auth.reddit_client_ID = "gtHDmj55nWtaAg"
         self.auth.reddit_client_secret = "alzSinkz6dFYdR0MzYRLMlhXAr0"
 
+        # DeepAI API key
+        self.auth.deepai_key = "..."
+
         # The section below is used directly by the bot.
         # It shouldn't be changed unless you know what you're doing.
         # Editing some of these these will almost certainly break things!
