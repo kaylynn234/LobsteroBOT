@@ -55,8 +55,7 @@ class LobsteroHELP(commands.HelpCommand):
         super().__init__(command_attrs={
             "aliases": [
                 "hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp", "howolp", "huwulp",
-                "hilp", "hulp", "hylp"],
-            "case_insen"})
+                "hilp", "hulp", "hylp"]})
 
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
