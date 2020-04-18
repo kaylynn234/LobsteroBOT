@@ -55,7 +55,8 @@ class LobsteroHELP(commands.HelpCommand):
         super().__init__(command_attrs={
             "aliases": [
                 "hlep", "hpel", "pehl", "phel", "pleh", "halp", "holp", "howolp", "huwulp",
-                "hilp", "hulp", "hylp"]})
+                "hilp", "hulp", "hylp"],
+            "case_insen"})
 
     async def check_and_jumble(self, embed):
         if self.context.invoked_with != "help":
@@ -244,7 +245,7 @@ class LobsteroHELP(commands.HelpCommand):
         lines = []
         if cog_matches:
             lines += ["The following modules might be what you're looking for: \n"]
-            lines += [f"**{m}**" for m in cog_matches]
+            lines += [f"``{m}``" for m in cog_matches] + ["\n"]
         if command_matches:
             lines += ["Did you mean: \n"]
             lines += [f"``<{m}``" for m in command_matches]
