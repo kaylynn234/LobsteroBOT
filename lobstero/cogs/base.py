@@ -24,19 +24,7 @@ Also features git-related commands."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.manager = None
         self.recent_commits = []
-        if "None" not in [lc.auth.github_username, lc.auth.github_password]:
-            self.manager = Github(lc.auth.github_username, lc.auth.github_password)
-
-        try:
-            if self.manager:
-                r = self.manager.get_repo(lc.config.github_repo)
-                latest = r.get_commits()
-                for c, _ in zip(latest, range(3)):
-                    self.recent_commits.append(c)
-        except:
-            pass
 
     @commands.command()
     async def search(self, ctx, *, text="aaaaaaaaaaaqdqdqfdqwfqwerfgeqrfgqwr3gfqerf"):
@@ -62,13 +50,13 @@ If no query is given when using the command, it returns nothing."""
 
             return await ctx.send(embed=embed)
         else:
-            commandstring = strings.blockjoin([x.name for x in results])
+            command_string = strings.blockjoin([x.name for x in results])
 
         embed = discord.Embed(
             title="Search results",
             description=(
                 "The following commands were found that matched your search:"
-                f"\n\n{commandstring}"),
+                f"\n\n{command_string}"),
             color=16202876)
 
         return await ctx.send(embed=embed)
@@ -96,15 +84,7 @@ If no query is given when using the command, it returns nothing."""
                 "\n\n**Recent updates**:\n"))
 
         appinfo = await self.bot.application_info()
-        invite_url = (
-            "https://discordapp.com/api/oauth2/authorize"
-            f"?client_id={appinfo.id}&scope=bot")
-
-        if self.manager:
-            for c in self.recent_commits:
-                embed.description += (
-                    f"\n[``{c.commit.sha[:7]}``]"
-                    f"({c.html_url}) {c.commit.message}")
+        invite_url = f"https://discordapp.com/api/oauth2/authorize?client_id={appinfo.id}&scope=bot"
 
         embed.add_field(
             name="Lobstero's support server",

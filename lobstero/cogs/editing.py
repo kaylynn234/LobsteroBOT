@@ -892,6 +892,22 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             embed.description += inspect.getdoc(e)
             await ctx.send(embed=embed)
 
+    @commands.command(aliases=["tti", "t2i", "texttoimage"])
+    @handlers.blueprints_or()
+    async def text2image(self, ctx, *, text):
+        """Turn some text into an image with the power of AI."""
+        data = {"text": text}
+        headers = {"api-key": "quickstart-QUdJIGlzIGNvbWluZy4uLi4K"}
+        async with self.session.post("https://api.deepai.org/api/text2img", data=data, headers=headers) as resp:
+            response_json = await resp.json()
+
+        if response_json.get("output_url", None):
+            embed = discord.Embed(color=16202876)
+            embed.set_image(url=response_json["output_url"])
+            await ctx.send(embed=embed)
+        else:
+            await ctx.simple_embed("The AI gave no result! This is probably an issue with it, and not you. Slow down!")
+
 
 def setup(bot):
     bot.add_cog(Cog(bot))
