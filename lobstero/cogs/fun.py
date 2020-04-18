@@ -105,10 +105,6 @@ You can also roll dice."""
                     "image": item['track']['album']['images'][0]['url'],
                     "artist": item['track']['album']['artists'][0]["name"]})
 
-    def cog_unload(self):
-        self.task.cancel()
-        self.session.close()
-
     async def clip_and_send(self, output, ctx):
         if len(output) > 1999:
             output = output[:1999]

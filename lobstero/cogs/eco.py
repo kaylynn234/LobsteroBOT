@@ -64,10 +64,6 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
                     self.bot.reddit_client = False
                 # anyone who wants to use anything else can suffer
 
-    def cog_unload(self):
-        self.task.cancel()
-        self.session.close()
-
     async def handle_confirmation(self, ctx, sent):
         try:
             msg = await self.bot.wait_for(

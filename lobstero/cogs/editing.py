@@ -145,10 +145,6 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         self.bot = bot
         self.session = bot.session
 
-    def cog_unload(self):
-        self.task.cancel()
-        self.session.close()
-
     def is_image(self, url):
         finalurl = None
         if str(url).lower().endswith(".png") or str(url).lower().endswith(".jpg"):

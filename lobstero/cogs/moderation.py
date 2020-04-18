@@ -8,7 +8,6 @@ import discord
 import demoji
 import dateparser
 
-import aiohttp
 import pendulum
 from lobstero.utils import db, embeds, text, misc, moderation
 from lobstero.models import handlers, menus
@@ -32,8 +31,6 @@ You can also use this module to view the wrongdoings of a member.
         self.session = bot.session
 
     def cog_unload(self):
-        self.task.cancel()
-        self.session.close()
         self.check_for_updates.cancel()
 
     def r_username(self, id_):
