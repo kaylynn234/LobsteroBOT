@@ -375,7 +375,7 @@ def grant_item(userid: str, item: str, count: int) -> None:
     current = find_inventory(userid)
     reconstructed, appended = [], False
     for pair in current:
-        inv_item, amount = next(pair.items())
+        inv_item, amount = list(pair.items())[0]
         if inv_item.lower() == item.lower():
             reconstructed.append({item: int(amount) + abs(count)})
             appended = True
@@ -395,7 +395,7 @@ def remove_item(userid: str, item: str, count: int) -> bool:
     current = find_inventory(userid)
     reconstructed, removed = [], False
     for pair in current:
-        inv_item, amount = next(pair.items())
+        inv_item, amount = list(pair.items())[0]
         if inv_item.lower() == item.lower():
             if amount > count:
                 reconstructed.append({item: int(amount) - abs(count)})
