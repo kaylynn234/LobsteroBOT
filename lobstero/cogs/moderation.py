@@ -29,7 +29,6 @@ You can also use this module to view the wrongdoings of a member.
     def __init__(self, bot):
         self.bot = bot
         self.check_for_updates.start()
-        self.task = self.bot.loop.create_task(self.aiohttp_init())
         self.session = bot.session
 
     def cog_unload(self):
