@@ -628,7 +628,7 @@ Use the inventory command to see the fish you own."""
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def mutate(self, ctx, operation):
+    async def mutate(self, ctx):
         """A base command for ruining text."""
         await ctx.simple_embed("Try using a subcommand - see \"<help mutate\" for more details.")
 
