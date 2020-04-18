@@ -7,12 +7,17 @@ import urllib.parse
 import re
 import sys
 import functools
+
+import upsidedown
+import uwuify
 import aiohttp
 import discord
 import imgkit
 import spotipy
 import matplotlib.pyplot as plotter
 
+from arrr import translate
+from zalgo_text import zalgo
 from io import BytesIO
 from spotipy.oauth2 import SpotifyClientCredentials
 from discord.ext import commands
@@ -22,7 +27,8 @@ from nltk.corpus import wordnet as wn
 from collections import Counter
 from lobstero.utils import misc, db, strings, text, embeds
 from lobstero.models import games, menus, handlers
-from lobstero import lobstero_config 
+from lobstero import lobstero_config
+from lobstero.external import corporate_bullshit, vape
 
 lc = lobstero_config.LobsteroCredentials()
 root_directory = f"{sys.path[0]}/".replace("\\", "/")
@@ -102,6 +108,12 @@ You can also roll dice."""
     def cog_unload(self):
         self.task.cancel()
         self.session.close()
+
+    async def clip_and_send(self, output, ctx):
+        if len(output) > 1999:
+            output = output[:1999]
+
+        await ctx.send(output)
 
     @commands.command(enabled=(lc.auth.cat_api_kay != "None"))
     @handlers.blueprints_or()
@@ -613,36 +625,71 @@ Use the inventory command to see the fish you own."""
         """Count with the fruit of god."""
         await ctx.send(f"{db.ooeric()} ooeric. More.")
 
-    async def folding_request(self, *, team: bool, utid=None, utname=None):
-        base = "https://stats.foldingathome.org/api/"
-        if utid and team:
-            url = f"{base}teams/{utid}"
-        elif utname:
-            t = "teams" if team else "donors"
-            url = f"{base}{t}?name={utname}&search_type=exact&passkey=&team=&month=&year"
-
-        async with self.session.get(url) as resp:
-            data = await resp.json()
-
-        if data.get("error"):
-            raise ValueError(f"Could not find {utid or utname}!")
-
-        if data.get("results") or data.get("donors"):
-            packaged = []
-            for item in (data.get("results") or data.get("donors")):
-                packaged.append(FoldingStats(**item))
-        else:  # single 
-            pass
-
-    @commands.command(name="foldingathome", aliases=["fah", "f@h"], enabled=False)
+    @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def folding(self, ctx):
-        """A base command for showing folding@home stats.
-Shows top teams if no subcommand is used."""
+    async def mutate(self, ctx, operation):
+        """A base command for ruining text."""
+        await ctx.simple_embed("Try using a subcommand - see \"<help mutate\" for more details.")
 
-        escaped = urllib.parse.quote(team_name)
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def zalgo(self, ctx, *, text):
+        """Ruins text with the fruit of the abyss."""
+        await self.clip_and_send(zalgo.zalgo().zalgofy(text), ctx)
 
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def pirate(self, ctx, *, text):
+        """Ruins text, with pirate flair."""
+        await self.clip_and_send(translate(text), ctx)
+
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def uwu(self, ctx, *, text):
+        """Ruins text uwu"""
+        await self.clip_and_send(uwuify.uwu_text(text), ctx)
+
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def flip(self, ctx, *, text):
+        """Ruins text, the Australian way."""
+        await self.clip_and_send(upsidedown.transform(text), ctx)
+
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def vaporize(self, ctx, *, text):
+        """Ruins text, the aesthetic way."""
+        await self.clip_and_send(vape.vaporize(text), ctx)
+
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def small(self, ctx, *, text):
+        """Ruins text, the tiny way."""
+        small_in = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-=+?!."
+        small_out = "ᵃᵇᶜᵈᵉᶠᵍʰᶦʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᵠᴿˢᵀᵁⱽᵂˣʸᶻ¹²³⁴⁵⁶⁷⁸⁹⁰⁻⁼⁺ˀᵎ·"
+        await self.clip_and_send(text.translate(text.maketrans(small_in, small_out)), ctx)
+
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def piglatin(self, ctx, *, text):
+        """Uinsray exttay."""
+        output = " ".join([f"{w[1:] if w[0].islower() else w[1:].capitalize()}{w[0].lower()}ay" for w in text.split()])
+        await self.clip_and_send(output, ctx)
+
+    @mutate.command()
+    @commands.guild_only()
+    @handlers.blueprints_or()
+    async def corporatebullshit(self, ctx,):
+        """Just what you always wanted."""
+        await ctx.send(corporate_bullshit.sentence())
 
     @commands.Cog.listener()
     async def on_message(self, message):
