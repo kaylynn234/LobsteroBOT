@@ -64,13 +64,6 @@ bot.run(lc.auth.token)
 backup = commands.Bot(command_prefix=commands.when_mentioned)
 backup.load_extension("jishaku")
 
-
-@backup.event
-async def on_command_error(context, exception):
-    if isinstance(exception, commands.CommandNotFound):
-        await context.send("Lobstero is currently in maintenace mode. It will be functional again shortly.")
-
-
 # all the jank
 while bot.dead:
     try:
