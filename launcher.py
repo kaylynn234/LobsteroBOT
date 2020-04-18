@@ -56,9 +56,8 @@ Reloads all modules. No parameters are required.
             "Check console output for details."))
         raise error
 
-while True:
-    bot.handle_extensions(lc.config.cogs_to_load, None)
-    bot.run(lc.auth.token)
+bot.handle_extensions(lc.config.cogs_to_load, None)
+bot.run(lc.auth.token)
 
 # everything has gone to shit!
 # time to try and save it
@@ -73,7 +72,7 @@ async def on_command_error(context, exception):
 
 
 # all the jank
-while True:
+while bot.dead:
     try:
         backup.run(lc.auth.token)
     except:
