@@ -7,6 +7,7 @@ import random
 import traceback
 import io
 
+import aiohttp
 import discord
 import uwuify
 
@@ -387,6 +388,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.first_run = True
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
         self.handler = LobsteroEH(self)
+        self.session = aiohttp.ClientSession()
 
         super().__init__(command_prefix, help_command=LobsteroHELP(), **kwargs)
 

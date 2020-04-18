@@ -47,7 +47,7 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
 
     def __init__(self, bot):
         self.bot = bot
-        self.task = self.bot.loop.create_task(self.aiohttp_init())
+        self.session = bot.session
         self.bot.chs = "<a:cheese:533544087484366848>"
 
         if not hasattr(self.bot, "reddit_client"):
@@ -63,9 +63,6 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
                 except:
                     self.bot.reddit_client = False
                 # anyone who wants to use anything else can suffer
-
-    async def aiohttp_init(self):
-        self.session = aiohttp.ClientSession()
 
     def cog_unload(self):
         self.task.cancel()

@@ -143,10 +143,7 @@ You can either:
 If you don't do any of that, Lobstero will search the previous few messages for an image."""
     def __init__(self, bot):
         self.bot = bot
-        self.task = self.bot.loop.create_task(self.aiohttp_init())
-
-    async def aiohttp_init(self):
-        self.session = aiohttp.ClientSession()
+        self.session = bot.session
 
     def cog_unload(self):
         self.task.cancel()

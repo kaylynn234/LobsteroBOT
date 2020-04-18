@@ -72,9 +72,9 @@ You can also roll dice."""
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.aio_init())
+        self.session = bot.session
 
     async def aio_init(self):
-        self.session = aiohttp.ClientSession()
 
         client_credentials_manager = SpotifyClientCredentials(
             lc.auth.spotify_client_id, lc.auth.spotify_client_secret)
