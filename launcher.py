@@ -61,7 +61,7 @@ bot.run(lc.auth.token)
 
 # everything has gone to shit!
 # time to try and save it
-backup = commands.Bot(command_prefix=commands.when_mentioned())
+backup = commands.Bot(command_prefix=commands.when_mentioned)
 backup.load_extension("jishaku")
 
 
