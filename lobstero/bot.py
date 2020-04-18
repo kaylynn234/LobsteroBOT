@@ -24,93 +24,6 @@ from lobstero import lobstero_config
 
 lc = lobstero_config.LobsteroCredentials()
 
-config_types = {
-    ("auth", "database_address"): str,
-    ("auth", "cat_api_key"): str,
-    ("auth", "spotify_client_id"): str,
-    ("auth", "spotify_client_secret"): str,
-    ("auth", "token"): str,
-    ("config", "owner_name"): str,
-    ("config", "owner_id"): list,
-    ("config", "home_channel"): int,
-    ("config", "cogs_to_load"): list,
-    ("config", "prefixes"): list,
-    ("config", "case_insensitive"): bool,
-    ("config", "spotify_playlist_uri"): str,
-    ("config", "support_server_url"): str,
-    ("config", "wkhtmltoimage_path"): str
-}
-
-failed = False
-for value, required in config_types.items():
-    try:
-        received = getattr(getattr(lc, value[0]), value[1])
-        assert isinstance(received, required)
-    except AssertionError:
-        logger = logging.getLogger(__name__)
-        logger.fatal(
-            "Config file configured incorrectly! Value %s does not match required type.", value[1])
-        failed = True
-
-if failed:
-    logger.fatal("One or more config values was of the incorrect type. Execution cannot continue.")
-    input("Press any key to exit.")
-    exit(1)
-
-
-# monkey patch Messageable.send to strip token
-async def monkey_send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
-    channel = await self._get_channel()
-    state = self._state
-    content = str(content) if content is not None else None
-    if embed is not None:
-        embed = embed.to_dict()
-        for k, v in embed.items():
-            if lc.auth.token.lower() in str(k).lower() or lc.auth.token.lower() in str(v).lower():
-                embed = None
-                break
-
-    if content:
-        if lc.auth.token.lower() in content.lower():
-            content = "[eat glass]"
-
-    if file is not None and files is not None:
-        raise commands.InvalidArgument('cannot pass both file and files parameter to send()')
-
-    if file is not None:
-        if not isinstance(file, discord.File):
-            raise commands.InvalidArgument('file parameter must be File')
-
-        try:
-            data = await state.http.send_files(channel.id, files=[file],
-                                               content=content, tts=tts, embed=embed, nonce=nonce)
-        finally:
-            file.close()
-
-    elif files is not None:
-        if len(files) > 10:
-            raise commands.InvalidArgument('files parameter must be a list of up to 10 elements')
-        elif not all(isinstance(file, discord.File) for file in files):
-            raise commands.InvalidArgument('files parameter must be a list of File')
-
-        try:
-            data = await state.http.send_files(channel.id, files=files, content=content, tts=tts,
-                                               embed=embed, nonce=nonce)
-        finally:
-            for f in files:
-                f.close()
-    else:
-        data = await state.http.send_message(channel.id, content, tts=tts, embed=embed, nonce=nonce)
-
-    ret = state.create_message(channel=channel, data=data)
-    if delete_after is not None:
-        await ret.delete(delay=delete_after)
-    return ret
-
-
-# help
-discord.abc.Messageable.send = monkey_send
-
 
 class LobsteroCONTEXT(commands.Context):
 
@@ -208,7 +121,7 @@ class LobsteroHELP(commands.HelpCommand):
         description = [
             f"```{cog.qualified_name}```",
             f"{cog.description}\n",
-            "```Commands```",
+            f"```Commands ({len(usable_commands)} available)``` ",
             strings.blockjoin([command.name for command in usable_commands])
         ]
 
@@ -318,18 +231,25 @@ class LobsteroHELP(commands.HelpCommand):
     async def send_error_message(self, error):
         usable = [c.qualified_name for c in await self.all_usable_commands()]
         if not self.not_found:
-            matches = False
+            command_matches = cog_matches = False
         else:
-            matches = difflib.get_close_matches(self.not_found, usable)
+            usable_cogs = self.context.bot.cogs.keys()
+            command_matches = difflib.get_close_matches(self.not_found, usable)
+            cog_matches = difflib.get_close_matches(self.not_found, usable_cogs)
 
-        if not matches:
+        if not (command_matches or cog_matches):
             return await self.context.simple_embed(error)
 
         embed = discord.Embed(title=error, color=16202876)
-        lines = ["Did you mean: \n"]
-        lines += [f"``<{m}``" for m in matches]
-        embed.description = "\n".join(lines)
+        lines = []
+        if command_matches:
+            lines += ["Did you mean: \n"]
+            lines += [f"``<{m}``" for m in command_matches]
+        if cog_matches:
+            lines += ["The following modules might be what you're looking for: \n"]
+            lines += [f"**``{m}``**" for m in cog_matches]
 
+        embed.description = "\n".join(lines)
         await self.context.send(embed=embed)
 
 

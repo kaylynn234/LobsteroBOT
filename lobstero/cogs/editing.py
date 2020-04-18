@@ -133,7 +133,7 @@ class ban_conglomerate():
 
 
 class Cog(commands.Cog, name="Editing"):
-    """Edit images. All commands in this module will take an ``Image`` parameter.
+    """Edit images. Almost all commands in this module will take an ``Image`` parameter.
 
 You can either:
 - attach the image to the message you send the command in
