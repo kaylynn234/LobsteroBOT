@@ -242,12 +242,12 @@ class LobsteroHELP(commands.HelpCommand):
 
         embed = discord.Embed(title=error, color=16202876)
         lines = []
+        if cog_matches:
+            lines += ["The following modules might be what you're looking for: \n"]
+            lines += [f"**{m}**" for m in cog_matches]
         if command_matches:
             lines += ["Did you mean: \n"]
             lines += [f"``<{m}``" for m in command_matches]
-        if cog_matches:
-            lines += ["The following modules might be what you're looking for: \n"]
-            lines += [f"**``{m}``**" for m in cog_matches]
 
         embed.description = "\n".join(lines)
         await self.context.send(embed=embed)
