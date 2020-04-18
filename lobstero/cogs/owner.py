@@ -124,12 +124,12 @@ You shouldn't even see this. if you do, you know what it does."""
         servert = f"""
         Server name: {guild.name}.
         Server region: {guild.region}.
-        
+
         This server has {len(guild.voice_channels)} voice channels.
         This server has {len(guild.roles)} roles.
         This server has {guild.member_count} members.
         This server has {len(guild.channels)} channels.
-        
+
         This server is {large}.
         This server is owned by {guild.owner}, and was created at {guild.created_at}.
         My nickname on this server is {guild.me.nick or self.bot.user.name}.
@@ -205,6 +205,14 @@ You shouldn't even see this. if you do, you know what it does."""
     @commands.is_owner()
     async def querydb(self, ctx, *, text):
         await ctx.send(f"{db.query_db(text)}")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_owner()
+    async def kill(self, ctx):
+        await ctx.send("...")
+        ctx.bot.dead = True
+        await ctx.bot.logout()
 
 
 def setup(bot):

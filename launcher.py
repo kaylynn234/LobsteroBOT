@@ -59,3 +59,22 @@ Reloads all modules. No parameters are required.
 while True:
     bot.handle_extensions(lc.config.cogs_to_load, None)
     bot.run(lc.auth.token)
+
+# everything has gone to shit!
+# time to try and save it
+backup = commands.Bot(command_prefix=commands.when_mentioned())
+backup.load_extension("jishaku")
+
+
+@backup.on_command_error()
+async def on_command_error(context, exception):
+    if isinstance(exception, commands.CommandNotFound):
+        await context.send("Lobstero is currently in maintenace mode. It will be functional again shortly.")
+
+
+# all the jank
+while True:
+    try:
+        backup.run(lc.auth.token)
+    except:
+        pass

@@ -383,6 +383,7 @@ class LobsteroEH:
 class LobsteroBOT(commands.AutoShardedBot):
 
     def __init__(self, **kwargs: Any):
+        self.dead = True
         command_prefix = self.get_prefix
         self.log = logging.getLogger(__name__)  # type: Type[logging.Logger]
         self.first_run = True
@@ -432,6 +433,7 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         """My linter wants me to add a docstring for this."""
 
+        self.dead = False
         if self.first_run:
             self.first_run = False
             await self.markov_generator.connect()
