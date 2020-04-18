@@ -885,7 +885,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             embed.description += inspect.getdoc(e)
             await ctx.send(embed=embed)
 
-    @commands.command(aliases=["tti", "t2i", "texttoimage"])
+    @commands.command(aliases=["tti", "t2i", "texttoimage"], enabled=False)
     @commands.cooldown(3, 60, commands.BucketType.user)
     @handlers.blueprints_or()
     async def text2image(self, ctx, *, text):
