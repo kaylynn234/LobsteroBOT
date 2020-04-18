@@ -897,7 +897,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     async def text2image(self, ctx, *, text):
         """Turn some text into an image with the power of AI."""
         data = {"text": text}
-        headers = {"api-key": "quickstart-QUdJIGlzIGNvbWluZy4uLi4K"}
+        headers = {"api-key": "tryit-39829218323-df262f6c689648f1fff42fad336710da"}
         async with self.session.post("https://api.deepai.org/api/text2img", data=data, headers=headers) as resp:
             response_json = await resp.json()
 
