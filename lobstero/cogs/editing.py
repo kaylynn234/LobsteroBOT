@@ -189,7 +189,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             try:
                 m = await c.convert(p_ctx, url)
             except commands.BadArgument:  # Member lookup failed, assume emoji
-                em = strings.split_count(url)
+                em = [emoji for emoji in substring for substring in strings.split_count(url)]
+
                 if em:
                     escape = "-".join([f"{ord(e):X}" for e in em]).lower()
                     constructed = await self.package(
@@ -197,7 +198,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
                 c = commands.PartialEmojiConverter()
                 try:
-                    em = strings.split_count(url)
+                    em = [emoji for emoji in substring for substring in strings.split_count(url)]
                     if not em:
                         e = await c.convert(p_ctx, url)
                 except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
