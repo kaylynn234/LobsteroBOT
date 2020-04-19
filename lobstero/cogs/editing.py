@@ -191,19 +191,19 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             except commands.BadArgument:  # Member lookup failed, assume emoji
                 em = strings.split_count(url)
                 if em:
-                    escape = "-".join([f"{ord(e):X}" for e in found_emoji]).lower()
+                    escape = "-".join([f"{ord(e):X}" for e in em]).lower()
                     constructed = await self.package(
                         f"{root_directory}data/static/emojis/{escape}.png", False)
 
                 c = commands.PartialEmojiConverter()
                 try:
-                    found_emoji = strings.split_count(url)
-                    if not found_emoji:
+                    em = strings.split_count(url)
+                    if not em:
                         e = await c.convert(p_ctx, url)
                 except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
                     constructed = await self.package(url)
                 else:  # Emoji lookup was a success
-                    if found_emoji:
+                    if em:
                         escape = "-".join([f"{ord(e):X}" for e in em]).lower()
                         filename = f"{root_directory}lobstero/data/static/emojis/{escape}.png"
                         constructed = await self.package(filename, False)
