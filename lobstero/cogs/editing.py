@@ -12,6 +12,8 @@ import discord
 import PIL
 import aiohttp
 
+from itertools import chain
+
 from scipy.io import wavfile
 from unittest import mock
 from io import BytesIO
@@ -189,7 +191,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             try:
                 m = await c.convert(p_ctx, url)
             except commands.BadArgument:  # Member lookup failed, assume emoji
-                em = [emoji for emoji in substring for substring in strings.split_count(url)]
+                em = list(chain(*strings.split_count(url)))
 
                 if em:
                     escape = "-".join([f"{ord(e):X}" for e in em]).lower()
@@ -198,7 +200,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
                 c = commands.PartialEmojiConverter()
                 try:
-                    em = [emoji for emoji in substring for substring in strings.split_count(url)]
+                    em = list(chain(*strings.split_count(url)))
                     if not em:
                         e = await c.convert(p_ctx, url)
                 except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
