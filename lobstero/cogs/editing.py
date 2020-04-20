@@ -657,7 +657,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 for offset in range(3):
                     draw.polygon(
                         (
-                            (row_index * 100, column_index * 100,
+                            (row_index * 100, column_index * 100),
                             (row_index * 100, column_index * 100 + height1 + offset * 2),
                             (row_index * 100 + 100, column_index * 100 + height2 + offset * 2),
                             (row_index * 100 + 100, column_index * 100)
