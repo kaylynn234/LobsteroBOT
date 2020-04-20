@@ -651,10 +651,19 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
-                height1 = (int((color1 / 255) * 100) * 100) / brightest
-                height2 = (int((color2 / 255) * 100) * 100) / brightest
+                height1 = 2 * (int((color1 / 255) * 100) * 100) / brightest
+                height2 = 2 * (int((color2 / 255) * 100) * 100) / brightest
 
                 for offset in range(3):
+                    draw.polygon(
+                        (
+                            (row_index * 100, column_index * 100,
+                            (row_index * 100, column_index * 100 + height1 + offset * 2),
+                            (row_index * 100 + 100, column_index * 100 + height2 + offset * 2),
+                            (row_index * 100 + 100, column_index * 100)
+                        ),
+                        fill="black")
+
                     draw.line(
                         (
                             (row_index * 100, column_index * 100 + height1 + offset * 2),
