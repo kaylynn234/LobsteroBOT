@@ -650,8 +650,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
-                height1 = int((tuple(color1)[0] / 255) * 20)
-                height2 = int((tuple(color2)[0] / 255) * 20)
+                height1 = int((color1 / 255) * 20)
+                height2 = int((color2 / 255) * 20)
 
                 draw.line(
                     (
