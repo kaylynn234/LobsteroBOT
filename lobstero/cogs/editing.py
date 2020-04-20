@@ -643,7 +643,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 20)
         width, height = im.size
         canvas = Image.new("L", (width * 20, height * 20))
-        arr = numpy.fliplr(numpy.rot90(numpy.array(im)))
+        arr = numpy.flipud(numpy.fliplr(numpy.rot90(numpy.array(im))))
         draw = ImageDraw.Draw(canvas)
 
         every_first = arr[::1, ::1]
