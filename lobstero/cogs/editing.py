@@ -642,7 +642,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         im.thumbnail((20, 20))
         brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 100)
         width, height = im.size
-        canvas = Image.new("L", (width * 99, height * 100))
+        canvas = Image.new("L", (width * 100 - 100, height * 100))
         arr = numpy.flipud(numpy.rot90(numpy.array(im)))
         draw = ImageDraw.Draw(canvas)
 
