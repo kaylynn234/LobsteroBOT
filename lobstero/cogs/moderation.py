@@ -612,7 +612,7 @@ The above will delete the most recent 25 messages in this channel with images, e
     async def archive(self, ctx):
         """Archives pins for the current channel. No parameters are required."""
 
-        channel = self.bot.get_channel(db.find_settings_channels(ctx.guild.id, "archive")[0]["channel"])
+        channel = self.bot.get_channel(db.find_settings_channels(ctx.guild.id, "archives")[0]["channel"])
         if not channel:
             return await ctx.simple_embed("There is no archive channel set on this server!")
 
