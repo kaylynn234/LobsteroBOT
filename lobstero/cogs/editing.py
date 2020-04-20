@@ -12,6 +12,8 @@ import discord
 import PIL
 import aiohttp
 
+from itertools import chain
+
 from scipy.io import wavfile
 from unittest import mock
 from io import BytesIO
@@ -189,22 +191,23 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             try:
                 m = await c.convert(p_ctx, url)
             except commands.BadArgument:  # Member lookup failed, assume emoji
-                em = strings.split_count(url)
+                em = list(chain(*strings.split_count(url)))
+
                 if em:
-                    escape = f"{ord(em[0]):X}"
+                    escape = "-".join([f"{ord(e):X}" for e in em]).lower()
                     constructed = await self.package(
                         f"{root_directory}data/static/emojis/{escape}.png", False)
 
                 c = commands.PartialEmojiConverter()
                 try:
-                    found_emoji = strings.split_count(url)
-                    if not found_emoji:
+                    em = list(chain(*strings.split_count(url)))
+                    if not em:
                         e = await c.convert(p_ctx, url)
                 except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
                     constructed = await self.package(url)
                 else:  # Emoji lookup was a success
-                    if found_emoji:
-                        escape = "-".join([f"{ord(e):X}" for e in found_emoji]).lower()
+                    if em:
+                        escape = "-".join([f"{ord(e):X}" for e in em]).lower()
                         filename = f"{root_directory}lobstero/data/static/emojis/{escape}.png"
                         constructed = await self.package(filename, False)
                     else:
