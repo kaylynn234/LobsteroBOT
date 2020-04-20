@@ -640,9 +640,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             raise BadInputException("Image too small!")
 
         im.thumbnail((20, 20))
-        brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 40)
+        brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 100)
         width, height = im.size
-        canvas = Image.new("L", (width * 40, height * 40))
+        canvas = Image.new("L", (width * 99, height * 100))
         arr = numpy.flipud(numpy.rot90(numpy.array(im)))
         draw = ImageDraw.Draw(canvas)
 
@@ -651,15 +651,16 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
-                height1 = (int((color1 / 255) * 40) * 40) / brightest
-                height2 = (int((color2 / 255) * 40) * 40) / brightest
+                height1 = (int((color1 / 255) * 100) * 100) / brightest
+                height2 = (int((color2 / 255) * 100) * 100) / brightest
 
-                draw.line(
-                    (
-                        (row_index * 40, column_index * 40 + height1),
-                        (row_index * 40 + 40, column_index * 40 + height2)
-                    ),
-                    fill="white", width=4, joint="curve")
+                for offset in range(3):
+                    draw.line(
+                        (
+                            (row_index * 100, column_index * 100 + height1 + offset),
+                            (row_index * 100 + 100, column_index * 100 + height2 + offset)
+                        ),
+                        fill="white", width=4, joint="curve")
 
         return canvas, "stringify.png"
 
