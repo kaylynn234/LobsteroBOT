@@ -636,10 +636,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @executor_function
     def image_do_stringify(self, result):
         im = Image.open(result.data).convert("L")
-        if im.size[0] < 20 or im.size[1] < 20:
+        if im.size[0] < 50 or im.size[1] < 50:
             raise BadInputException("Image too small!")
 
-        im.thumbnail((20, 20))
+        im.thumbnail((50, 50))
         brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 100)
         width, height = im.size
         canvas = Image.new("L", (width * 100 - 100, height * 100))
