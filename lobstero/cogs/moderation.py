@@ -620,25 +620,24 @@ The above will delete the most recent 25 messages in this channel with images, e
         mesg = await ctx.send(embed=embed_mesg)
 
         failures = 0
-        pinchn = discord.utils.get(ctx.guild.channels, id=int(channel))
         for x in await ctx.message.channel.pins():
 
             embed = discord.Embed(color=16202876, title=f"#{x.channel.name}")
             if x.content:
                 embed.description = x.content
             embed.set_author(name=x.author, url=x.jump_url, icon_url=x.author.avatar_url)
-            await pinchn.send(embed=embed)
+            await channel.send(embed=embed)
 
             for y in x.attachments:
                 atturl = y.url
                 fname = await self.imgdownload(str(atturl))
                 try:
-                    await pinchn.send(file=discord.File(fname[0]))
+                    await channel.send(file=discord.File(fname[0]))
                 except discord.HTTPException:
                     failures += 1
 
             for embed in x.embeds:
-                await pinchn.send(embed=embed)
+                await channel.send(embed=embed)
 
             await x.unpin()
 
