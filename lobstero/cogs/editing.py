@@ -160,7 +160,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         try:
             file_name = urlsplit(file_loc)[2].split('/')[-1]
             file_ext = file_name.split(".", 1)[1]
-        except KeyError, IndexError:
+        except (KeyError, IndexError):
             return None  # Not a well-formed url
         f = io.BytesIO()
 
