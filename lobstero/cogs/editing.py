@@ -269,7 +269,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         if result is None:
             return
 
-        to_do = getattr(self, f"do_{op}")
+        to_do = getattr(self, f"image_do_{op}")
 
         # ugly, will fix later
         try:
@@ -306,7 +306,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             except ValueError:
                 raise BadSyntaxException("Too many brackets for one operation!", current_step)
 
-            op_to_run = getattr(self, f"do_{function_body}", None)
+            op_to_run = getattr(self, f"image_do_{function_body}", None)
             if op_to_run is None:
                 raise UnknownOperationException(f"Operation {function_body} does not exist!", current_step)
 
@@ -340,7 +340,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 await self.save_and_send(ctx, processed[0], processed[1], elapsed=time_taken, **processed[2])
 
     @executor_function
-    def do_blur(self, result, amount=10):
+    def image_do_blur(self, result, amount=10):
         myimage = Image.open(result.data)
         im = myimage.convert("RGBA")
         output = im.filter(ImageFilter.GaussianBlur(amount))
@@ -348,7 +348,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return output, "blur.png"
 
     @executor_function
-    def do_gay(self, result):
+    def image_do_gay(self, result):
         simage = Image.open(result.data)
         gim = Image.open(f"{root_directory}lobstero/data/static/gay.jpg").convert("RGBA")
         im = simage.convert("RGBA")
@@ -360,7 +360,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return output, "gay.png"
 
     @executor_function
-    def do_fry(self, result, amount=2):
+    def image_do_fry(self, result, amount=2):
         simage = Image.open(result.data)
         im = simage.convert("RGBA")
         output = im.filter(ImageFilter.UnsharpMask(radius=10, percent=450, threshold=amount))
@@ -368,7 +368,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return output, "fry.png"
 
     @executor_function
-    def do_nom(self, result):
+    def image_do_nom(self, result):
         d_im = Image.open(result.data).convert("RGBA")
 
         c_owobase = Image.open(f"{root_directory}lobstero/data/static/blobowo.png").convert("RGBA")
@@ -388,7 +388,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return c_owobase, "nom.png"
 
     @executor_function
-    def do_bless(self, result):
+    def image_do_bless(self, result):
         im = Image.open(result.data).convert("RGBA")
         c_im = im.resize((1024, 1024), PIL.Image.ANTIALIAS)
         c_blesstop = Image.open(f"{root_directory}lobstero/data/static/bless.png").convert("RGBA")
@@ -398,7 +398,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return c_im, "bless.png"
 
     @executor_function
-    def do_asciify(self, result):
+    def image_do_asciify(self, result):
         opened = Image.open(result.data).convert("RGBA")
         colorlist = [
             "blue", "green", "red", "orange", "greenyellow", "lawngreen", "hotpink",
@@ -412,7 +412,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return asciified, "ascii.png"
 
     @executor_function
-    def do_xokify(self, result):
+    def image_do_xokify(self, result):
         im = Image.open(result.data).convert("RGBA")
         c_im = im.resize((1024, 1024), PIL.Image.ANTIALIAS)
         converter = ImageEnhance.Color(c_im)
@@ -427,14 +427,14 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return masked, "xok.png"
 
     @executor_function
-    def do_jpeg(self, result, quality=1):
+    def image_do_jpeg(self, result, quality=1):
         d_im = Image.open(result.data).convert("CMYK")
         d_im.thumbnail((200, 200))
 
         return d_im, "jpegify.jpeg", {"quality": quality}
 
     @executor_function
-    def do_chromatic(self, result, strength=2):
+    def image_do_chromatic(self, result, strength=2):
         d_im = Image.open(result.data).convert("RGB")
         d_im.thumbnail((1024, 1024))
         if (d_im.size[0] % 2 == 0):
@@ -449,7 +449,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return final_im, "chromatic.png"
 
     @executor_function
-    def do_halftone(self, result):
+    def image_do_halftone(self, result):
         im = Image.open(result.data)
         h = halftone.Halftone()
         output = h.make(im, style='grayscale', angles=[45], sample=16)
@@ -497,7 +497,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return img.resize((basewidth, hsize), method)
 
     @executor_function
-    def do_mosaic(self, result):
+    def image_do_mosaic(self, result):
         d_im = Image.open(result.data).convert("RGBA")
         base = self.smooth_resize(d_im, 100, Image.NEAREST)
         c_base = base.convert("L").convert("RGBA")
@@ -515,7 +515,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return output, "mosaic.png"
 
     @executor_function
-    def do_quilt(self, result, squares="random"):
+    def image_do_quilt(self, result, squares="random"):
         im = Image.open(result.data).convert("RGBA")
         im.thumbnail((4000, 4000))
         width, height = im.size
@@ -592,7 +592,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return img
 
     @executor_function
-    def do_triangulate(self, result):
+    def image_do_triangulate(self, result):
         im = Image.open(result.data).convert("RGBA")
         if im.size[0] < 20 or im.size[1] < 20:
             raise BadInputException("Image too small!")
@@ -631,7 +631,37 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return output, "triangulate.png"
 
     @executor_function
-    def do_glitch(self, result, max_times=40):
+    def image_do_stringify(self, result):
+        im = Image.open(result.data).convert("L")
+        if im.size[0] < 20 or im.size[1] < 20:
+            raise BadInputException("Image too small!")
+
+        im.thumbnail((20, 20))
+        width, height = im.size
+        canvas = Image.new("L", (width * 20, height * 20))
+        arr = numpy.array(im)
+        draw = ImageDraw.Draw(canvas)
+
+        every_first = arr[::1, ::1]
+        every_second = arr[1::1, 1::1]
+
+        for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
+            for column_index, (color1, color2) in enumerate(zip(row1, row2)):
+                height1 = int((color1[0] / 255) * 20)
+                height2 = int((color2[0] / 255) * 20)
+
+                draw.line(
+                    (
+                        (row_index * 20, column_index * 20 + height1),
+                        (row_index * 20 + 20, column_index * 20 + height2)
+                    ),
+                    fill="white", width=1, joint="curve")
+
+        output = canvas.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
+        return output, "stringify.png"
+
+    @executor_function
+    def image_do_glitch(self, result, max_times=40):
         im = Image.open(result.data).convert("RGB")
         for _ in range(random.randint(20, max_times)):
             random_slice_y = random.randint(1, im.size[1] - 1)
@@ -644,7 +674,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return im, "glitch.png"
 
     @executor_function
-    def do_tunnelvision(self, result):
+    def image_do_tunnelvision(self, result):
         im = Image.open(result.data).convert("RGB")
         for i, _ in enumerate(range(random.randint(30, 60))):
             m = float(f"0.{100 - i}")
@@ -681,6 +711,13 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         """Fits an image into a cool-looking pattern"""
 
         await self.process_single("triangulate", ctx, url)
+
+    @commands.command()
+    @handlers.blueprints_or()
+    async def stringify(self, ctx, url=None):
+        """Make an image look like a joy division album cover"""
+
+        await self.process_single("stringify", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
