@@ -640,6 +640,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             raise BadInputException("Image too small!")
 
         im.thumbnail((20, 20))
+        brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 20)
         width, height = im.size
         canvas = Image.new("L", (width * 20, height * 20))
         arr = numpy.fliplr(numpy.rot90(numpy.array(im)))
@@ -650,8 +651,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
-                height1 = int((color1 / 255) * 20)
-                height2 = int((color2 / 255) * 20)
+                height1 = (int((color1 / 255) * 20) * 20) / brightest
+                height2 = (int((color2 / 255) * 20) * 20) / brightest
 
                 draw.line(
                     (
@@ -660,8 +661,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                     ),
                     fill="white", width=1, joint="curve")
 
-        output = canvas.rotate(-90).transpose(Image.FLIP_LEFT_RIGHT)
-        return output, "stringify.png"
+        return canvas, "stringify.png"
 
     @executor_function
     def image_do_glitch(self, result, max_times=40):
