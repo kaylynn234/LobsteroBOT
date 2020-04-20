@@ -621,11 +621,12 @@ The above will delete the most recent 25 messages in this channel with images, e
 
         failures = 0
         for x in await ctx.message.channel.pins():
-
             embed = discord.Embed(color=16202876, title=f"#{x.channel.name}")
+            embed.set_author(name=x.author, icon_url=x.author.avatar_url)
+            embed.add_field(name="Original", value=f"[Jump!]({x.jump_url})")
             if x.content:
                 embed.description = x.content
-            embed.set_author(name=x.author, url=x.jump_url, icon_url=x.author.avatar_url)
+
             await channel.send(embed=embed)
 
             for y in x.attachments:
