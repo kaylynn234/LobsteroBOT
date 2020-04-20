@@ -160,7 +160,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         try:
             file_name = urlsplit(file_loc)[2].split('/')[-1]
             file_ext = file_name.split(".", 1)[1]
-        except KeyError:
+        except KeyError, IndexError:
             return None  # Not a well-formed url
         f = io.BytesIO()
 
@@ -706,119 +706,119 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @commands.command()
     @handlers.blueprints_or()
-    async def tunnelvision(self, ctx, url=None):
+    async def tunnelvision(self, ctx, *, url=None):
         """Far away!"""
 
         await self.process_single("tunnelvision", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def glitch(self, ctx, url=None):
+    async def glitch(self, ctx, *, url=None):
         """Ruin an image"""
 
         await self.process_single("glitch", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def triangulate(self, ctx, url=None):
+    async def triangulate(self, ctx, *, url=None):
         """Fits an image into a cool-looking pattern"""
 
         await self.process_single("triangulate", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def stringify(self, ctx, url=None):
+    async def stringify(self, ctx, *, url=None):
         """Make an image look like a joy division album cover"""
 
         await self.process_single("stringify", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def quilt(self, ctx, url=None):
+    async def quilt(self, ctx, *, url=None):
         """Jumbled squares."""
 
         await self.process_single("quilt", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def mosaic(self, ctx, url=None):
+    async def mosaic(self, ctx, *, url=None):
         """Sqaure dance!"""
 
         await self.process_single("mosaic", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def halftone(self, ctx, url=None):
+    async def halftone(self, ctx, *, url=None):
         """Fancy depressive dots."""
 
         await self.process_single("halftone", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def chromatic(self, ctx, url=None):
+    async def chromatic(self, ctx, *, url=None):
         """Fancy lens things!"""
 
         await self.process_single("chromatic", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def xokify(self, ctx, url=None):
+    async def xokify(self, ctx, *, url=None):
         """xok"""
 
         await self.process_single("xokify", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def jpeg(self, ctx, url=None):
+    async def jpeg(self, ctx, *, url=None):
         """Ever wanted to make an image look terrible?"""
 
         await self.process_single("jpeg", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def blur(self, ctx, url=None):
+    async def blur(self, ctx, *, url=None):
         """Blur an image. Everyone has to start somewhwere."""
 
         await self.process_single("blur", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def fry(self, ctx, url=None):
+    async def fry(self, ctx, *, url=None):
         """Deep-frying, except not really."""
 
         await self.process_single("fry", ctx, url)
 
     @commands.command(name="asciify")
     @handlers.blueprints_or()
-    async def asciify_command(self, ctx, url=None):
+    async def asciify_command(self, ctx, *, url=None):
         """Turn an image into some spicy dots."""
 
         await self.process_single("asciify", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def gay(self, ctx, url=None):
+    async def gay(self, ctx, *, url=None):
         """Unleash the powers of homosexuality on any image."""
 
         await self.process_single("gay", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def bless(self, ctx, url=None):
+    async def bless(self, ctx, *, url=None):
         """🛐🛐🛐"""
 
         await self.process_single("bless", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def nom(self, ctx, url=None):
+    async def nom(self, ctx, *, url=None):
         """Eating is a fun and enjoyable activity."""
 
         await self.process_single("nom", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
-    async def shitpost(self, ctx, url=None):
+    async def shitpost(self, ctx, *, url=None):
         """It's humour from the future!"""
 
         result = await self.processfile(ctx, url)
@@ -832,7 +832,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
     @commands.command()
     @handlers.blueprints_or()
-    async def audioimage(self, ctx, url=None):
+    async def audioimage(self, ctx, *, url=None):
         """Turn an image into audio."""
 
         result = await self.processfile(ctx, url)
