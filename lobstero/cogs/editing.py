@@ -657,10 +657,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                 for offset in range(3):
                     draw.line(
                         (
-                            (row_index * 100, column_index * 100 + height1 + offset),
-                            (row_index * 100 + 100, column_index * 100 + height2 + offset)
+                            (row_index * 100, column_index * 100 + height1 + offset * 2),
+                            (row_index * 100 + 100, column_index * 100 + height2 + offset * 2)
                         ),
-                        fill="white", width=4, joint="curve")
+                        fill="white", width=9, joint="curve")
 
         return canvas, "stringify.png"
 
