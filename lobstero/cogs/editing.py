@@ -647,12 +647,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         draw = ImageDraw.Draw(canvas)
 
         every_first = arr[::1, ::1]
-        every_second = arr[1::1, 1::1]
+        every_second = arr[1::1, ::1]
 
         for row_index, (row1, row2) in enumerate(zip(every_first, every_second)):
             for column_index, (color1, color2) in enumerate(zip(row1, row2)):
-                height1 = (int((color2 / 255) * 20) * 20) / brightest
-                height2 = (int((color1 / 255) * 20) * 20) / brightest
+                height1 = (int((color1 / 255) * 20) * 20) / brightest
+                height2 = (int((color2 / 255) * 20) * 20) / brightest
 
                 draw.line(
                     (
