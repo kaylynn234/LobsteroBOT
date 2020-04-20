@@ -656,10 +656,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
                 draw.polygon(
                     (
-                        (row_index * 100, column_index * 100 + 100),
-                        (row_index * 100, column_index * 100 + height1),
-                        (row_index * 100 + 100, column_index * 100 + height2),
-                        (row_index * 100 + 100, column_index * 100 + 100)
+                        (row_index * 100, column_index * 50 + 50),
+                        (row_index * 100, column_index * 50 + height1),
+                        (row_index * 100 + 100, column_index * 50 + height2),
+                        (row_index * 100 + 100, column_index * 50 + 50)
                     ),
                     fill="black")
 
