@@ -10,7 +10,6 @@ import cv2
 import numpy as np
 import discord
 import PIL
-import aiohttp
 
 from itertools import chain
 
@@ -22,7 +21,7 @@ from lobstero.utils import strings
 from lobstero.models import handlers
 from lobstero.external import asciify, kromo, halftone
 from urllib.parse import urlsplit
-from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance
+from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance, ImageOps
 from discord.ext import commands
 from jishaku.functools import executor_function
 from jishaku.codeblocks import codeblock_converter
@@ -152,7 +151,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         if str(url).lower().endswith(".png") or str(url).lower().endswith(".jpg"):
             finalurl = url.lower()
         elif str(url).lower().endswith(".jpeg"):
-            finalurl = f"{url[:-4]}jpg"
+            finalurl = f"{url[:-4]}jpg" 
         return finalurl
 
     async def package(self, file_loc, download=True):
@@ -634,10 +633,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         return output, "triangulate.png"
 
     @executor_function
-    def image_do_stringify(self, result):
+    def image_do_stringify(self, result, invert=False):
         im = Image.open(result.data).convert("L")
         if im.size[0] < 50 or im.size[1] < 50:
             raise BadInputException("Image too small!")
+        if invert:
+            im = ImageOps.invert(im)
 
         im.thumbnail((50, 50))
         brightest = int((sorted(numpy.array(im).flatten(), reverse=True)[0] / 255) * 100)
@@ -672,6 +673,16 @@ If you don't do any of that, Lobstero will search the previous few messages for 
                         fill="white", width=12, joint="curve")
 
         return canvas, "stringify.png"
+
+    @executor_function
+    def image_do_colortrast(self, result, invert=False):
+        im = Image.open(result.data).convert("L")
+        if invert:
+            im = ImageOps.invert(im)
+
+        output = ImageOps.colorize(im, "DodgerBlue", "FireBrick", "FloralWhite")
+
+        return output, "colortrast.png"
 
     @executor_function
     def image_do_glitch(self, result, max_times=40):
@@ -717,6 +728,13 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         """Ruin an image"""
 
         await self.process_single("glitch", ctx, url)
+
+    @commands.command()
+    @handlers.blueprints_or()
+    async def colortrast(self, ctx, *, url=None):
+        """Colorizes an image in red/blue light"""
+
+        await self.process_single("colortrast", ctx, url)
 
     @commands.command()
     @handlers.blueprints_or()
