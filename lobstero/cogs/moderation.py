@@ -607,7 +607,7 @@ The above will delete the most recent 25 messages in this channel with images, e
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 300, commands.BucketType.channel)
+    @commands.cooldown(1, 86400, commands.BucketType.guild)
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def archive(self, ctx):
         """Archives pins for the current channel. No parameters are required."""
