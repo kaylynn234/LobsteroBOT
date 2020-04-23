@@ -149,8 +149,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     def iter_attachments(self, items):
         current = []
         valid = [".jpeg", ".jpg", ".png", ".webp", "gif"]
-        for item in filter(None, items):
-            if True not in [item.filename.lower().endswith(v) for v in valid]:
+        for item in items:
+            if True not in [str(item.filename).lower().endswith(v) for v in valid]:
                 continue
 
             if item.height:  # actually media
