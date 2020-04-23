@@ -216,7 +216,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             results.append([str(e.url), True])
 
         # 3: Try message attachments
-        results.extend(self.iter_attachments(ctx.message))
+        results.extend(self.iter_attachments(ctx.message.attachments))
 
         # 4: Try as just a URL
         valid = [".jpeg", ".jpg", ".png", ".webp", "gif"]
