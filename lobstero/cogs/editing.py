@@ -235,7 +235,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             results.extend(self.iter_attachments(message.attachments))
 
         # 7: Give up
-        results.append([str(m.avatar_url_as(static_format="png", size=2048)), True])
+        results.append([str(ctx.author.avatar_url_as(static_format="png", size=2048)), True])
 
         # Last step: Attempt to find one that works and return
         for result in results:
