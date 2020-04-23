@@ -90,7 +90,7 @@ class MissingColonException(BadSyntaxException):
 
 class MissingSemicolonException(BadSyntaxException):
     """A MissingBracketsException error is raised when your code has no semicolons.
-    A semicolon is needed after each operation - this is to concisely break them up so that they aren't clustered together.
+    A semicolon is needed after each operation - this is to break them up so that they aren't clustered together.
 
     Double-check what you're doing!
     The Imagescript manual has more in-depth information on the basics."""
@@ -146,13 +146,19 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         self.bot = bot
         self.session = bot.session
 
-    def is_image(self, url):
-        finalurl = None
-        if str(url).lower().endswith(".png") or str(url).lower().endswith(".jpg"):
-            finalurl = url.lower()
-        elif str(url).lower().endswith(".jpeg"):
-            finalurl = f"{url[:-4]}jpg" 
-        return finalurl
+    def iter_attachments(self, items):
+        current = []
+        valid = [".jpeg", ".jpg", ".png", ".webp", "gif"]
+        for item in items:
+            if True not in [item.filename.lower().endswith(v) for v in valid]:
+                continue
+
+            if item.height:  # actually media
+                current.append(item.url)
+            else:
+                continue
+
+        return [[item, True] for item in current]
 
     async def package(self, file_loc, download=True):
         """Packages a local or downloaded file into an object."""
@@ -182,63 +188,69 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         return f_obj
 
-    async def processfile(self, p_ctx, url):
-        constructed = None
-        if url:
-            value = None
-            c = commands.MemberConverter()
+    async def processfile(self, ctx, url):
+        results = []  # Sequence of [URL / filename: str, downloadable: bool]
+
+        #  1: Try member lookup
+        c = commands.MemberConverter()
+        try:
+            m = await c.convert(ctx, url)
+        except commands.BadArgument:
+            pass
+        else:
+            results.append([m.avatar_url_as(static_format="png", size=2048), True])
+
+        # 2: Try emoji lookup
+        em = list(chain(*strings.split_count(str(url))))  # for unicode emoji
+        if em:
+            escape = "-".join([f"{ord(e):X}" for e in em]).lower()
+            results.append([f"{root_directory}data/static/emojis/{escape}.png", False])
+
+        # 2.5: Try custom emoji lookup
+        c = commands.PartialEmojiConverter()
+        try:
+            e = await c.convert(ctx, url)
+        except commands.BadArgument:
+            pass
+        else:
+            results.append([str(e.url), True])
+
+        # 3: Try message attachments
+        results.extend(self.iter_attachments(ctx.message))
+
+        # 4: Try as just a URL
+        valid = [".jpeg", ".jpg", ".png", ".webp", "gif"]
+        if True in [str(url).lower().endswith(v) for v in valid]:
+            results.append([str(url), True])
+
+        # 5 & 6: Try looking through embeds and attachments in previous messages
+        try:
+            messages = await ctx.history(limit=15).flatten()
+        except discord.DiscordException:
+            messages = []
+
+        for message in messages:
+            embed_images = filter(None, [embed.image for embed in message.embeds])
+            results.extend(self.iter_attachments(embed_images))
+            results.extend(self.iter_attachments(message.attachments))
+
+        # 7: Give up
+        results.append([m.avatar_url_as(static_format="png", size=2048), True])
+
+        # Last step: Attempt to find one that works and return
+        for result in results:
             try:
-                m = await c.convert(p_ctx, url)
-            except commands.BadArgument:  # Member lookup failed, assume emoji
-                em = list(chain(*strings.split_count(url)))
+                constructed = await self.package(*result)
+            except (OSError, IndexError, ValueError, KeyboardInterrupt):
+                pass
+            else:
+                constructed.data.seek(0)
+                return constructed
 
-                if em:
-                    escape = "-".join([f"{ord(e):X}" for e in em]).lower()
-                    constructed = await self.package(
-                        f"{root_directory}data/static/emojis/{escape}.png", False)
+        await ctx.send("Congratulations! You've found Arnold, the unreachable code path! Now time will implode.")
+        return None
 
-                c = commands.PartialEmojiConverter()
-                try:
-                    em = list(chain(*strings.split_count(url)))
-                    if not em:
-                        e = await c.convert(p_ctx, url)
-                except commands.BadArgument:  # Emoji lookup failed, assume it's a URL and pray
-                    constructed = await self.package(url)
-                else:  # Emoji lookup was a success
-                    if em:
-                        escape = "-".join([f"{ord(e):X}" for e in em]).lower()
-                        filename = f"{root_directory}lobstero/data/static/emojis/{escape}.png"
-                        constructed = await self.package(filename, False)
-                    else:
-                        constructed = await self.package(str(e.url))
-
-            else:  # Member conversion was a success, get an avatar url and download it
-                value = m.avatar_url_as(static_format="png", size=2048)
-                constructed = await self.package(str(value))
-
-        elif url is None:
-            if p_ctx.message.attachments:
-                constructed = await self.package(p_ctx.message.attachments[0].url)
-
-        if constructed is None:
-            for message in await p_ctx.channel.history(limit=25).flatten():
-                if not constructed:
-                    if message.embeds and message.embeds[0].image:
-                        constructed = await self.package(message.embeds[0].image.url)
-                    if message.attachments:
-                        await self.package(message.attachments[0].url)
-                else:
-                    break
-
-        if constructed is None:  # No luck despite all this.
-            embed = discord.Embed(title="No images were found.", color=16202876)
-            await p_ctx.send(embed=embed)
-            return None
-
-        constructed.data.seek(0)  # just to be safe
-        return constructed
-
-    async def save_and_send(self, p_ctx, output, name, elapsed=None, *args, **kwargs):
+    async def save_and_send(self, ctx, output, name, elapsed=None, *args, **kwargs):
         # Saves an Image into a BytesIO buffer and sends it.
         # Extra args/ kwargs are passed to save.
         file_f = name.split('.')[1]
@@ -251,9 +263,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         embed.set_image(url=f"attachment://{name}")
         embed.description = elapsed
 
-        await p_ctx.send(file=constructed_file, embed=embed)
+        await ctx.send(file=constructed_file, embed=embed)
 
-    async def save_for_next_step(self, p_ctx, output, name, *args, **kwargs):
+    async def save_for_next_step(self, ctx, output, name, *args, **kwargs):
         # Saves an Image into a BytesIO buffer. This is an intermediary thing.
         # Extra args/ kwargs are passed to save.
         file_name, file_f = name.split('.')
