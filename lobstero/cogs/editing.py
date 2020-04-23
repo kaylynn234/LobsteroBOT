@@ -194,7 +194,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         #  1: Try member lookup
         c = commands.MemberConverter()
         try:
-            m = await c.convert(ctx, url)
+            m = await c.convert(ctx, str(url))
         except commands.BadArgument:
             pass
         else:
@@ -209,7 +209,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         # 2.5: Try custom emoji lookup
         c = commands.PartialEmojiConverter()
         try:
-            e = await c.convert(ctx, url)
+            e = await c.convert(ctx, str(url))
         except commands.BadArgument:
             pass
         else:
