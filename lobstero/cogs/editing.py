@@ -198,7 +198,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         except commands.BadArgument:
             pass
         else:
-            results.append([m.avatar_url_as(static_format="png", size=2048), True])
+            results.append([str(m.avatar_url_as(static_format="png", size=2048)), True])
 
         # 2: Try emoji lookup
         em = list(chain(*strings.split_count(str(url))))  # for unicode emoji
@@ -235,7 +235,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             results.extend(self.iter_attachments(message.attachments))
 
         # 7: Give up
-        results.append([m.avatar_url_as(static_format="png", size=2048), True])
+        results.append([str(m.avatar_url_as(static_format="png", size=2048)), True])
 
         # Last step: Attempt to find one that works and return
         for result in results:
