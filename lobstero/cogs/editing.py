@@ -244,6 +244,9 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             except (OSError, IndexError, ValueError, KeyboardInterrupt):
                 pass
             else:
+                if not constructed:
+                    continue
+
                 constructed.data.seek(0)
                 return constructed
 
