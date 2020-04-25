@@ -29,7 +29,7 @@ if lc.config.wkhtmltoimage_path != "None":
     config = imgkit.config(wkhtmltoimage=lc.config.wkhtmltoimage_path)
 
 
-class afkh:
+class AfkHolder:
 
     def __init__(self, user, reason):
         self.user, self.reason, = user, reason.replace("*", "")
@@ -88,8 +88,10 @@ Also features commands for setting AFk statuses and similar."""
     @handlers.blueprints_or()
     async def afk(self, ctx, *, reason="afk"):
         """Set an afk status so that people know why you're not in chat."""
-        await ctx.send(f"I set your AFK - {reason}")
-        data = afkh(ctx.author, reason)
+        c = commands.clean_content()
+        scrubbed = await c.convert(ctx, reason)
+        await ctx.send(f"I set your AFK - {scrubbed}")
+        data = AfkHolder(ctx.author, reason)
         self.bot.afks.append(data)
 
     @commands.command()
@@ -103,9 +105,8 @@ Use the command without an argument to reset it."""
             db.afk_message_set(ctx.author.id, message)
         else:
             if len(message) > 160:
-                await embeds.simple_embed((
-                    "AFK messages have a maximum character limit of 160."
-                    f"You provided {len(message)} charcters."), ctx)
+                await ctx.simple_embed(
+                    f"AFK messages have a maximum character limit of 160. You provided {len(message)} charcters.")
             else:
                 db.afk_message_set(ctx.author.id, message)
                 await embeds.simple_embed("AFK message changed!", ctx)
@@ -421,23 +422,38 @@ Valid usage can also include the following:
     @commands.Cog.listener()
     @commands.guild_only()
     async def on_message(self, message):
+        mentioned_afk_members = []
 
         for member in self.bot.afks:
             if member.user == message.author:
                 result = db.return_afk_message(message.author.id)
                 readable = date.delta(
                     pendulum.now("Atlantic/Reykjavik"), member.time, justnow=timedelta(seconds=0))[0]
+
+                self.bot.afks.remove(member)
+                context = await self.bot.get_context(message)
+                if context.command:
+                    continue
+
                 elapsed = f"\n(*Away for {readable}*)"
                 if result is None:
-                    await message.channel.send(
-                        "Welcome back. I removed your afk." + elapsed, delete_after=10)
+                    await context.send(
+                        f"Welcome back. I removed your afk.{elapsed}", delete_after=10)
                 else:
-                    await message.channel.send(result + elapsed, delete_after=10)
-                self.bot.afks.remove(member)
-                return
+                    await context.send(result + elapsed, delete_after=10)
 
             if member.user.mention in message.content and not message.author.bot:
+                mentioned_afk_members.append(member)
+
+        if mentioned_afk_members:
+            user_names = [member.user.name for member in mentioned_afk_members]
+            if len(mentioned_afk_members) == 1:
                 await message.channel.send(member.print(), delete_after=10)
+            elif len(mentioned_afk_members) == 2:
+                await message.channel.send(f"{user_names[0]} and {user_names[1]} are both AFK.")
+            else:
+                await message.channel.send(", ".join(user_names[:-1]) + f" and {user_names[-1]} are AFK.")
+
 
 
 def setup(bot):
