@@ -158,7 +158,7 @@ If no user is specified, displays your profile."""
             hugcount = 0
         else:
             try:
-                hugcount = int(next(next(filtered_inv).values()))
+                hugcount = int(list(next(filtered_inv).values())[0])
             except IndexError:
                 hugcount = 0
 
