@@ -423,6 +423,7 @@ Valid usage can also include the following:
     @commands.guild_only()
     async def on_message(self, message):
         mentioned_afk_members = []
+        context = await self.bot.get_context(message)
 
         for member in self.bot.afks:
             if member.user == message.author:
@@ -431,7 +432,6 @@ Valid usage can also include the following:
                     pendulum.now("Atlantic/Reykjavik"), member.time, justnow=timedelta(seconds=0))[0]
 
                 self.bot.afks.remove(member)
-                context = await self.bot.get_context(message)
                 if context.command:
                     continue
 
@@ -445,7 +445,7 @@ Valid usage can also include the following:
             if member.user.mention in message.content and not message.author.bot:
                 mentioned_afk_members.append(member)
 
-        if mentioned_afk_members:
+        if mentioned_afk_members and not context.command:
             user_names = [member.user.name for member in mentioned_afk_members]
             if len(mentioned_afk_members) == 1:
                 await message.channel.send(member.print(), delete_after=10)
@@ -453,7 +453,6 @@ Valid usage can also include the following:
                 await message.channel.send(f"{user_names[0]} and {user_names[1]} are both AFK.")
             else:
                 await message.channel.send(", ".join(user_names[:-1]) + f" and {user_names[-1]} are AFK.")
-
 
 
 def setup(bot):
