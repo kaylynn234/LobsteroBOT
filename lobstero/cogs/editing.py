@@ -265,7 +265,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         embed = discord.Embed(color=16202876)
         embed.set_image(url=f"attachment://{name}")
         embed.description = elapsed
-    
+
         await ctx.send(file=constructed_file, embed=embed)
 
     async def save_for_next_step(self, ctx, output, name, *args, **kwargs):
@@ -481,31 +481,15 @@ If you don't do any of that, Lobstero will search the previous few messages for 
 
         return str(num)
 
-    def package_for_opencv(self, wheel, degrees, ban, ban_mask, banhandler):
+    @executor_function
+    def package_wheel(self, wheel, degrees, ban, ban_mask, banhandler):
         whl = wheel.rotate(degrees)
         whl.paste(ban, None, ban)
         out = banhandler.generate_frame(ban_mask)
         out.paste(whl, (63, 63), whl)
+        out.thumbnail(400, 400)
 
-        buffer = BytesIO()
-        out.save(buffer, "png")
-        buffer.seek(0)
-
-        imgstr = buffer.read()
-        nparr = np.fromstring(imgstr, np.uint8)
-        converted = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-        return converted
-
-    def produce_video(self, frames):
-        writer = cv2.VideoWriter(
-            f"{root_directory}lobstero/data/generated/wheelofban.webm",
-            cv2.VideoWriter_fourcc(*"VP90"), 30, (640, 640))
-
-        for frame in frames:
-            writer.write(frame)
-
-        writer.release()
+        return out
 
     def smooth_resize(self, img, basewidth=1000, method=Image.LANCZOS):
         wpercent = (basewidth / float(img.size[0]))
@@ -906,29 +890,24 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         ban = Image.open(f"{root_directory}lobstero/data/static/ban_spin_top.png")
         ban = ban.convert("RGBA").resize((512, 512), Image.ANTIALIAS)
         ban_mask = Image.open(f"{root_directory}lobstero/data/static/transparentban.png").convert("RGBA")
-        degrees, to_spin, frameid = 0, 9.9, 0
+        degrees, to_spin, = 0, 9.9
         frames = []  # what could possibly go wrong
 
-        for _ in range(random.randint(25, 175)):
-            frameid += 1
+        for _ in range(random.randint(25, 75)):
             degrees += to_spin
-            frames.append(self.package_for_opencv(wheel, degrees, ban, ban_mask, banhandler))
+            frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
-        for _ in range(70):
-            frameid += 1
-            to_spin = to_spin * 0.95
+        for _ in range(35):
+            to_spin = to_spin * 0.9
             degrees += to_spin
-            frames.append(self.package_for_opencv(wheel, degrees, ban, ban_mask, banhandler))
+            frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
         for _ in range(20):
-            frameid += 1
-            frames.append(self.package_for_opencv(wheel, degrees, ban, ban_mask, banhandler))
+            frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
-        to_run = functools.partial(self.produce_video, frames)
-        await self.bot.loop.run_in_executor(None, to_run)
+        await self.save_and_send(ctx, frames[0], save_all=True, append_images=frames[1:], optimize=True, loop=0))
 
         done = discord.Embed(title="Judgement comes!", color=16202876)
-        await ctx.send(file=discord.File(f"{root_directory}lobstero/data/generated/wheelofban.webm"))
         await snt.edit(embed=done)
 
     @commands.command()
