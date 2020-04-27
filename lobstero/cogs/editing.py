@@ -905,7 +905,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         done = discord.Embed(title="Judgement comes!", color=16202876)
         await snt.edit(embed=done)
         await self.save_and_send(
-            ctx, frames[0], "wheelofban.gif", save_all=True, append_images=frames[1:], optimize=True, loop=0
+            ctx, frames[0], "wheelofban.gif", save_all=True, append_images=frames[1:], optimize=True, loop=0, fps=30
         )
 
     @commands.command()
