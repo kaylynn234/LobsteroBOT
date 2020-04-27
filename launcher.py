@@ -17,10 +17,7 @@ os.chdir(root_directory)
 
 # loop = asyncio.ProactorEventLoop()
 logging.basicConfig(level=logging.INFO)
-
-bot = LobsteroBOT(
-    case_insensitive=lc.config.case_insensitive,
-    owner_ids=set(lc.config.owner_id))
+bot = LobsteroBOT(case_insensitive=lc.config.case_insensitive, owner_ids=set(lc.config.owner_id))
 
 try:
     from discord.ext import menus
@@ -56,17 +53,7 @@ Reloads all modules. No parameters are required.
             "Check console output for details."))
         raise error
 
-bot.handle_extensions(lc.config.cogs_to_load, None)
-bot.run(lc.auth.token)
 
-# everything has gone to shit!
-# time to try and save it
-backup = commands.Bot(command_prefix=commands.when_mentioned)
-backup.load_extension("jishaku")
-
-# all the jank
-while bot.dead:
-    try:
-        backup.run(lc.auth.token)
-    except:
-        pass
+while True:
+    bot.handle_extensions(lc.config.cogs_to_load, None)
+    bot.run(lc.auth.token)
