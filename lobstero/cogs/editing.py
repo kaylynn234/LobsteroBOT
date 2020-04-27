@@ -890,12 +890,12 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         degrees, to_spin, = 0, 9.9
         frames = []  # what could possibly go wrong
 
-        for _ in range(random.randint(25, 75)):
+        for _ in range(random.randint(25, 170)):
             degrees += to_spin
             frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
-        for _ in range(35):
-            to_spin = to_spin * 0.9
+        for _ in range(70):
+            to_spin = to_spin * 0.95
             degrees += to_spin
             frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
