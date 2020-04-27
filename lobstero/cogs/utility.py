@@ -182,9 +182,9 @@ If no user is specified, displays your profile."""
         achieved = 5 - len(unachieved_badges)
         if unachieved_badges:
             if not hugcount:
-                encouragement = "You should get started!"
+                encouragement = "You should try hugging somebody!!"
             else:
-                encouragement = "\nKeep going!"
+                encouragement = "There are still badges to be had!"
             until_next = f"{unachieved_badges[0] - hugcount} hugs until next badge. {encouragement}"
         else:
             until_next = "Looks like you've got all of the badges!"
