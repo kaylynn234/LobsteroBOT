@@ -877,10 +877,6 @@ If you don't do any of that, Lobstero will search the previous few messages for 
     @handlers.blueprints_or()
     async def wheelofban(self, ctx):
         """Spin the wheel of ban!"""
-
-        waiting = discord.Embed(title="Spinning the wheel...", color=16202876)
-        snt = await ctx.send(embed=waiting)
-
         banhandler = ban_conglomerate()
         wheel = Image.open(f"{root_directory}lobstero/data/static/wheel_of_ban.png")
         wheel = wheel.convert("RGBA").resize((512, 512), Image.ANTIALIAS)
@@ -903,7 +899,6 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
         done = discord.Embed(title="Judgement comes!", color=16202876)
-        await snt.edit(embed=done)
         await self.save_and_send(
             ctx, frames[0], "wheelofban.gif", save_all=True,
             append_images=frames[1:], optimize=True, loop=0, duration=30
