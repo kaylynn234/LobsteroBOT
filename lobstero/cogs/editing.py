@@ -1,4 +1,3 @@
-import functools
 import inspect
 import random
 import sys
@@ -6,8 +5,6 @@ import io
 import time
 
 import numpy
-import cv2
-import numpy as np
 import discord
 import PIL
 
@@ -905,9 +902,8 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         for _ in range(20):
             frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
-        await self.save_and_send(ctx, frames[0], save_all=True, append_images=frames[1:], optimize=True, loop=0))
-
         done = discord.Embed(title="Judgement comes!", color=16202876)
+        await self.save_and_send(ctx, frames[0], save_all=True, append_images=frames[1:], optimize=True, loop=0)
         await snt.edit(embed=done)
 
     @commands.command()
