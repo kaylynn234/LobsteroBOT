@@ -24,7 +24,7 @@ try:
     from discord.ext import menus
     print(f"Looks like ext.menus is already installed at {menus.__name__}! Great work.")
 except ImportError:
-    print(f"Ext.menus is not installed! Installing now - make sure you have curl on path.")
+    print("Ext.menus is not installed! Installing now - make sure you have curl on path.")
     write_to = commands.__file__.replace("commands", "menus")
     url = "https://raw.githubusercontent.com/Rapptz/discord-ext-menus/master/discord/ext/menus/__init__.py"
     os.mkdir(write_to.replace("__init__.py", ""))
@@ -40,15 +40,14 @@ async def reload(ctx):
     status = await ctx.send("Attempting to reload modules...")
     try:
         bot.handle_extensions(lc.config.cogs_to_load, True)
+        await status.edit(content="~~Attempting to reload modules...~~\nModules reloaded successfully.")
+    except Exception:
         await status.edit(content=(
-            "~~Attempting to reload modules...~~\n"
-            "Modules reloaded successfully."))
-    except Exception as error:
-        await status.edit(content=(
-            "~~Attempting to reload modules...~~\n"
-            "Errors occurred while reloading. "
-            "Check console output for details."))
-        raise error
+            "~~Attempting to reload modules...~~\nErrors occurred while reloading. Check console output for details."
+            )
+        )
+
+        raise
 
 
 while True:
