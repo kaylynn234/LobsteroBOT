@@ -484,7 +484,7 @@ If you don't do any of that, Lobstero will search the previous few messages for 
         whl.paste(ban, None, ban)
         out = banhandler.generate_frame(ban_mask)
         out.paste(whl, (63, 63), whl)
-        out.thumbnail(400, 400)
+        out.thumbnail((400, 400))
 
         return out
 
