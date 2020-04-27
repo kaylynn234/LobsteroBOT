@@ -903,8 +903,10 @@ If you don't do any of that, Lobstero will search the previous few messages for 
             frames.append(await self.package_wheel(wheel, degrees, ban, ban_mask, banhandler))
 
         done = discord.Embed(title="Judgement comes!", color=16202876)
-        await self.save_and_send(ctx, frames[0], save_all=True, append_images=frames[1:], optimize=True, loop=0)
         await snt.edit(embed=done)
+        await self.save_and_send(
+            ctx, "wheelofban.gif", frames[0], save_all=True, append_images=frames[1:], optimize=True, loop=0
+        )
 
     @commands.command()
     @handlers.blueprints_or()
