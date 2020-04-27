@@ -19,26 +19,23 @@ os.chdir(root_directory)
 logging.basicConfig(level=logging.INFO)
 bot = LobsteroBOT(case_insensitive=lc.config.case_insensitive, owner_ids=set(lc.config.owner_id))
 
+# venvs don't like ext.menus, this is mostly not needed but just in case
 try:
     from discord.ext import menus
     print(f"Looks like ext.menus is already installed at {menus.__name__}! Great work.")
 except ImportError:
     print(f"Ext.menus is not installed! Installing now - make sure you have curl on path.")
     write_to = commands.__file__.replace("commands", "menus")
-    url = (
-        "https://raw.githubusercontent.com/Rapptz/discord-ext-menus/"
-        "master/discord/ext/menus/__init__.py")
+    url = "https://raw.githubusercontent.com/Rapptz/discord-ext-menus/master/discord/ext/menus/__init__.py"
     os.mkdir(write_to.replace("__init__.py", ""))
     os.system(f"curl {url} --output {write_to}")
+    from discord.ext import menus
 
 
 @bot.command()
 @commands.is_owner()
 async def reload(ctx):
-    """<reload
-
-Reloads all modules. No parameters are required.
-    """
+    """Reloads all modules."""
 
     status = await ctx.send("Attempting to reload modules...")
     try:
