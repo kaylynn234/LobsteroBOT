@@ -18,8 +18,8 @@ root_directory = sys.path[0] + "/"
 async def connect_to_db():
     old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')
     db = await bigbeans.connect(user="postgres", password="postgres", host="localhost", port=5432)
-    for table in dict(old_db).keys():
-        for item in table.all():
+    for table in ["afkmessagelist", "customreacts", "deniedchannels", "ecodata", "gnomedata", "inventory", "moderation", "prefixes", "reminders", "serversettings", "settings_channels", "tagdata", "welcomemessages"]:
+        for item in old_db[table].all():
             to_insert = dict(item)
             del to_insert["id"]
             await db[table].insert(**to_insert)
@@ -150,30 +150,6 @@ async def return_afk_message(user_id) -> Optional[str]:
         return None
     else:
         return result[0]["message"]
-
-
-async def return_fishing_bal(userid: int) -> Type[OrderedDict]:
-    """I'm gonna get rid of this soon. Returns how many fish you have."""
-    table = db['fishdata']
-    for x in await table.all():
-        if str(x["userid"]) == str(userid):
-            return x
-
-    return None
-
-
-async def fishedit(userid: int, fishtype, amount=1) -> None:
-    """Edits how many fish a user has. They're bionic!"""
-    table = db["fishdata"]
-    result = None
-    for x in await table.all():
-        if str(x["userid"]) == str(userid):
-            result = x
-
-    oldval = result.get(fishtype, 0)
-    data = {"userid": userid, fishtype: oldval + amount}
-
-    await table.upsert(["userid"], **data)
 
 
 async def settings_values() -> list:
