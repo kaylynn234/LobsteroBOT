@@ -266,7 +266,6 @@ class LobsteroEH:
 class LobsteroBOT(commands.AutoShardedBot):
 
     def __init__(self, **kwargs: Any):
-        self.dead = True
         command_prefix = self.get_prefix
         self.log = logging.getLogger(__name__)  # type: Type[logging.Logger]
         self.first_run = True
@@ -316,9 +315,9 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         """My linter wants me to add a docstring for this."""
 
-        self.dead = False
         if self.first_run:
             self.first_run = False
+            await db.connect_to_db()
             await self.markov_generator.connect()
             # self.handle_extensions(lc.config.cog_mapping, True)
 
@@ -425,7 +424,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         ctx = await self.get_context(message, cls=LobsteroCONTEXT)
         await self.invoke(ctx)
 
- async def handle(self, location, error: Exception) -> bool:
+    async def handle(self, location, error: Exception) -> bool:
         """Handles an exception given context and the exception itself."""
 
         cannot_send = (
@@ -437,7 +436,6 @@ class LobsteroBOT(commands.AutoShardedBot):
             return False  # nothing to be done
 
         error = getattr(error, "original", error)  # just in case
-        error_name = strings.pascalcase(type(error).__name__)
         response = None
 
         if isinstance(error, (commands.CommandNotFound, InsecureRequestWarning)):
@@ -503,7 +501,6 @@ class LobsteroBOT(commands.AutoShardedBot):
             except discord.errors.Forbidden:
                 pass  # whoop-di-doo
 
-
     async def format_tb_and_send(self, exception, location=None, additional=None):
         to_be_formatted = "".join(traceback.format_exception(type(exception), exception, exception.__traceback__, 4))
         if "discord.errors.Forbidden" in to_be_formatted:
@@ -530,7 +527,7 @@ class LobsteroBOT(commands.AutoShardedBot):
                 print(f"Exception: {exc}")  # Can't be helped
 
     async def on_error(self, event_method, *args, **kwargs):
-        exception = sys.exc_info()
+        exception = sys.exc_info()[1]
         context = None
         if args:
             context = args[0] if isinstance(args[0], (discord.Message, commands.Context)) else None

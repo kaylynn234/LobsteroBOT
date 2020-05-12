@@ -4,19 +4,26 @@ Entirely useless for anything else."""
 import sys
 import json
 import calendar
-from unittest import mock
 from collections import OrderedDict
 from typing import Optional, Type, Mapping, Sequence
 
 import pendulum
 import dataset
-from aioify import aioify
-from dataset.util import ResultIter
+import bigbeans
 from lobstero.utils import misc
 
 root_directory = sys.path[0] + "/"
 
-db = dataset.connect('sqlite:///' + root_directory + 'data.db')
+
+async def connect_to_db():
+    old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')
+    db = await bigbeans.connect(user="postgres", password="postgres", host="localhost", port=5432)
+    for table in dict(old_db).keys():
+        for item in table.all():
+            to_insert = dict(item)
+            del to_insert["id"]
+            await db[table].insert(**to_insert)
+        print("finished table " + table)
 
 
 async def economy_manipulate(user_id, amount) -> None:
