@@ -517,7 +517,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         sendable = location_message + [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
         for userid in lc.config.owner_id:
-            destination = await self.bot.fetch_user(userid)
+            destination = await self.fetch_user(userid)
             try:
                 for to_send in sendable:
                     await destination.send(to_send)
