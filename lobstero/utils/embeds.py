@@ -8,8 +8,7 @@ import discord
 
 def errorbed(text: str) -> Type[discord.Embed]:
     """Formats an embed for command errors """
-    return (True, discord.Embed(
-        title="You can't use this command!", description=text, color=16202876))
+    return discord.Embed(title="You can't use this command!", description=text, color=16202876)
 
 
 async def simple_embed(em_title: str, chn_location) -> Type[discord.Embed]:

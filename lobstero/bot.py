@@ -5,7 +5,7 @@ import logging
 import difflib
 import random
 import traceback
-import io
+import sys
 
 import aiohttp
 import discord
@@ -28,11 +28,9 @@ lc = lobstero_config.LobsteroCredentials()
 
 class LobsteroCONTEXT(commands.Context):
 
-    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
+    async def send(self, content=None, **kwargs):
         try:
-            return await super().send(
-                content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after,
-                nonce=nonce)
+            return await super().send(content, **kwargs)
 
         except discord.errors.Forbidden:
             if self.guild:
@@ -264,121 +262,6 @@ class LobsteroEH:
             "raised": Counter()}
         self.bot = bot
 
-    async def format_tb_and_send(self, additional=None):
-        f = io.StringIO()
-        traceback.print_exc(8, f)  # Prints to a stream
-        to_be_formatted = f.getvalue()
-        if "discord.errors.Forbidden" in to_be_formatted:
-            return  # we don't need to spam DMs with this nonsense.
-
-        sendable = [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
-
-        for userid in lc.config.owner_id:
-            destination = await self.bot.fetch_user(userid)
-            try:
-                for to_send in sendable:
-                    await destination.send(to_send)
-                if additional:
-                    await destination.send(additional)
-            except Exception as exc:
-                print(f"Exception: {exc}")  # Can't be helped
-
-    async def handle(self, ctx: Type[commands.Context], error: Exception) -> None:
-        """Handles an exception given context and the exception itself.
-        Logging is handled for you, and statistics are automatically updated."""
-
-        error = getattr(error, "original", error)  # just in case
-        cannot_send = (
-            discord.errors.Forbidden, discord.ext.menus.CannotReadMessageHistory,
-            discord.ext.menus.CannotEmbedLinks, discord.ext.menus.CannotSendMessages
-        )
-
-        handled, message = None, None
-        error_name = strings.pascalcase(type(error).__name__)
-
-        if isinstance(error, (commands.CommandNotFound, InsecureRequestWarning)):
-            handled = True
-            # We can swallow these safely. They do nothing helpful and pollute the console.
-
-        if isinstance(error, commands.MissingPermissions):
-            handled, message = embeds.errorbed(
-                f"You are missing required permissions\n\n{strings.blockjoin(error.missing_perms)}"
-            )
-
-        if isinstance(error, commands.errors.MissingRequiredArgument):
-            handled, message = embeds.errorbed(f"Missing required argument ``{error.param.name}``")
-
-        if isinstance(error, commands.errors.TooManyArguments):
-            handled, message = embeds.errorbed("Too many arguments provided")
-
-        if isinstance(error, commands.errors.BotMissingPermissions):
-            handled, message = embeds.errorbed(
-                f"I am missing required permissions\n\n{strings.blockjoin(error.missing_perms)}"
-            )
-
-        if isinstance(error, commands.errors.NotOwner):
-            handled, message = embeds.errorbed("You are not the bot owner.")
-
-        if isinstance(error, OverflowError):
-            handled, message = embeds.errorbed("What the fuck no why would you even do that jesus christ")
-
-        if isinstance(error, commands.errors.CommandOnCooldown):
-            handled, message = embeds.errorbed(
-                "This command is on cooldown! You can use it again in {:.2f}s!".format(error.retry_after)
-            )
-
-        if isinstance(error, cannot_send):
-            handled = True
-            try:
-                await ctx.author.send("I could not reply to your command because I am missing permissions.")
-            except discord.errors.Forbidden:
-                pass  # Nothing we can do about this one.
-
-        if isinstance(error, commands.errors.MaxConcurrencyReached):
-            handled, message = embeds.errorbed("This command is already in use!")
-
-        if isinstance(error, commands.errors.BadArgument):
-            handled, message = embeds.errorbed("Bad argument provided! Check your capitalisation and spelling.")
-
-        if isinstance(error, commands.errors.DisabledCommand):
-            handled, message = embeds.errorbed("This command is currently disabled.")
-
-        if isinstance(error, discord.ext.menus.CannotAddReactions):
-            handled, message = embeds.errorbed("This command uses a reaction menu, but the bot cannot add reactions.")
-
-        if isinstance(error, BlueprintFailure):
-            handled, message = embeds.errorbed(error.description)
-
-        if handled and message:
-            misc.utclog(ctx, (
-                f"Handled {error_name} in {ctx.guild or '(No guild)'} "
-                f"channel {ctx.channel or '(No channel)'} "
-                f"from member \"{ctx.author or '(No author, somehow)'}\" "))
-            self.session_errors["handled"][error_name] += 1
-        elif handled and not message:
-            self.session_errors["swallowed"][error_name] += 1
-        else:
-            misc.utclog(ctx, f"Exception occurred and was not handled: {error_name}: Raising")
-            self.session_errors["raised"][error_name] += 1
-
-        if message:
-            try:
-                await ctx.send(embed=message, delete_after=10)
-            except discord.Forbidden:
-                misc.utclog(ctx, f"Exception {error_name} handled, but message was not sent.")
-
-        if not handled:
-            try:
-                await ctx.send(
-                    "Something went wrong, and the developer has been notified. Check my permissions in this channel."
-                )
-            except discord.errors.Forbidden:
-                pass  # whoop-di-doo
-
-            await self.format_tb_and_send(additional=str((dir(error), error.args)))
-
-            raise error  # Raise again, now that it's been logged on discord.
-
 
 class LobsteroBOT(commands.AutoShardedBot):
 
@@ -401,7 +284,7 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def get_prefix(self, message) -> str:
         """Gets the prefix that should be used based on message context."""
 
-        prefix_l = db.prefix_list()
+        prefix_l = await db.prefix_list()
         if str(message.guild.id) not in prefix_l:
             return lc.config.prefixes
         else:
@@ -456,9 +339,9 @@ class LobsteroBOT(commands.AutoShardedBot):
         """
 
         blacklisted = True in [
-            db.is_not_blacklisted(str(ctx.author.id), "user"),
-            db.is_not_blacklisted(str(ctx.guild.id), "guild"),
-            db.is_not_blacklisted(str(ctx.channel.id), "channel")]
+            await db.is_not_blacklisted(str(ctx.author.id), "user"),
+            await db.is_not_blacklisted(str(ctx.guild.id), "guild"),
+            await db.is_not_blacklisted(str(ctx.channel.id), "channel")]
 
         if blacklisted is False:
             misc.utclog(ctx, f"{ctx.author} cannot use command {ctx.command.name}.")
@@ -483,7 +366,6 @@ class LobsteroBOT(commands.AutoShardedBot):
         """Called every message. Processes commands."""
 
         should_continue = False
-
         for server, channels in self.restricted_channels.items():
             if message.guild is not None and message.guild.id == server:
                 if message.channel.id not in channels:
@@ -493,7 +375,7 @@ class LobsteroBOT(commands.AutoShardedBot):
             return
 
         if message.guild:
-            table = db.give_table()
+            table = await db.give_table()
             if message.guild.id not in table:
                 th = misc.populate({})
             else:
@@ -507,38 +389,32 @@ class LobsteroBOT(commands.AutoShardedBot):
             db.is_not_blacklisted(str(message.channel.id), "channel"),
             db.is_not_blacklisted(str(message.guild.id), "guild"))
 
-        if False not in blacklists:
-            if random.randint(1, 2000) == 2000 and th["random_reactions"]:
-                await message.add_reaction(random.choice(text.emotes))
-
-            elif random.randint(1, 4000) == 4000 and th["random_reactions"]:
-                await message.add_reaction("\N{CHESTNUT}")
-                await message.add_reaction("\N{ALARM CLOCK}")
-
-            user_mentioned = (
-                f"<@{message.guild.me.id}>" in message.content or
-                f"<@!{message.guild.me.id}>" in message.content)
-
-            cchannels = db.find_settings_channels(message.guild.id, "conversation")
-
-            if th["respond_on_mention"] and user_mentioned:
-                should_continue = True
-
-            elif random.randint(1, 567) == 567 and th["random_messages"]:
-                should_continue = True
-
-            elif message.channel.name == "crabversation":
-                should_continue = True
-
-            elif message.channel.id in [int(c["channel"]) for c in cchannels]:
-                should_continue = True
-
-        else:
+        if False in blacklists:
             return
+
+        if random.randint(1, 2000) == 2000 and th["random_reactions"]:
+            await message.add_reaction(random.choice(text.emotes))
+
+        elif random.randint(1, 4000) == 4000 and th["random_reactions"]:
+            await message.add_reaction("\N{CHESTNUT}")
+            await message.add_reaction("\N{ALARM CLOCK}")
+
+        user_mentioned = (
+            f"<@{self.user.id}>" in message.content or
+            f"<@!{self.user.id}>" in message.content)
+
+        cchannels = await db.find_settings_channels(message.guild.id, "conversation")
+        if th["respond_on_mention"] and user_mentioned:
+            should_continue = True
+        elif random.randint(1, 567) == 567 and th["random_messages"]:
+            should_continue = True
+        elif message.channel.name == "crabversation":
+            should_continue = True
+        elif message.channel.id in [int(c["channel"]) for c in cchannels]:
+            should_continue = True
 
         c_ctx = await self.get_context(message)
         can_continue = await self.handle_blacklist(c_ctx)
-
         if can_continue and should_continue and not c_ctx.valid:
             await c_ctx.trigger_typing()
             markov = await self.markov_generator.generate()
@@ -549,17 +425,117 @@ class LobsteroBOT(commands.AutoShardedBot):
         ctx = await self.get_context(message, cls=LobsteroCONTEXT)
         await self.invoke(ctx)
 
-    async def on_command_error(self, context, exception):
-        if context.command:
-            context.command.reset_cooldown(context)
+ async def handle(self, location, error: Exception) -> bool:
+        """Handles an exception given context and the exception itself."""
 
-        await self.handler.handle(context, exception)
+        cannot_send = (
+            discord.errors.Forbidden, discord.ext.menus.CannotReadMessageHistory,
+            discord.ext.menus.CannotEmbedLinks, discord.ext.menus.CannotSendMessages
+        )
+
+        if isinstance(error, cannot_send):
+            return False  # nothing to be done
+
+        error = getattr(error, "original", error)  # just in case
+        error_name = strings.pascalcase(type(error).__name__)
+        response = None
+
+        if isinstance(error, (commands.CommandNotFound, InsecureRequestWarning)):
+            return True
+
+        if isinstance(error, commands.MissingPermissions):
+            response = embeds.errorbed(
+                f"You're missing required permissions\n\n{strings.blockjoin(error.missing_perms)}"
+            )
+
+        if isinstance(error, commands.errors.MissingRequiredArgument):
+            response = embeds.errorbed(f"Missing required argument ``{error.param.name}``")
+
+        if isinstance(error, commands.errors.TooManyArguments):
+            response = embeds.errorbed("Too many arguments provided")
+
+        if isinstance(error, commands.errors.BotMissingPermissions):
+            response = embeds.errorbed(
+                f"I am missing required permissions\n\n{strings.blockjoin(error.missing_perms)}"
+            )
+
+        if isinstance(error, commands.errors.NotOwner):
+            response = embeds.errorbed("You are not the bot owner.")
+
+        if isinstance(error, OverflowError):
+            response = embeds.errorbed("What the fuck no why would you even do that jesus christ")
+
+        if isinstance(error, commands.errors.CommandOnCooldown):
+            response = embeds.errorbed(
+                "This command is on cooldown! You can use it again in {:.2f}s!".format(error.retry_after)
+            )
+
+        if isinstance(error, commands.errors.MaxConcurrencyReached):
+            response = embeds.errorbed("This command is already in use!")
+
+        if isinstance(error, commands.errors.BadArgument):
+            response = embeds.errorbed("Bad argument provided! Check your capitalisation and spelling.")
+
+        if isinstance(error, commands.errors.DisabledCommand):
+            response = embeds.errorbed("This command is currently disabled.")
+
+        if isinstance(error, discord.ext.menus.CannotAddReactions):
+            response = embeds.errorbed("This command uses a reaction menu, but the bot cannot add reactions.")
+
+        if isinstance(error, BlueprintFailure):
+            response = embeds.errorbed(error.description)
+
+        if response:
+            try:
+                await location.send(embed=response, delete_after=10)
+            except:
+                return False
+        else:
+            try:
+                await location.send(
+                    """You've found Arnold, the unreachable error message. Now time will collapse.
+                    Normally I'd have something to tell you when something went wrong, but nope, not this time.
+                    My best guess? The develeper sucks. I bet an important file is missing somewhere. Past that?
+                    There's a chance permissions in this channel are borked, but if you're seeing this, they probably aren't.
+                    Feel free to join the support server and harass the bot developer if it makes you feel better - that's ``<info`` if you didn't know.
+                    Anyway, this specific issue should get fixed soon. Hopefully. Nobody really likes Arnold anyway."""
+                )
+            except discord.errors.Forbidden:
+                pass  # whoop-di-doo
+
+
+    async def format_tb_and_send(self, exception, location=None, additional=None):
+        to_be_formatted = "".join(traceback.format_exception(type(exception), exception, exception.__traceback__, 4))
+        if "discord.errors.Forbidden" in to_be_formatted:
+            return  # we don't need to spam DMs with this nonsense.
+
+        location_message = []
+        if isinstance(location, (discord.Message, commands.Context)):
+            location_message = [f"""
+            This happened in guild {location.guild.name} with ID {location.guild.id}.
+            The message was sent in channel {location.channel.name} with ID {location.channel.id}.
+            User {location.author} with ID {location.author.id} sent the message that caused this issue.
+            The command that caused this issue was:
+            {getattr(getattr(location, 'command', None), 'qualified_name', None) or '(None)'}"""]
+
+        sendable = location_message + [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
+        for userid in lc.config.owner_id:
+            destination = await self.bot.fetch_user(userid)
+            try:
+                for to_send in sendable:
+                    await destination.send(to_send)
+                if additional:
+                    await destination.send(additional)
+            except Exception as exc:
+                print(f"Exception: {exc}")  # Can't be helped
 
     async def on_error(self, event_method, *args, **kwargs):
+        exception = sys.exc_info()
+        context = None
+        if args:
+            context = args[0] if isinstance(args[0], (discord.Message, commands.Context)) else None
+        if getattr(context, "command", False):
+            context.command.reset_cooldown(context)
 
-        msg = f"""**Additional notes:**
-        Event: {event_method}
-        Provided args: {", ".join([str(i) for i in args])}
-        Provided kwargs: {", ".join([f"{x}: {y}" for x, y in kwargs])}
-        """
-        await self.handler.format_tb_and_send(additional=msg)
+        await self.format_tb_and_send(exception, context, event_method)
+        await self.handle(context, exception)
