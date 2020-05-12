@@ -13,16 +13,43 @@ import bigbeans
 from lobstero.utils import misc
 
 root_directory = sys.path[0] + "/"
+db = None  # Optional[bigbeans.Databean]
 
 
 async def connect_to_db():
-    old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')
+    global db
     db = await bigbeans.connect(user="postgres", password="postgres", host="localhost", port=5432)
-    for table in ["afkmessagelist", "customreacts", "deniedchannels", "ecodata", "gnomedata", "inventory", "moderation", "prefixes", "reminders", "serversettings", "settings_channels", "tagdata", "welcomemessages"]:
-        for item in old_db[table].all():
+
+
+# old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')
+async def migrate(old, new):
+    tables = [
+        "afkmessagelist", "customreacts", "deniedchannels",
+        "ecodata", "gnomedata", "inventory", "moderation",
+        "prefixes", "reminders", "serversettings", "settings_channels",
+        "tagdata", "welcomemessages"
+    ]
+
+    for table in tables:
+        try:
+            await new[table].drop()
+        except:
+            pass
+
+        for item in old[table].all():
             to_insert = dict(item)
             del to_insert["id"]
-            await db[table].insert(**to_insert)
+
+            # this is disgusting, but what can you do
+            if "user" in to_insert:
+                to_insert["username"] = to_insert["user"]
+                del to_insert["user"]
+
+            if "moderation_confirmation" in to_insert:
+                to_insert["moderation_confirmation"] = str(to_insert["moderation_confirmation"])
+
+            print(to_insert)
+            await new[table].insert(**to_insert)
         print("finished table " + table)
 
 
