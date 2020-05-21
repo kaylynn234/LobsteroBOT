@@ -53,7 +53,7 @@ Valid usage would be something along the lines of ``<settings respond_on_mention
         if value and changeto:
             if value.lower() in acceptable and str(changeto).lower() in ["true", "false"]:
                 newval = True if changeto.lower() == "true" else False
-                db.edit_settings_value(ctx.guild.id, value.lower(), newval)
+                await db.edit_settings_value(ctx.guild.id, value.lower(), newval)
                 await embeds.simple_embed("Value updated.", ctx)
             else:
                 await embeds.simple_embed("That value is not valid!", ctx)
@@ -67,7 +67,7 @@ Valid usage would be something along the lines of ``<settings respond_on_mention
         """A base command for all welcome messages.
 If no subcommand is used, displays a list of all welcome messages on this server."""
 
-        data = db.all_welcome_messages_for_guild(str(ctx.guild.id))
+        data = await db.all_welcome_messages_for_guild(str(ctx.guild.id))
         messages = [x["message"] for x in data]
         source = menus.ListEmbedMenu(messages, "Welcome messages for this server", 10, True)
         menu = MenuPages(source, timeout=30, clear_reactions_after=True)
@@ -89,8 +89,8 @@ Example usage is ``<wm add this is a cool welcome message! hi %u!``
 Emoji, mentions of specific users, specific channels, and specific roles will function normally."""
 
         if message is not None:
-            db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
-            db.add_welcome_message(str(ctx.guild.id), message)
+            await db.edit_settings_value(ctx.guild.id, "welcome_messages", True)
+            await db.add_welcome_message(str(ctx.guild.id), message)
             await ctx.simple_embed("Welcome message added!")
         else:
             await ctx.simple_embed("Please provide the message that you wish to add as a welcome message.")
@@ -101,7 +101,7 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
     async def wm_del(self, ctx, *, message):
         """Removes a welcome message from this server by content. """
 
-        res = db.remove_welcome_message(str(ctx.guild.id), message)
+        res = await db.remove_welcome_message(str(ctx.guild.id), message)
         if res:
             await ctx.simple_embed("Matching welcome messages deleted.")
         else:
@@ -114,7 +114,7 @@ Emoji, mentions of specific users, specific channels, and specific roles will fu
 Use this command without a subcommand to display currently set values.
 ``<channels set`` is probably the subcommand you want to use."""
 
-        channels = db.find_settings_channels(ctx.guild.id)
+        channels = await db.find_settings_channels(ctx.guild.id)
         mapped_channels = map(lambda k: (self.bot.get_channel(k["channel"]), k["type"]), channels)
         name_types = {c[0].name if c[0] else "(Inaccessible/ deleted)": c[1] for c in mapped_channels}
         sorted_channels = sorted(list(name_types.items()), key=lambda t: (t[1], t[0]))
@@ -157,7 +157,7 @@ When specifying a channel, the channel mention, channel ID or channel name can b
             return await ctx.simple_embed("That channel isn't on this server.")
 
         print("ye")
-        res = db.add_settings_channel(ctx.guild.id, found_channel.id, channeltype.lower())
+        res = await db.add_settings_channel(ctx.guild.id, found_channel.id, channeltype.lower())
         print("poog0-wkgw")
         if res:
             await ctx.simple_embed("Channel added!")
@@ -194,7 +194,7 @@ When specifying a channel, the channel mention, channel ID or channel name can b
         if found_channel.guild.id != ctx.guild.id:
             return await ctx.simple_embed("That channel isn't on this server.")
 
-        db.remove_settings_channel(ctx.guild.id, found_channel.id, channeltype.lower())
+        await db.remove_settings_channel(ctx.guild.id, found_channel.id, channeltype.lower())
         await ctx.simple_embed("Channel removed.")
 
     @channels.command(name="wipe")
@@ -213,7 +213,7 @@ The following channel types exist:
         if channeltype.lower() not in valid:
             return await ctx.simple_embed("That's not a valid channel type!")
 
-        db.wipe_settings_channel(ctx.guild.id, channeltype.lower())
+        await db.wipe_settings_channel(ctx.guild.id, channeltype.lower())
         await ctx.simple_embed("Channel removed.")
 
     @commands.command(aliases=["selfrole", "sr"])
@@ -233,7 +233,7 @@ The following channel types exist:
                     role = x
 
         if role is not None:
-            roles = db.assignables_check(ctx.guild.id)
+            roles = await db.assignables_check(ctx.guild.id)
             roles = [int(x) for x in roles]
             if role.id in roles:
                 await ctx.author.add_roles(role)
@@ -261,7 +261,7 @@ The following channel types exist:
                     role = x
 
         if role is not None:
-            roles = db.assignables_check(ctx.guild.id)
+            roles = await db.assignables_check(ctx.guild.id)
             roles = [int(x) for x in roles]
             if role.id in roles:
                 await ctx.author.remove_roles(role)
@@ -288,7 +288,7 @@ The following channel types exist:
                     role = x
 
         if role is not None:
-            db.assignables_add(ctx.guild.id, role.id)
+            await db.assignables_add(ctx.guild.id, role.id)
             await embeds.simple_embed("Successfully made this role self-assignable!", ctx)
         else:
             await embeds.simple_embed((
@@ -310,7 +310,7 @@ The following channel types exist:
                     role = x
 
         if role is not None:
-            db.assignables_remove(ctx.guild.id, role.id)
+            await db.assignables_remove(ctx.guild.id, role.id)
             await embeds.simple_embed("Successfully removed this self-assignable role!", ctx)
         else:
             await embeds.simple_embed(
@@ -321,7 +321,7 @@ The following channel types exist:
     @handlers.blueprints_or()
     async def listassignables(self, ctx, page: int = 1):
         """Lists all self-assignable roles on this server."""
-        roles = db.assignables_check(ctx.guild.id)
+        roles = await db.assignables_check(ctx.guild.id)
         data = [str(ctx.guild.get_role(int(x))) for x in roles]
         source = menus.ListEmbedMenu(data, "Self-assignable roles for this server", 10, True)
         menu = MenuPages(source, timeout=30, clear_reactions_after=True)
@@ -332,7 +332,7 @@ The following channel types exist:
     @commands.guild_only()
     @handlers.blueprints_or(commands.has_permissions(administrator=True))
     async def changeprefix(self, ctx, *, new):
-        db.add_prefix(ctx.guild.id, new)
+        await db.add_prefix(ctx.guild.id, new)
         await embeds.simple_embed("Prefix updated!", ctx)
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
@@ -344,10 +344,11 @@ The base command for all blueprints-related commands.
 Blueprints are used to configure who can use what command.
 No parameters are required. Displays a list of all blueprints if a subcommand is not used.
         """
-        dbresults = sorted(db.blueprints_for_guild(ctx.guild.id), key=lambda x: x["command"])
+        dbresults = sorted(await db.blueprints_for_guild(ctx.guild.id), key=lambda x: x["command"])
         results = [
             f"Blueprint ID {x['id']}: **``{x['criteria_type']}``** for **``<{x['command']}``**"
-            for x in dbresults]
+            for x in dbresults
+        ]
 
         desc = (
             "Displaying all blueprints on this server - use the reactions below "
@@ -367,7 +368,7 @@ Displays specific details about a blueprint based on blueprint ID.
             return await embeds.simple_embed(text.bp_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.bp_not_number, ctx)
-        res = db.blueprint_by_id(id_)
+        res = await db.blueprint_by_id(id_)
         if not res:
             return await embeds.simple_embed(text.bp_none_matching, ctx)
         if str(res["guildid"]) != str(ctx.guild.id):
@@ -393,14 +394,14 @@ Removes a blueprint by ID.
             return await embeds.simple_embed(text.bp_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.bp_not_number, ctx)
-        res = db.blueprint_by_id(id_)
+        res = await db.blueprint_by_id(id_)
         if not res:
             return await embeds.simple_embed(text.bp_none_matching, ctx)
         if str(res["guildid"]) != str(ctx.guild.id):
             return await embeds.simple_embed(text.bp_on_other_guild, ctx)
 
         await embeds.simple_embed("Blueprint removed.", ctx)
-        db.clear_blueprint(str(ctx.guild.id), id_)
+        await db.clear_blueprint(str(ctx.guild.id), id_)
 
     @blueprints.command(name="wipe", aliases=["scrub"])
     @commands.has_permissions(manage_messages=True)
@@ -415,12 +416,12 @@ Deletes all blueprints for a command.
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
 
-        current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
+        current_blueprints = await db.blueprints_for(str(ctx.guild.id), command.qualified_name)
         if not current_blueprints:
             return await embeds.simple_embed("There are no blueprints for this command.", ctx)
 
         await embeds.simple_embed(f"{len(current_blueprints)} blueprint(s) removed.", ctx)
-        db.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
+        await db.clear_blueprints_for(str(ctx.guild.id), command.qualified_name)
 
     @blueprints.command(name="make", aliases=["create", "add"])
     @commands.has_permissions(manage_messages=True)
@@ -435,7 +436,7 @@ Walks you through adding a blueprint to a command."""
         if not command:
             return await embeds.simple_embed("That doesn't seem like a valid command.", ctx)
 
-        current_blueprints = db.blueprints_for(str(ctx.guild.id), command.qualified_name)
+        current_blueprints = await db.blueprints_for(str(ctx.guild.id), command.qualified_name)
         if current_blueprints and len(current_blueprints) >= 10:
             return await embeds.simple_embed("There's a maximum of 10 blueprints per command.", ctx)
 
@@ -506,7 +507,7 @@ Walks you through adding a blueprint to a command."""
                     return await ctx.send(embed=embeds.bp_wrong_value)
 
         # add the blueprint to the database
-        db.add_blueprint(str(ctx.guild.id), command.qualified_name, bp_numbered[m.selected_b], value, m2.choice)
+        await db.add_blueprint(str(ctx.guild.id), command.qualified_name, bp_numbered[m.selected_b], value, m2.choice)
 
         # tell the user we didn't die in the process
         embed = discord.Embed(color=16202876, title="Blueprints")
@@ -519,7 +520,7 @@ Walks you through adding a blueprint to a command."""
     async def cr(self, ctx):
         """A base command for managing custom reactions.
 If no subcommand is used, lists all custom reactions on this server."""
-        reactions = db.return_server_reacts_list(str(ctx.guild.id))
+        reactions = await db.return_server_reacts_list(str(ctx.guild.id))
 
         if not reactions:
             return await ctx.send(embed=embeds.cr_none_present)
@@ -548,9 +549,9 @@ If no subcommand is used, lists all custom reactions on this server."""
         if msg.content.lower() not in ["full", "partial"]:
             return await base.edit(embed=embeds.cr_formatted_incorrectly)
         else:
-            db.remove_reaction(str(ctx.guild.id), trigger)
+            await db.remove_reaction(str(ctx.guild.id), trigger)
             rtype = "full" if "full" in msg.content.lower() else "partial"
-            db.add_reaction(str(ctx.guild.id), trigger, response, rtype)
+            await db.add_reaction(str(ctx.guild.id), trigger, response, rtype)
             embed = discord.Embed(title="Reaction added!", color=16202876)
             return await base.edit(embed=embed)
 
@@ -559,7 +560,7 @@ If no subcommand is used, lists all custom reactions on this server."""
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cr_add(self, ctx, trigger, *, response):
         """Add a custom reaction."""
-        if not db.find_matching_response(str(ctx.guild.id), trigger):
+        if not await db.find_matching_response(str(ctx.guild.id), trigger):
             base = await ctx.send(embed=embeds.cr_triggertype)
             await self.process_add(ctx, trigger, response, base)
         else:
@@ -577,7 +578,7 @@ If no subcommand is used, lists all custom reactions on this server."""
                 await base.edit(embed=embeds.cr_triggertype)
                 await self.process_add(ctx, trigger, response, base)
             else:
-                db.add_reaction(str(ctx.guild.id), trigger, response, )
+                await db.add_reaction(str(ctx.guild.id), trigger, response, )
                 embed = discord.Embed(title="Reaction added!", color=16202876)
                 return await base.edit(embed=embed)
 
@@ -586,8 +587,8 @@ If no subcommand is used, lists all custom reactions on this server."""
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cr_del(self, ctx, *, trigger):
         """Deletes a custom reaction by trigger."""
-        if db.find_matching_response(str(ctx.guild.id), trigger):
-            db.remove_reaction(str(ctx.guild.id), trigger)
+        if await db.find_matching_response(str(ctx.guild.id), trigger):
+            await db.remove_reaction(str(ctx.guild.id), trigger)
             await ctx.simple_embed("Reaction removed.")
         else:
             await ctx.simple_embed("There isn't a custom reaction with that trigger!")
@@ -597,8 +598,8 @@ If no subcommand is used, lists all custom reactions on this server."""
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cr_deny(self, ctx):
         """Deny the current channel access to custom reactions."""
-        if not db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
-            db.add_new_deny_channel(ctx.guild.id, str(ctx.channel.id))
+        if not await db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
+            await db.add_new_deny_channel(ctx.guild.id, str(ctx.channel.id))
             await ctx.simple_embed("Custom reactions are now denied in this channel.")
         else:
             await ctx.simple_embed("Custom reactions are already denied in this channel!")
@@ -608,8 +609,8 @@ If no subcommand is used, lists all custom reactions on this server."""
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cr_allow(self, ctx):
         """Allow the current channel access to custom reactions."""
-        if db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
-            db.remove_deny_channel(ctx.guild.id, str(ctx.channel.id))
+        if await db.is_denied(str(ctx.guild.id), str(ctx.channel.id)):
+            await db.remove_deny_channel(ctx.guild.id, str(ctx.channel.id))
             await ctx.simple_embed("Custom reactions are now allowed in this channel.")
 
         else:
@@ -620,14 +621,14 @@ If no subcommand is used, lists all custom reactions on this server."""
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
     async def cr_info(self, ctx, *, trigger):
         """View info on a custom reaction with the provided trigger."""
-        reactions = db.return_server_reacts_list(str(ctx.guild.id))
+        reactions = await db.return_server_reacts_list(str(ctx.guild.id))
         if not reactions:
             return await ctx.send(embed=embeds.cr_none_present)
 
-        if not db.find_matching_response(str(ctx.guild.id), trigger):
+        if not await db.find_matching_response(str(ctx.guild.id), trigger):
             return await ctx.send(embed=embeds.cr_no_trigger)
 
-        reaction = db.raw_find_matching_response(str(ctx.guild.id), trigger)
+        reaction = await db.raw_find_matching_response(str(ctx.guild.id), trigger)
         responses = json.loads(reaction["response"])
         mtype = reaction["type"]
         desc = f"**Trigger type**: {mtype}\n**Total responses**: {str(len(responses))}"
@@ -644,7 +645,7 @@ If no subcommand is used, lists all custom reactions on this server."""
     async def cr_search(self, ctx, *, query=None):
         """Search for a custom reaction based on a query."""
         fetched = []
-        reactions = db.return_server_reacts_list(str(ctx.guild.id))
+        reactions = await db.return_server_reacts_list(str(ctx.guild.id))
         if not reactions:
             return await ctx.send(embed=embeds.cr_none_present)
 
@@ -666,13 +667,13 @@ If no subcommand is used, lists all custom reactions on this server."""
     async def on_message(self, message):
         """Called every message. Handles reactions."""
         if message.author.bot is False and message.guild:
-            if db.is_denied(str(message.guild.id), str(message.channel.id)):
+            if await db.is_denied(str(message.guild.id), str(message.channel.id)):
                 return
 
             if message.content is None or message.content == "":
                 return
 
-            reacts = db.return_server_reacts_list(message.guild.id)
+            reacts = await db.return_server_reacts_list(message.guild.id)
             for reaction in reacts:
                 is_partial = (
                     reaction["type"] == "partial" and
@@ -713,18 +714,18 @@ If no subcommand is used, lists all custom reactions on this server."""
     @commands.Cog.listener()
     async def on_member_join(self, member):
 
-        table = db.give_table()
+        table = await db.give_table()
         if member.guild.id not in table:
             th = misc.populate({})
         else:
             th = misc.populate(table[member.guild.id])
 
         if th["welcome_messages"] is True:
-            wchannels = db.find_settings_channels(member.guild.id, "welcoming")
+            wchannels = await db.find_settings_channels(member.guild.id, "welcoming")
             wchannels = filter(None, map(lambda k: self.bot.get_channel(k["channel"]), wchannels))
             wchannels = filter(lambda c: c.guild.id == member.guild.id, wchannels)
 
-            welcomemessagelist = db.all_welcome_messages_for_guild(str(member.guild.id))
+            welcomemessagelist = await db.all_welcome_messages_for_guild(str(member.guild.id))
             collated = [x["message"] for x in welcomemessagelist]
             if len(collated) == 0:
                 return

@@ -272,7 +272,7 @@ It's not every day you experience the rolling of the dice."""
 
             return await ctx.send(embed=embed)
 
-        gnomecount = db.add_gnome(ctx.message.mentions[0].id, 1)
+        gnomecount = await db.add_gnome(ctx.message.mentions[0].id, 1)
         gnome_filenames = [x for x in os.listdir(root_directory + "lobstero/data/static/gnomes/")]
         gnome_index = random.randint(1, len(gnome_filenames))
         gnomefile = discord.File(
@@ -315,9 +315,9 @@ Up to 6 people can be hugged at once."""
             embed.description = "".join(outstr)
             await ctx.send(embed=embed)
 
-            db.grant_item(str(ctx.author.id), "Token of love & friendship", len(mentionlist))
+            await db.grant_item(str(ctx.author.id), "Token of love & friendship", len(mentionlist))
             for member in mentionlist:
-                db.grant_item(str(member.id), "Token of love & friendship", 1)
+                await db.grant_item(str(member.id), "Token of love & friendship", 1)
         else:
             embed.description = f"{ctx.author.mention} hugs ``ṫ̫̼h̉̃ͤe̵̡̊ v̴̹̅o̢͙̎iͭ͢͡d̬̽̕``"
             ctx.command.reset_cooldown(ctx)
@@ -341,8 +341,8 @@ You can only hug one person this tightly."""
             embed.description = (
                 f"{ctx.message.author.mention} hugs {mentionlist[0].mention} "
                 "four times more tightly than usual")
-            db.grant_item(ctx.author.id, "Token of love & friendship", 4)
-            db.grant_item(mentionlist[0].id, "Token of love & friendship", 1)
+            await db.grant_item(ctx.author.id, "Token of love & friendship", 4)
+            await db.grant_item(mentionlist[0].id, "Token of love & friendship", 1)
         elif len(mentionlist) > 1:
             embed.description = "You can't hug more than one person that tightly!"
             ctx.command.reset_cooldown(ctx)
@@ -543,7 +543,7 @@ Make sure to quote names "like so" if they're longer than two words."""
         """Throw out a line and take a fish.
 Use the inventory command to see the fish you own."""
 
-        if db.economy_check(ctx.author.id) < 11:
+        if await db.economy_check(ctx.author.id) < 11:
             embed = discord.Embed(
                 description="You don't have enough <a:cheese:533544087484366848> to fish!",
                 color=16202876)
@@ -552,8 +552,8 @@ Use the inventory command to see the fish you own."""
 
         result = random.choice(fishchances)
 
-        db.economy_manipulate(ctx.author.id, -10)
-        db.grant_item(ctx.author.id, text.fish_names[result], 1)
+        await db.economy_manipulate(ctx.author.id, -10)
+        await db.grant_item(ctx.author.id, text.fish_names[result], 1)
 
         embedtext = [
             f"You found a {text.fishdict[result]}!\n\n"
@@ -619,7 +619,7 @@ Use the inventory command to see the fish you own."""
     @handlers.blueprints_or()
     async def ooeric(self, ctx):
         """Count with the fruit of god."""
-        await ctx.send(f"{db.ooeric()} ooeric. More.")
+        await ctx.send(f"{await db.ooeric()} ooeric. More.")
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
@@ -699,7 +699,7 @@ Use the inventory command to see the fish you own."""
         if message.guild.id == 177192169516302336:
             should_continue = 0
 
-        table = db.give_table()
+        table = await db.give_table()
         if message.guild.id not in table:
             th = misc.populate({})
         else:

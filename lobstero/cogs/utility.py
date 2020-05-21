@@ -102,13 +102,13 @@ Use the command without an argument to reset it."""
 
         if message == "Welcome back. I removed your afk.":
             await embeds.simple_embed("AFK message reset.", ctx)
-            db.afk_message_set(ctx.author.id, message)
+            await db.afk_message_set(ctx.author.id, message)
         else:
             if len(message) > 160:
                 await ctx.simple_embed(
                     f"AFK messages have a maximum character limit of 160. You provided {len(message)} charcters.")
             else:
-                db.afk_message_set(ctx.author.id, message)
+                await db.afk_message_set(ctx.author.id, message)
                 await embeds.simple_embed("AFK message changed!", ctx)
 
     @commands.command(aliases=["p", "pong"])
@@ -152,7 +152,7 @@ If no user is specified, displays your profile."""
         gold = "https://cdn.discordapp.com/emojis/571264849179443200.png?v=1"
         diamond = "https://cdn.discordapp.com/emojis/571264832565673984.png?v=1"
 
-        inv = db.find_inventory(str(user.id))
+        inv = await db.find_inventory(str(user.id))
         filtered_inv = filter(lambda k: list(k.keys())[0] == "Token of love & friendship", inv)
         if not filtered_inv:
             hugcount = 0
@@ -237,7 +237,7 @@ If no parameters are provided, shows details for you instead."""
 
         if tagname is None:
             return await embeds.simple_embed("Please specify a tag to find the value of.", ctx)
-        value = db.return_tag(ctx.guild.id, tagname.lower())
+        value = await db.return_tag(ctx.guild.id, tagname.lower())
         if value is None:
             return await embeds.simple_embed("There is no tag for that value.", ctx)
         embed = discord.Embed(
@@ -254,7 +254,7 @@ If no parameters are provided, shows details for you instead."""
 
         if tagvalue is None:
             return await embeds.simple_embed("Please specify a tag name and a tag value.", ctx)
-        db.set_tag(ctx.guild.id, tagname, tagvalue)
+        await db.set_tag(ctx.guild.id, tagname, tagvalue)
         await embeds.simple_embed("Tag added!", ctx)
 
     @tag.command(name="remove")
@@ -266,7 +266,7 @@ Make sure you quote arguments that are multiple words."""
 
         if tagname is None:
             return await embeds.simple_embed("Please specify a tag name.", ctx.guild.id)
-        db.delete_tag(ctx.guild.id, tagname)
+        await db.delete_tag(ctx.guild.id, tagname)
         await embeds.simple_embed("Tag removed.", ctx.channel.id)
 
     @tag.command(name="list")
@@ -275,7 +275,7 @@ Make sure you quote arguments that are multiple words."""
     async def taglist(self, ctx):
         """Lists all tags on this server."""
 
-        results = db.return_all_tags(ctx.guild.id)
+        results = await db.return_all_tags(ctx.guild.id)
         if not results:
             return await embeds.simple_embed("There are no tags on this server!", ctx.channel.id)
         source = menus.ListEmbedMenu(results, "Showing all tags for this server", 5, True)
@@ -309,7 +309,7 @@ Make sure you quote arguments that are multiple words."""
     @handlers.blueprints_or()
     async def remind(self, ctx):
         """A base command for managing reminders. Displays a list of active reminders if no subcommand is used."""
-        reminders = db.find_reminders_for_user(ctx.author.id)
+        reminders = await db.find_reminders_for_user(ctx.author.id)
         if not reminders:
             return await ctx.simple_embed("Looks like you don't have any reminders to list.")
 
@@ -348,7 +348,7 @@ Valid usage can also include the following:
             decoded = dateparser.parse(date, settings={'TIMEZONE': 'UTC'})
             if decoded:
                 passed = pendulum.parse(str(decoded))
-                db.add_reminder(ctx.author.id, reason, passed, str(pendulum.now("Atlantic/Reykjavik")))  # utc + 0
+                await db.add_reminder(ctx.author.id, reason, passed, str(pendulum.now("Atlantic/Reykjavik")))  # utc + 0
 
                 await ctx.simple_embed(f"Got it! I'll remind you in {passed.diff_for_humans(absolute=True)}.")
             else:
@@ -359,13 +359,13 @@ Valid usage can also include the following:
     @handlers.blueprints_or()
     async def remind_remove(self, ctx, *, reminderid):
         """Removes a currently active reminder by ID."""
-        reminder = db.find_reminder(int(reminderid))
+        reminder = await db.find_reminder(int(reminderid))
         if not reminder:
             return await ctx.simple_embed("This reminder does not exist.")
         if int(reminder["user"]) != ctx.author.id:
             return await ctx.simple_embed("This reminder exists, but is not owned by you.")
 
-        db.negate_reminder(int(reminderid))
+        await db.negate_reminder(int(reminderid))
         await ctx.simple_embed("Reminder removed.")
 
     @remind.command(name="view", aliases=["id"])
@@ -373,7 +373,7 @@ Valid usage can also include the following:
     @handlers.blueprints_or()
     async def remind_view(self, ctx, *, reminderid):
         """Shows details on a currently active reminder by ID."""
-        reminder = db.find_reminder(int(reminderid))
+        reminder = await db.find_reminder(int(reminderid))
         if not reminder:
             return await ctx.simple_embed("This reminder does not exist.")
         if int(reminder["user"]) != ctx.author.id:
@@ -417,7 +417,7 @@ Valid usage can also include the following:
                     except discord.errors.Forbidden:
                         pass
 
-                db.negate_reminder(item["id"])
+                await db.negate_reminder(item["id"])
 
     @commands.Cog.listener()
     @commands.guild_only()
@@ -427,7 +427,7 @@ Valid usage can also include the following:
 
         for member in self.bot.afks:
             if member.user == message.author:
-                result = db.return_afk_message(message.author.id)
+                result = await db.return_afk_message(message.author.id)
                 readable = date.delta(
                     pendulum.now("Atlantic/Reykjavik"), member.time, justnow=timedelta(seconds=0))[0]
 

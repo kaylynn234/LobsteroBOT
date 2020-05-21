@@ -385,8 +385,8 @@ class LobsteroBOT(commands.AutoShardedBot):
             return await misc.handle_dm(owners, message, self)
 
         blacklists = (
-            db.is_not_blacklisted(str(message.channel.id), "channel"),
-            db.is_not_blacklisted(str(message.guild.id), "guild"))
+            await db.is_not_blacklisted(str(message.channel.id), "channel"),
+            await db.is_not_blacklisted(str(message.guild.id), "guild"))
 
         if False in blacklists:
             return

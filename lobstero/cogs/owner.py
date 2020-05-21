@@ -57,7 +57,7 @@ You shouldn't even see this. if you do, you know what it does."""
 
         # sue me
         to_set = getattr(db, "blacklist_add") if new else getattr(db, "blacklist_remove")
-        to_set(str(converted.id), what.lower())
+        await to_set(str(converted.id), what.lower())
         await embeds.simple_embed("Blacklisted successfully.", ctx)
 
     @commands.command()
@@ -199,12 +199,6 @@ You shouldn't even see this. if you do, you know what it does."""
             await ctx.send((
                 f"{str(message.author)}:\n{str(message.content)}"
                 f"\n\nHas attachments: {attachments}"))
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.is_owner()
-    async def querydb(self, ctx, *, text):
-        await ctx.send(f"{db.query_db(text)}")
 
     @commands.command()
     @commands.guild_only()

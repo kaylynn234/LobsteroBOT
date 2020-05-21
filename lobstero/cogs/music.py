@@ -19,7 +19,7 @@ class Cog(commands.Cog, name="Music"):
         await self.bot.wavelink.initiate_node(
             host="127.0.0.1", port=2333, rest_uri="http://127.0.0.1:2333",
             password="lobsterlink", identifier='TEST', region='us_central')
-    
+
     # TODO: Make a menu-based "remote" command to control music
     # TODO: Make a check to decide whether the user can use a command based on vc member count
     # TODO: Add all of the commands lol (play, pause, skip, queue)

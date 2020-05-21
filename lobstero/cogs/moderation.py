@@ -54,7 +54,7 @@ You can also use this module to view the wrongdoings of a member.
         """Displays a list of all infractions on this server.
 Multiple subcommands exist for more fine-grained viewing."""
 
-        results = db.find_all_infractions(ctx.guild.id)
+        results = await db.find_all_infractions(ctx.guild.id)
         data = [list(item.items()) for item in list(results)]
         desc = (
             "Displaying all recorded infractions on this server - use the reactions below "
@@ -73,7 +73,7 @@ Multiple subcommands exist for more fine-grained viewing."""
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.mod_not_number, ctx)
-        res = db.find_specific_infraction(id_)
+        res = await db.find_specific_infraction(id_)
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
@@ -103,7 +103,7 @@ Multiple subcommands exist for more fine-grained viewing."""
 
         if not user:
             return await embeds.simple_embed(text.mod_member_invalid, ctx)
-        results = db.find_all_member_infractions(ctx.guild.id, user.id)
+        results = await db.find_all_member_infractions(ctx.guild.id, user.id)
         if not results:
             return await embeds.simple_embed(text.mod_none_assoc, ctx)
 
@@ -130,7 +130,7 @@ Striked infractions are not counted."""
 
         if not user:
             return await embeds.simple_embed(text.mod_member_invalid, ctx)
-        results = db.find_all_member_infractions(ctx.guild.id, user.id)
+        results = await db.find_all_member_infractions(ctx.guild.id, user.id)
         if not results:
             return await embeds.simple_embed(text.mod_none_assoc, ctx)
 
@@ -156,7 +156,7 @@ Striked infractions are not counted."""
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.mod_not_number, ctx)
-        res = db.find_specific_infraction(id_)
+        res = await db.find_specific_infraction(id_)
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
@@ -164,10 +164,10 @@ Striked infractions are not counted."""
 
         if res["redacted"] == "True":
             await embeds.simple_embed("Record unstriked.", ctx)
-            db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "False")
+            await db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "False")
         else:
             await embeds.simple_embed("Record striked.", ctx)
-            db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "True")
+            await db.strike_infraction(res["operation"], res["guild"], res["user"], id_, "True")
 
     @records.command(name="close")
     @handlers.blueprints_or(commands.has_permissions(manage_messages=True))
@@ -179,7 +179,7 @@ Closing a record stops it from expiring."""
             return await embeds.simple_embed(text.mod_id_invalid, ctx)
         elif not id_.isnumeric():
             return await embeds.simple_embed(text.mod_not_number, ctx)
-        res = db.find_specific_infraction(id_)
+        res = await db.find_specific_infraction(id_)
         if not res:
             return await embeds.simple_embed(text.mod_none_matching, ctx)
         if str(res["guild"]) != str(ctx.guild.id):
@@ -187,7 +187,7 @@ Closing a record stops it from expiring."""
 
         if res["expiry"] != "False":
             await embeds.simple_embed("Record closed.", ctx)
-            db.close_infraction(id_)
+            await db.close_infraction(id_)
         else:
             await embeds.simple_embed("Record is already closed.", ctx)
 
@@ -229,7 +229,7 @@ The specific pairs that you pass are optional, but the command requires at least
                 "Make sure to provide pairs of arguments when filtering records. "
                 "Use <records filter to see a list of valid arguments."), ctx)
 
-        results = db.find_all_infractions(ctx.guild.id)
+        results = await db.find_all_infractions(ctx.guild.id)
         filtered = await self.fits_record_criteria(ctx, chunked, results)
         data = [list(item.items()) for item in list(filtered)]
         desc = (
@@ -300,7 +300,7 @@ The specific pairs that you pass are optional, but the command requires at least
             "Users warned")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("warn", ctx.guild.id, user.id, ctx.author.id, r[2])
+                await db.log_infraction("warn", ctx.guild.id, user.id, ctx.author.id, r[2])
 
     @m.command(name="mute")
     @commands.guild_only()
@@ -318,7 +318,7 @@ A mute role is created and set up if it does not already exist."""
             "Users muted")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("mute", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.log_infraction("mute", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_mute(ctx, user)
 
     @m.command(name="deafen")
@@ -335,7 +335,7 @@ A deafen role is created and set up if it does not already exist."""
             ctx, arg, text.action_deafen, "User deafened", "Users deafened")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("deafen", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.log_infraction("deafen", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_deafen(ctx, user)
 
     @m.command(name="kick")
@@ -351,7 +351,7 @@ A deafen role is created and set up if it does not already exist."""
             ctx, arg, text.action_kick, "User kicked", "Users kicked")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("kick", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.log_infraction("kick", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_kick(ctx, user)
 
     @m.command(name="ban")
@@ -367,7 +367,7 @@ A deafen role is created and set up if it does not already exist."""
             ctx, arg, text.action_ban, "User banned", "Users banned")
         if r[0]:
             for user in r[1]:
-                db.log_infraction("ban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
+                await db.log_infraction("ban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_ban(ctx, user)
 
     @m.command(name="softban")
@@ -384,7 +384,7 @@ A deafen role is created and set up if it does not already exist."""
             ctx, arg, text.action_softban, "User softbanned", "Users softbanned")
         if r[0]:
             for user in r[1]:
-                db.log_infraction(
+                await db.log_infraction(
                     "softban", ctx.guild.id, user.id, ctx.author.id, r[2], str(r[3]))
                 await moderation.handle_softban(ctx, user)  
 
@@ -470,7 +470,7 @@ A deafen role is created and set up if it does not already exist."""
                         except Exception as e:
                             print(e)
 
-                    db.close_infraction(item["id"])
+                    await db.close_infraction(item["id"])
 
     async def fits_criteria(self, message, pairs):
         res = []
@@ -612,7 +612,7 @@ The above will delete the most recent 25 messages in this channel with images, e
     async def archive(self, ctx):
         """Archives pins for the current channel. No parameters are required."""
 
-        channel = self.bot.get_channel(db.find_settings_channels(ctx.guild.id, "archives")[0]["channel"])
+        channel = self.bot.get_channel(await db.find_settings_channels(ctx.guild.id, "archives")[0]["channel"])
         if not channel:
             return await ctx.simple_embed("There is no archive channel set on this server!")
 
