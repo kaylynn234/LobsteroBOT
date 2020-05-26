@@ -11,7 +11,7 @@ import aiohttp
 import discord
 import uwuify
 
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import Any, Type
 
 from urllib3.exceptions import InsecureRequestWarning
@@ -267,6 +267,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
     def __init__(self, **kwargs: Any):
         command_prefix = self.get_prefix
+        self.prefix_cache = defaultdict(lambda: {"prefix": lc.config.prefixes})
         self.log = logging.getLogger(__name__)  # type: Type[logging.Logger]
         self.first_run = True
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
@@ -283,14 +284,7 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def get_prefix(self, message) -> str:
         """Gets the prefix that should be used based on message context."""
 
-        prefix_l = await db.prefix_list()
-        if str(message.guild.id) not in prefix_l:
-            return lc.config.prefixes
-        else:
-            if prefix_l[str(message.guild.id)]["prefix"] == "<":
-                return lc.config.prefixes
-            else:
-                return prefix_l[str(message.guild.id)]["prefix"]
+        return self.prefix_cache[str(message.guild.id)]["prefix"]
 
     def handle_extensions(self, seq, loadtype=False, excluded=[]) -> None:
         """Deals with management of Lobstero's extensions."""
@@ -315,6 +309,7 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         """My linter wants me to add a docstring for this."""
 
+        self.prefix_cache = await db.prefix_list()
         if self.first_run:
             self.first_run = False
             await db.connect_to_db()

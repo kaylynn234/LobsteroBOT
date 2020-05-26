@@ -41,6 +41,11 @@ class LobsteroCredentials():
         # Generally all you need to do here is change the port (7379) to something else.
         self.auth.database_address = "redis_async://localhost:7379;db=0"
 
+        # Database details 
+        self.auth.storage_database_username = "..."  # String
+        self.auth.storage_database_password = "..."  # String
+        self.auth.storage_database_name = "..."  # String
+
         # Cat API key: Should be a string. Get a key from https://thecatapi.com/
         # You'll need this if you want <cat to work.
         # Set it to "None" to disable the cat command.

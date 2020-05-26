@@ -333,6 +333,7 @@ The following channel types exist:
     @handlers.blueprints_or(commands.has_permissions(administrator=True))
     async def changeprefix(self, ctx, *, new):
         await db.add_prefix(ctx.guild.id, new)
+        self.bot.prefix_cache = await db.prefix_list()
         await embeds.simple_embed("Prefix updated!", ctx)
 
     @commands.group(invoke_without_command=True, ignore_extra=False)
