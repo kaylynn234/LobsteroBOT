@@ -10,9 +10,9 @@ import imgkit
 from io import BytesIO
 from datetime import timedelta
 
-from lobstero.utils import embeds, db, strings
-from lobstero.models import menus, handlers
-from lobstero import lobstero_config 
+from ..utils import embeds, db, strings
+from ..models import menus, handlers
+from .. import lobstero_config 
 from discord.ext.menus import MenuPages
 from natural import date
 from py_expression_eval import Parser

@@ -4,7 +4,7 @@ import random
 import sys
 import collections
 
-from lobstero.utils import misc
+from ..utils import misc
 
 root_directory = sys.path[0] + "/"
 

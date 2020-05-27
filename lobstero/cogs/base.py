@@ -6,11 +6,10 @@ import collections
 
 import discord
 
-from discord.ext import commands, tasks
-from github import Github
-from lobstero.utils import strings
-from lobstero.models import handlers
-from lobstero import lobstero_config
+from discord.ext import commands
+from ..utils import strings
+from ..models import handlers
+from .. import lobstero_config
 
 status_position = collections.deque([0, 1, 2, 3])
 lc = lobstero_config.LobsteroCredentials()

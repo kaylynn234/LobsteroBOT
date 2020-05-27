@@ -273,6 +273,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
         self.handler = LobsteroEH(self)
         self.session = aiohttp.ClientSession()
+        self.background_tasks = []
 
         super().__init__(command_prefix, help_command=LobsteroHELP(), **kwargs)
 
@@ -291,7 +292,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         for filename in seq:
             if filename not in excluded:
-                f = f"lobstero.cogs.{filename}"
+                f = f"LobsteroBOT.lobstero.cogs.{filename}"
                 if loadtype:
                     self.reload_extension(f)
                     pre = "RELOAD: "

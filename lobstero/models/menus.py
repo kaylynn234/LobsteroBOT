@@ -6,8 +6,8 @@ import pendulum
 import discord
 import humanize
 from discord.ext import menus 
-from lobstero.utils import text
-from lobstero.models import games
+from ..utils import text
+from . import games
 
 
 class ListEmbedMenu(menus.ListPageSource):

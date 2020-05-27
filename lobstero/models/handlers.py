@@ -2,9 +2,9 @@
 Mainly to do with the commands extension."""
 
 from discord.ext import commands
-from lobstero.utils import db
-from lobstero import lobstero_config
-from lobstero.models.exceptions import BlueprintFailure
+from ..utils import db
+from ...lobstero import lobstero_config
+from ..models.exceptions import BlueprintFailure
 
 lc = lobstero_config.LobsteroCredentials()
 

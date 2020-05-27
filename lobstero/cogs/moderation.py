@@ -9,8 +9,8 @@ import demoji
 import dateparser
 
 import pendulum
-from lobstero.utils import db, embeds, text, misc, moderation
-from lobstero.models import handlers, menus
+from ..utils import db, embeds, text, misc, moderation
+from ..models import handlers, menus
 from discord.ext import commands, tasks
 from discord.ext.menus import MenuPages
 from urllib.parse import urlsplit

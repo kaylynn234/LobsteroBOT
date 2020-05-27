@@ -9,8 +9,8 @@ import discord
 
 from discord.ext import commands
 from discord.ext.menus import MenuPages
-from lobstero.utils import db, embeds, strings
-from lobstero.models import menus, handlers
+from ..utils import db, embeds, strings
+from ..models import menus
 
 root_directory = sys.path[0] + "/"
 

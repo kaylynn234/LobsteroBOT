@@ -25,10 +25,10 @@ from discord.ext.menus import MenuPages
 from PIL import Image
 from nltk.corpus import wordnet as wn
 from collections import Counter
-from lobstero.utils import misc, db, strings, text, embeds
-from lobstero.models import games, menus, handlers
-from lobstero import lobstero_config
-from lobstero.external import corporate_bullshit, vape
+from ..utils import misc, db, strings, text, embeds
+from ..models import games, menus, handlers
+from .. import lobstero_config
+from ..external import corporate_bullshit, vape
 
 lc = lobstero_config.LobsteroCredentials()
 root_directory = f"{sys.path[0]}/".replace("\\", "/")

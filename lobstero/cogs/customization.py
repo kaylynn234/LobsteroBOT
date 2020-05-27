@@ -8,8 +8,8 @@ import discord
 import validators
 
 from discord.ext.menus import MenuPages
-from lobstero.utils import db, embeds, misc, text, strings
-from lobstero.models import menus, handlers
+from ..utils import db, embeds, misc, text, strings
+from ..models import menus, handlers
 from discord.ext import commands
 
 root_directory = sys.path[0] + "/"

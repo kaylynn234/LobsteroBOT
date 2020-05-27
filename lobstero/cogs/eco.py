@@ -1,6 +1,5 @@
 import sys
 import random
-import aiohttp
 import discord
 import asyncio
 import praw
@@ -10,11 +9,11 @@ import pendulum
 from html import unescape
 from discord.ext.menus import MenuPages
 from discord.ext import commands
-from lobstero.utils import embeds, text, db, misc
-from lobstero.models import menus, handlers
-from lobstero import lobstero_config 
+from ..utils import embeds, text, db, misc
+from ..models import menus, handlers
+from ..lobstero_config import LobsteroCredentials
 
-lc = lobstero_config.LobsteroCredentials()
+lc = LobsteroCredentials()
 
 root_directory = sys.path[0] + "/"
 

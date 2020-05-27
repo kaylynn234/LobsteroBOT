@@ -13,10 +13,10 @@ from itertools import chain
 from scipy.io import wavfile
 from unittest import mock
 from io import BytesIO
-from lobstero import lobstero_config
-from lobstero.utils import strings
-from lobstero.models import handlers
-from lobstero.external import asciify, kromo, halftone
+from .. import lobstero_config
+from ..utils import strings
+from ..models import handlers
+from ..external import asciify, kromo, halftone
 from urllib.parse import urlsplit
 from PIL import ImageFilter, ImageFont, Image, ImageDraw, ImageEnhance, ImageOps
 from discord.ext import commands
