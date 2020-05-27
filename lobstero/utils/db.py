@@ -26,7 +26,6 @@ async def connect_to_db():
         database=lc.auth.storage_database_name
     )
 
-
 root_directory = sys.path[0] + "/"
 
 

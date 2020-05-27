@@ -302,6 +302,8 @@ class LobsteroBOT(commands.AutoShardedBot):
             self.first_run = False
             await db.connect_to_db()
             await self.markov_generator.connect()
+            self._db_migrate = db.migrate
+            self._db_obj = db.db
 
         for task in self.background_tasks:
             task.start()
