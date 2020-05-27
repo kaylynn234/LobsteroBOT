@@ -37,7 +37,7 @@ class GreedyMention(commands.Converter):
             else:
                 try:
                     member = await commands.MemberConverter().convert(ctx, argument)
-                    return [[member], None] 
+                    return [[member], None]
                 except commands.BadArgument:
                     return [[], argument]
 
@@ -47,7 +47,7 @@ class GreedyMention(commands.Converter):
 
 async def blueprint_check(ctx):
     """A preliminary check that enables blueprint functionality.."""
-    res = db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
+    res = await db.blueprints_for(str(ctx.guild.id), ctx.command.qualified_name)
     if res is None:
         return False
 

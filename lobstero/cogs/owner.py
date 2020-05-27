@@ -106,6 +106,7 @@ You shouldn't even see this. if you do, you know what it does."""
             embed.add_field(name="Channels", value="There are too many channels to display.")
         await ctx.send(embed=embed)
 
+
 def setup(bot):
     """Fuck you flake8"""
     bot.add_cog(Cog(bot))
