@@ -445,7 +445,7 @@ async def strike_infraction(operation, guildid, userid, id_, new: bool = True):
 async def return_all_expiring_infractions():
     """What will go wrong, when?"""
     statement = "SELECT * FROM moderation WHERE NOT (expiry = 'False')"
-    return await db.query(statement)
+    return await db.fetch_query(statement)
 
 
 async def close_infraction(_id):
@@ -489,7 +489,7 @@ async def negate_reminder(_id):
 async def return_all_expiring_reminders():
     """Returns all expiring reminders."""
     statement = "SELECT * FROM reminders WHERE NOT (expiry = 'False')"
-    return await db.query(statement)
+    return await db.fetch_query(statement)
 
 
 async def add_reminder(authorid, reason, date, issued):
