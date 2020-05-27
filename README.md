@@ -21,5 +21,3 @@ But if you really wanna take it upon yourself:
 
 ## Contributing
 Feel free.
-
-
