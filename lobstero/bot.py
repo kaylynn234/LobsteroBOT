@@ -487,7 +487,7 @@ class LobsteroBOT(commands.AutoShardedBot):
 
     async def format_tb_and_send(self, exception, location=None, additional=None):
         to_be_formatted = "".join(
-            f"{additional}\n", traceback.format_exception(type(exception), exception, exception.__traceback__, 4)
+            [f"{additional}\n"] + traceback.format_exception(type(exception), exception, exception.__traceback__, 4)
         )
 
         if "discord.errors.Forbidden" in to_be_formatted:
