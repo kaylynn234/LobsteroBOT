@@ -616,7 +616,7 @@ async def retrieve_ooeric():
     table = db['ooer']
     data = {"ooer": "ooer"}
     res = await table.find(**data)
-    return int(res[0])["amount"] if res else 0
+    return int(res[0]["amount"]) if res else 0
 
 
 async def ooeric():
