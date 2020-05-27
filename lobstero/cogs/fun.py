@@ -197,9 +197,10 @@ It's not every day you experience the rolling of the dice."""
 
         if lc.config.wkhtmltoimage_path != "None":
             conf = {"config": config}
+            options = {"options": {"format": "png"}}
         else:
             conf = {}
-            options = {"options": {"xvfb": ""}}
+            options = {"options": {"xvfb": "", "format": "png"}}
 
         to_run = functools.partial(
             imgkit.from_url, "http://joshmillard.com/garkov/",
