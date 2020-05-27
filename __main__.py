@@ -8,8 +8,8 @@ import sys
 import logging
 
 from discord.ext import commands
-from lobstero.bot import LobsteroBOT
-from lobstero import lobstero_config
+from .lobstero.bot import LobsteroBOT
+from .lobstero import lobstero_config
 
 lc = lobstero_config.LobsteroCredentials()
 root_directory = sys.path[0] + "/"

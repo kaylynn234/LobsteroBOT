@@ -1,7 +1,6 @@
 """Provides an entire suite of abstracted database functions.
 Entirely useless for anything else."""
 
-import asyncio
 import sys
 import json
 import calendar
@@ -10,14 +9,16 @@ from typing import Optional, Mapping, Sequence
 
 import pendulum
 import bigbeans
-import misc
+from . import misc
 from ..lobstero_config import LobsteroCredentials
 
 lc = LobsteroCredentials()
+db = None
 
 
 async def connect_to_db():
-    return await bigbeans.connect(
+    global db
+    db = await bigbeans.connect(
         user=lc.auth.storage_database_username,
         password=lc.auth.storage_database_password,
         host=lc.auth.storage_database_address,
@@ -27,7 +28,6 @@ async def connect_to_db():
 
 
 root_directory = sys.path[0] + "/"
-db = asyncio.create_task(connect_to_db())
 
 
 # old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')

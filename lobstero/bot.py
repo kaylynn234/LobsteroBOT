@@ -18,10 +18,10 @@ from urllib3.exceptions import InsecureRequestWarning
 from discord.ext import commands
 from discord.ext.menus import MenuPages
 from chattymarkov import ChattyMarkovAsync
-from lobstero.utils import db, misc, text, embeds, strings
-from lobstero.models import menus
-from lobstero.models.exceptions import BlueprintFailure
-from lobstero import lobstero_config
+from ..lobstero.utils import db, misc, text, embeds, strings
+from ..lobstero.models import menus
+from ..lobstero.models.exceptions import BlueprintFailure
+from ..lobstero import lobstero_config
 
 lc = lobstero_config.LobsteroCredentials()
 
