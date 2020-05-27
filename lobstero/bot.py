@@ -485,7 +485,10 @@ class LobsteroBOT(commands.AutoShardedBot):
                 pass  # whoop-di-doo
 
     async def format_tb_and_send(self, exception, location=None, additional=None):
-        to_be_formatted = "".join(traceback.format_exception(type(exception), exception, exception.__traceback__, 4))
+        to_be_formatted = "".join(
+            f"{additional}\n", traceback.format_exception(type(exception), exception, exception.__traceback__, 4)
+        )
+
         if "discord.errors.Forbidden" in to_be_formatted:
             return  # we don't need to spam DMs with this nonsense.
 
@@ -504,8 +507,6 @@ class LobsteroBOT(commands.AutoShardedBot):
             try:
                 for to_send in sendable:
                     await destination.send(to_send)
-                if additional:
-                    await destination.send(additional)
             except Exception as exc:
                 print(f"Exception: {exc}")  # Can't be helped
 
