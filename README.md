@@ -17,7 +17,7 @@ But if you really wanna take it upon yourself:
  - Get a PostgreSQL server and optionally a Redis server running. PostgreSQL is used for persistent bot storage, and Redis is used for markov data. Keep track of the details for both.
  - Run the download_content script. This will download a bunch of images that you'll want to have around.
  - Copy lobstero_config_example.py, rename to lobstero_config.py, and edit it in your favorite text manipulation program. It should be easy enough to understand.
- - Run launcher.py to actually run the bot.
+ - Run python -m LobsteroBOT (or any variation thereof) to actually run the bot.
 
 ## Contributing
 Feel free.
