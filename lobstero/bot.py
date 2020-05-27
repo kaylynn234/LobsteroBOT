@@ -518,4 +518,12 @@ class LobsteroBOT(commands.AutoShardedBot):
             context.command.reset_cooldown(context)
 
         await self.format_tb_and_send(exception, context, event_method)
-        await self.handle(context.channel if isinstance(context, discord.Message) else context, exception)
+        if isinstance(context, commands.Context):
+            context_location = context
+        elif isinstance(context, discord.Message):
+            if context.channel:
+                context_location = context.channel
+            else:
+                return
+
+        await self.handle(context_location, exception)
