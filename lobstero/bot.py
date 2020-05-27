@@ -529,3 +529,6 @@ class LobsteroBOT(commands.AutoShardedBot):
             return
 
         await self.handle(context_location, exception)
+
+    async def on_command_error(self, context, error):
+        await self.on_error("command", context)
