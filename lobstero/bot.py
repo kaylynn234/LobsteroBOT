@@ -252,17 +252,6 @@ class LobsteroHELP(commands.HelpCommand):
         await self.context.send(embed=embed)
 
 
-class LobsteroEH:
-    """A very bad solution to error handling."""
-
-    def __init__(self, bot):
-        self.session_errors = {
-            "handled": Counter(),
-            "swallowed": Counter(),
-            "raised": Counter()}
-        self.bot = bot
-
-
 class LobsteroBOT(commands.AutoShardedBot):
 
     def __init__(self, **kwargs: Any):
@@ -271,7 +260,6 @@ class LobsteroBOT(commands.AutoShardedBot):
         self.log = logging.getLogger(__name__)  # type: Type[logging.Logger]
         self.first_run = True
         self.markov_generator = ChattyMarkovAsync(lc.auth.database_address)
-        self.handler = LobsteroEH(self)
         self.session = aiohttp.ClientSession()
         self.background_tasks = []
 
@@ -310,13 +298,15 @@ class LobsteroBOT(commands.AutoShardedBot):
     async def on_ready(self) -> None:
         """My linter wants me to add a docstring for this."""
 
-        self.prefix_cache = await db.prefix_list()
         if self.first_run:
             self.first_run = False
             await db.connect_to_db()
             await self.markov_generator.connect()
-            # self.handle_extensions(lc.config.cog_mapping, True)
 
+        for task in self.background_tasks:
+            task.start()
+
+        self.prefix_cache = await db.prefix_list()
         chn = self.get_channel(lc.config.home_channel)
         await chn.send("Bot online.")
         self.log.info("Bot online.")
