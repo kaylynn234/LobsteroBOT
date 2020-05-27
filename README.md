@@ -3,32 +3,23 @@
 A bad discord bot written by somebody with way too much time.
 Lobstero is publicly available on discord already - invite it to your server using [this link](https://discordapp.com/api/oauth2/authorize?client_id=642538503711752234&scope=bot).
 
-## Bugs
-There will be plenty of these. Open an issue and I'll get to it as soon as possible.
+## Installation
+I'm gonna level with you: I never actually used Poetry. It didn't play nice with a few of my dependencies, so I dropped it. Lobstero and Poetry have been a hoax all along.
+Your parents have lied to you.
+
+I can see almost no reason why you would want to self-host Lobstero.
+The bot is available on discord already - see heading. Why are you doing this?
+But if you really wanna take it upon yourself:
+
+ - Don't use Python 2. I can only guarantee support for Python 3.7 and above, but in theory Lobstero should run on Python 3.6 as well.
+ - Start by installing dependencies. These can be found in requirements.txt. I assume you know how pip works. Tough luck if you don't. Please use a venv.
+ - Additionally, a few commands require the system package wkhtmltopdf. Get that all installed and set up.
+ - Get a PostgreSQL server and optionally a Redis server running. PostgreSQL is used for persistent bot storage, and Redis is used for markov data. Keep track of the details for both.
+ - Run the download_content script. This will download a bunch of images that you'll want to have around.
+ - Copy lobstero_config_example.py, rename to lobstero_config.py, and edit it in your favorite text manipulation program. It should be easy enough to understand.
+ - Run launcher.py to actually run the bot.
 
 ## Contributing
-Any and all pull requests are welcomed. However, before diving head-first into a big rewrite, open an issue or talk it out with me on Discord - you can find me at Kaylynn#4444. I'm happy to help with anything you may want to do, but I need to be told for that to happen.
-
-## Installation
- I would really, really prefer if you did not run an instance of Lobstero. One is enough. However, I can't stop you, so if you're that type:
-
- - You'll need Poetry to install dependencies. This is to save everyone an aneurysm.
- - You'll need git. On windows, GitHub Desktop or the (much better) Git Bash will suffice. If you're on Linux I don't need to explain this to you. 
- - Python 3.7+ is required. While technically compatible with Python 3.6, the bot has only been tested with 3.7.6 and above. Use Python 3.6 at your own peril!
- - With all of this in hand, use [Poetry](https://python-poetry.org/) to install required dependencies and then continue from there. It's rather simple:
-
-```sh
-poetry install
-# "copy" on windows, instead of "cp"
-cp lobstero_config.example.py  lobstero_config.py
-# read and edit to taste in your favorite editor
-# "python" on windows, instead of "python3"
-poetry run python3 launcher.py
-```
-
-## Additional notes
-
-Make sure to have a Redis database running as well. Lobstero's markov functionality depends on this, and active learning can be turned on through the config file.
-Database schema for everything *should* be handled automatically. No guarantees, though.
+Feel free.
 
 
