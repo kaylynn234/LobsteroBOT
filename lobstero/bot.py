@@ -479,7 +479,8 @@ class LobsteroBOT(commands.AutoShardedBot):
                     "My best guess? The develeper sucks. I bet an important file is missing somewhere. Past that?\n"
                     "There's a chance permissions in this channel are borked, but if you're seeing this, they probably aren't.\n"
                     "Feel free to join the support server and harass the bot developer if it makes you feel better - that's ``<info`` if you didn't know.\n"
-                    "Anyway, this specific issue should get fixed soon. Hopefully. Nobody really likes Arnold anyway."
+                    "Anyway, this specific issue should get fixed soon. Hopefully. Nobody really likes Arnold anyway.",
+                    delete_after=5
                 )
             except discord.errors.Forbidden:
                 pass  # whoop-di-doo
