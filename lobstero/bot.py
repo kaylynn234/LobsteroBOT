@@ -325,6 +325,8 @@ class LobsteroBOT(commands.AutoShardedBot):
         If they are, they get sent a spooky message, and the command isn't executed.
         """
 
+        return True
+
         blacklisted = True in [
             await db.is_not_blacklisted(str(ctx.author.id), "user"),
             await db.is_not_blacklisted(str(ctx.guild.id), "guild"),
@@ -346,8 +348,6 @@ class LobsteroBOT(commands.AutoShardedBot):
                 blacklisted = True
             else:
                 blacklisted = False
-
-        return blacklisted
 
     async def on_message(self, message):
         """Called every message. Processes commands."""
@@ -371,13 +371,6 @@ class LobsteroBOT(commands.AutoShardedBot):
         else:
             owners = [self.get_user(id_) for id_ in lc.config.owner_id]
             return await misc.handle_dm(owners, message, self)
-
-        blacklists = (
-            await db.is_not_blacklisted(str(message.channel.id), "channel"),
-            await db.is_not_blacklisted(str(message.guild.id), "guild"))
-
-        if False in blacklists:
-            return
 
         if random.randint(1, 2000) == 2000 and th["random_reactions"]:
             await message.add_reaction(random.choice(text.emotes))
