@@ -11,10 +11,20 @@ from typing import Optional, Mapping, Sequence
 import pendulum
 import bigbeans
 from lobstero.utils import misc
+from lobstero_config import LobsteroCredentials
+
+lc = LobsteroCredentials()
 
 
 async def connect_to_db():
-    return await bigbeans.connect(user="postgres", password="postgres", host="localhost", port=5432)
+    return await bigbeans.connect(
+        user=lc.auth.storage_database_username,
+        password=lc.auth.storage_database_password,
+        host=lc.auth.storage_database_address,
+        port=lc.auth.storage_database_port,
+        database=lc.auth.storage_database_name
+    )
+
 
 root_directory = sys.path[0] + "/"
 db = asyncio.create_task(connect_to_db())
