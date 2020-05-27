@@ -510,14 +510,16 @@ class LobsteroBOT(commands.AutoShardedBot):
                 print(f"Exception: {exc}")  # Can't be helped
 
     async def on_error(self, event_method, *args, **kwargs):
-        exception = sys.exc_info()[1]
+        exception = kwargs.get("exception") or sys.exc_info()[1]
         context = None
         if args:
             context = args[0] if isinstance(args[0], (discord.Message, commands.Context)) else None
         if getattr(context, "command", False):
             context.command.reset_cooldown(context)
 
-        await self.format_tb_and_send(exception, context, event_method)
+        if exception:
+            await self.format_tb_and_send(exception, context, event_method)
+
         if isinstance(context, commands.Context):
             context_location = context
         elif isinstance(context, discord.Message):
@@ -531,4 +533,4 @@ class LobsteroBOT(commands.AutoShardedBot):
         await self.handle(context_location, exception)
 
     async def on_command_error(self, context, error):
-        await self.on_error("command", context)
+        await self.on_error("command", context, exception=error)
