@@ -525,5 +525,7 @@ class LobsteroBOT(commands.AutoShardedBot):
                 context_location = context.channel
             else:
                 return
+        else:
+            return
 
         await self.handle(context_location, exception)
