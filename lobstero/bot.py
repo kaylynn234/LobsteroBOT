@@ -358,8 +358,10 @@ class LobsteroBOT(commands.AutoShardedBot):
                 if message.channel.id not in channels:
                     return
 
-        if message.author.bot:
+        if message.author.bot or message.author.id == self.user.id:
             return
+
+        print(message.id)
 
         if message.guild:
             table = await db.give_table()
@@ -516,4 +518,4 @@ class LobsteroBOT(commands.AutoShardedBot):
             context.command.reset_cooldown(context)
 
         await self.format_tb_and_send(exception, context, event_method)
-        await self.handle(context, exception)
+        await self.handle(context.channel if isinstance(context, discord.Message) else context, exception)
