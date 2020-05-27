@@ -47,10 +47,7 @@ Also features commands for setting AFk statuses and similar."""
     def __init__(self, bot):
         self.bot = bot
         self.bot.afks = []
-        self.check_reminders.start()
-
-    def cog_unload(self):
-        self.check_reminders.cancel()
+        self.bot.background_tasks.append(self.check_reminders)
 
     @commands.command(aliases=["e", "emote"])
     @handlers.blueprints_or()
