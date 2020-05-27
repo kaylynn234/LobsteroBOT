@@ -474,12 +474,12 @@ class LobsteroBOT(commands.AutoShardedBot):
         else:
             try:
                 await location.send(
-                    """You've found Arnold, the unreachable error message. Now time will collapse.
-                    Normally I'd have something to tell you when something went wrong, but nope, not this time.
-                    My best guess? The develeper sucks. I bet an important file is missing somewhere. Past that?
-                    There's a chance permissions in this channel are borked, but if you're seeing this, they probably aren't.
-                    Feel free to join the support server and harass the bot developer if it makes you feel better - that's ``<info`` if you didn't know.
-                    Anyway, this specific issue should get fixed soon. Hopefully. Nobody really likes Arnold anyway."""
+                    "You've found Arnold, the unreachable error message. Now time will collapse.\n"
+                    "Normally I'd have something to tell you when something went wrong, but nope, not this time.\n"
+                    "My best guess? The develeper sucks. I bet an important file is missing somewhere. Past that?\n"
+                    "There's a chance permissions in this channel are borked, but if you're seeing this, they probably aren't.\n"
+                    "Feel free to join the support server and harass the bot developer if it makes you feel better - that's ``<info`` if you didn't know.\n"
+                    "Anyway, this specific issue should get fixed soon. Hopefully. Nobody really likes Arnold anyway."
                 )
             except discord.errors.Forbidden:
                 pass  # whoop-di-doo
@@ -491,12 +491,12 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         location_message = []
         if isinstance(location, (discord.Message, commands.Context)):
-            location_message = [f"""
-            This happened in guild {location.guild.name} with ID {location.guild.id}.
-            The message was sent in channel {location.channel.name} with ID {location.channel.id}.
-            User {location.author} with ID {location.author.id} sent the message that caused this issue.
-            The command that caused this issue was:
-            {getattr(getattr(location, 'command', None), 'qualified_name', None) or '(None)'}"""]
+            location_message = [
+                f"This happened in guild {location.guild.name} with ID {location.guild.id}.\n"
+                f"The message was sent in channel {location.channel.name} with ID {location.channel.id}.\n"
+                f"User {location.author} with ID {location.author.id} sent the message that caused this issue.\n"
+                f"The command that caused this issue was "
+                f"{getattr(getattr(location, 'command', None), 'qualified_name', None) or '(None)'}"]
 
         sendable = location_message + [f"```python\n{x}```" for x in misc.chunks(to_be_formatted, 1980)]
         for userid in lc.config.owner_id:
