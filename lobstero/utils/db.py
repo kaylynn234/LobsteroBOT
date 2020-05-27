@@ -10,8 +10,8 @@ from typing import Optional, Mapping, Sequence
 
 import pendulum
 import bigbeans
-from lobstero.utils import misc
-from lobstero_config import LobsteroCredentials
+import misc
+from ..lobstero_config import LobsteroCredentials
 
 lc = LobsteroCredentials()
 
