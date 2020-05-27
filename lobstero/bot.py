@@ -11,7 +11,7 @@ import aiohttp
 import discord
 import uwuify
 
-from collections import Counter, defaultdict
+from collections import defaultdict
 from typing import Any, Type
 
 from urllib3.exceptions import InsecureRequestWarning

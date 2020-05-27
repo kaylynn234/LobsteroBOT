@@ -38,44 +38,6 @@ You shouldn't even see this. if you do, you know what it does."""
         except discord.errors.Forbidden:
             await ctx.send("Message not sent.")
 
-    async def handle_bwlist(self, new, ctx, what, who):
-        """Actually does the things for blacklists and whitelists"""
-
-        if what.lower() not in ["member", "channel", "guild"]:
-            return await embeds.simple_embed("Not a valid block type.", ctx)
-
-        if what.lower() == "channel":
-            c = getattr(commands, f"TextChannelConverter")
-        else:
-            c = getattr(commands, f"{what.capitalize()}Converter")
-        ready_to_convert, converted = c(), None
-
-        try:
-            converted = await ready_to_convert.convert(ctx, who)
-        except commands.BadArgument:
-            return await embeds.simple_embed(f"Couldn't find a matching {what.lower()}.", ctx)
-
-        # sue me
-        to_set = getattr(db, "blacklist_add") if new else getattr(db, "blacklist_remove")
-        await to_set(str(converted.id), what.lower())
-        await embeds.simple_embed("Blacklisted successfully.", ctx)
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.is_owner()
-    async def blacklist(self, ctx, what, *, who):
-        """Denies the specified object access to bot functionality."""
-
-        await self.handle_bwlist(True, ctx, what, who)
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.is_owner()
-    async def whitelist(self, ctx, what, *, who):
-        """Allows the specified object access to bot functionality."""
-
-        await self.handle_bwlist(False, ctx, what, who)
-
     @commands.group(invoke_without_command=True, ignore_extra=False)
     @commands.guild_only()
     @commands.is_owner()
@@ -145,69 +107,6 @@ You shouldn't even see this. if you do, you know what it does."""
         else:
             embed.add_field(name="Channels", value="There are too many channels to display.")
         await ctx.send(embed=embed)
-
-    @serverinfo.command(name="channels")
-    @commands.guild_only()
-    @commands.is_owner()
-    async def serverinfo_channels(self, ctx, guildid: int = None):
-        """Shows a list of channels on a server."""
-
-        guild = self.bot.get_guild(guildid)
-
-        if guild is None:
-            return await embeds.simple_embed("Invalid server!", ctx)
-
-        data = [f"``{chn.type}``: [{chn.id}] {chn.name}" for chn in guild.channels]
-        menu = menus.ListEmbedMenu(data, "Showing all channels on this guild", 8, True)
-        pages = MenuPages(source=menu)
-        await pages.start(ctx)
-
-    @serverinfo.command(name="members")
-    @commands.guild_only()
-    @commands.is_owner()
-    async def serverinfo_members(self, ctx, guildid: int = None):
-        """Shows a list of members in a server."""
-
-        guild = self.bot.get_guild(guildid)
-
-        if guild is None:
-            return await embeds.simple_embed("Invalid server!", ctx)
-
-        data = [f"{member} | Bot: {member.bot}" for member in guild.members]
-        menu = menus.ListEmbedMenu(data, "Showing all members in this guild", 8, True)
-        pages = MenuPages(source=menu)
-        await pages.start(ctx)
-
-    @serverinfo.command(name="peek")
-    @commands.guild_only()
-    @commands.is_owner()
-    async def serverinfo_peek(self, ctx, channelid: int = None):
-        """Looks through recent messages in a channel."""
-
-        channel = self.bot.get_channel(channelid)
-
-        if channel is None:
-            return await embeds.simple_embed("Invalid channel!", ctx)
-
-        try:
-            messages = await channel.history(limit=10).flatten()
-        except discord.errors.Forbidden:
-            return await embeds.simple_embed("Cannot peek channel!", ctx)
-        messages.reverse()
-        for message in messages:
-            attachments = "\n".join([attachment.url for attachment in message.attachments])
-            await ctx.send((
-                f"{str(message.author)}:\n{str(message.content)}"
-                f"\n\nHas attachments: {attachments}"))
-
-    @commands.command()
-    @commands.guild_only()
-    @commands.is_owner()
-    async def kill(self, ctx):
-        await ctx.send("...")
-        ctx.bot.dead = True
-        await ctx.bot.logout()
-
 
 def setup(bot):
     """Fuck you flake8"""
