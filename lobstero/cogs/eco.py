@@ -375,7 +375,7 @@ Who's the richest of them all?"""
         """Shows the lobstero inventory of yourself or someone else."""
 
         who = ctx.author if who is None else who
-        inv = db.find_inventory(who.id)
+        inv = await db.find_inventory(who.id)
         strpairs = [f"**{list(x.keys())[0]}**: {list(x.values())[0]}" for x in inv]
         if not strpairs:
             embed = discord.Embed(
