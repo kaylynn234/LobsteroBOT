@@ -1,24 +1,23 @@
 """Provides an entire suite of abstracted database functions.
 Entirely useless for anything else."""
 
+import asyncio
 import sys
 import json
 import calendar
 from collections import OrderedDict
-from typing import Optional, Type, Mapping, Sequence
+from typing import Optional, Mapping, Sequence
 
 import pendulum
-import dataset
 import bigbeans
 from lobstero.utils import misc
 
-root_directory = sys.path[0] + "/"
-db = None  # Optional[bigbeans.Databean]
-
 
 async def connect_to_db():
-    global db
-    db = await bigbeans.connect(user="postgres", password="postgres", host="localhost", port=5432)
+    return await bigbeans.connect(user="postgres", password="postgres", host="localhost", port=5432)
+
+root_directory = sys.path[0] + "/"
+db = asyncio.create_task(connect_to_db())
 
 
 # old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')
