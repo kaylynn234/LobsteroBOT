@@ -3,13 +3,11 @@ You get the point."""
 
 import sys
 
-from typing import Union
-
 import discord
 
 from discord.ext import commands
 from discord.ext.menus import MenuPages
-from ..utils import db, embeds, strings
+from ..utils import embeds, strings
 from ..models import menus
 
 root_directory = sys.path[0] + "/"
