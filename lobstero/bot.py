@@ -325,29 +325,14 @@ class LobsteroBOT(commands.AutoShardedBot):
         If they are, they get sent a spooky message, and the command isn't executed.
         """
 
-        return True
-
-        blacklisted = True in [
-            await db.is_not_blacklisted(str(ctx.author.id), "user"),
-            await db.is_not_blacklisted(str(ctx.guild.id), "guild"),
-            await db.is_not_blacklisted(str(ctx.channel.id), "channel")]
-
-        if blacklisted is False:
-            misc.utclog(ctx, f"{ctx.author} cannot use command {ctx.command.name}.")
-            await ctx.send((
-                f"**{ctx.author.name}**, {random.choice(text.quotelist)} "
-                "Your access to bot functions has been disabled."), delete_after=10)
-            await ctx.message.add_reaction("🚫")
-        else:
-            if ctx.valid:
-                commandname = getattr(ctx.command, "name", None)
-                misc.utclog(ctx, f"{ctx.author} is trying to use command {commandname}.")
-
+        blacklisted = False
         if ctx.guild.id == 177192169516302336:
             if ctx.message.channel.id in [487287141047599106, 487288080764502016]:
                 blacklisted = True
             else:
                 blacklisted = False
+
+        return blacklisted
 
     async def on_message(self, message):
         """Called every message. Processes commands."""
@@ -360,8 +345,6 @@ class LobsteroBOT(commands.AutoShardedBot):
 
         if message.author.bot or message.author.id == self.user.id:
             return
-
-        print(message.id)
 
         if message.guild:
             table = await db.give_table()
