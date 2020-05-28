@@ -473,7 +473,7 @@ async def find_reminder(id_):
 async def find_reminders_for_user(id_):
     """Finds all reminders for a user."""
     table = db['reminders']
-    res = await table.find(user=id_)
+    res = await table.find(userid=id_)
     if res:
         return [dict(i) for i in res]
     else:
@@ -494,7 +494,7 @@ async def return_all_expiring_reminders():
 
 async def add_reminder(authorid, reason, date, issued):
     """Adds a reminder."""
-    data = {"user": str(authorid), "expiry": str(date), "reason": reason, "issued": str(issued)}
+    data = {"userid": str(authorid), "expiry": str(date), "reason": reason, "issued": str(issued)}
     table = db['reminders']
     await table.insert(**data)
 

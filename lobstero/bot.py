@@ -308,7 +308,6 @@ class LobsteroBOT(commands.AutoShardedBot):
                     return "Chat functionality is currently disabled."
 
                 self.markov_generator.generate = error_message
-                raise
 
             self._db_migrate = db.migrate
             self._db_obj = db.db
