@@ -301,12 +301,23 @@ class LobsteroBOT(commands.AutoShardedBot):
         if self.first_run:
             self.first_run = False
             await db.connect_to_db()
-            await self.markov_generator.connect()
+            try:
+                await self.markov_generator.connect()
+            except OSError:
+                async def error_message():
+                    return "Chat functionality is currently disabled."
+
+                self.markov_generator.generate = error_message
+                raise
+
             self._db_migrate = db.migrate
             self._db_obj = db.db
 
         for task in self.background_tasks:
-            task.start()
+            try:
+                task.start()
+            except RuntimeError:
+                pass  # task is already running
 
         self.prefix_cache = await db.prefix_list()
         chn = self.get_channel(lc.config.home_channel)
