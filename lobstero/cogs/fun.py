@@ -554,7 +554,7 @@ Use the inventory command to see the fish you own."""
         result = random.choice(fishchances)
 
         await db.economy_manipulate(ctx.author.id, -10)
-        await db.grant_item(ctx.author.id, text.fish_names[result], 1)
+        await db.grant_item(str(ctx.author.id), text.fish_names[result], 1)
 
         embedtext = [
             f"You found a {text.fishdict[result]}!\n\n"

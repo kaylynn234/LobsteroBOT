@@ -415,7 +415,7 @@ class LobsteroBOT(commands.AutoShardedBot):
         response = None
 
         if isinstance(error, (commands.CommandNotFound, InsecureRequestWarning)):
-            return True
+            return False
 
         if isinstance(error, commands.MissingPermissions):
             response = embeds.errorbed(
@@ -478,6 +478,8 @@ class LobsteroBOT(commands.AutoShardedBot):
             except discord.errors.Forbidden:
                 pass  # whoop-di-doo
 
+        return True
+
     async def format_tb_and_send(self, exception, location=None, additional=None):
         to_be_formatted = "".join(
             [f"{additional}\n"] + traceback.format_exception(type(exception), exception, exception.__traceback__, 4)
@@ -512,9 +514,6 @@ class LobsteroBOT(commands.AutoShardedBot):
         if getattr(context, "command", False):
             context.command.reset_cooldown(context)
 
-        if exception:
-            await self.format_tb_and_send(exception, context, event_method)
-
         if isinstance(context, commands.Context):
             context_location = context
         elif isinstance(context, discord.Message):
@@ -525,7 +524,9 @@ class LobsteroBOT(commands.AutoShardedBot):
         else:
             return
 
-        await self.handle(context_location, exception)
+        handled = await self.handle(context_location, exception)
+        if exception and handled is True:
+            await self.format_tb_and_send(exception, context, event_method)
 
     async def on_command_error(self, context, error):
         await self.on_error("command", context, exception=error)
