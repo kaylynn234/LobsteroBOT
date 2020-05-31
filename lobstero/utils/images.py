@@ -4,7 +4,7 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 
 
 def make_meme(top_string: str, bottom_string: str, filename: str) -> None:

@@ -12,7 +12,7 @@ from ..utils import db, embeds, misc, text, strings
 from ..models import menus, handlers
 from discord.ext import commands
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 valid_bp_responses = [
     "has_any_role", "has_role", "has_permissions", "has_strict_permissions",
     "is_specific_user", "is_guild_owner"]

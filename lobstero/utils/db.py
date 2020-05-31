@@ -26,7 +26,7 @@ async def connect_to_db():
         database=lc.auth.storage_database_name
     )
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 
 
 # old_db = dataset.connect('sqlite:///' + root_directory + 'data.db')

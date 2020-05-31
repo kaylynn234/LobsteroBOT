@@ -12,7 +12,7 @@ from .lobstero.bot import LobsteroBOT
 from .lobstero import lobstero_config
 
 lc = lobstero_config.LobsteroCredentials()
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 os.chdir(root_directory)
 
 # loop = asyncio.ProactorEventLoop()

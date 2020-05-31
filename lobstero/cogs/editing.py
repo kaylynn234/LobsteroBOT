@@ -23,7 +23,7 @@ from discord.ext import commands
 from jishaku.functools import executor_function
 from jishaku.codeblocks import codeblock_converter
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 lc = lobstero_config.LobsteroCredentials()
 
 

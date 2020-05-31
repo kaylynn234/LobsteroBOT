@@ -21,7 +21,7 @@ from PIL import Image
 
 afks = []
 whitelist = [487374098864013352, 369883232767836161]
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 lc = lobstero_config.LobsteroCredentials()
 
 

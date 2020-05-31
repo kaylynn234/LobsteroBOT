@@ -31,7 +31,7 @@ from .. import lobstero_config
 from ..external import corporate_bullshit, vape
 
 lc = lobstero_config.LobsteroCredentials()
-root_directory = f"{sys.path[0]}/".replace("\\", "/")
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 nouns = {x.name().split('.', 1)[0] for x in wn.all_synsets('n')}
 verbs = {x.name().split('.', 1)[0] for x in wn.all_synsets('v')}
 mazes = {}
@@ -178,7 +178,7 @@ Thanks Luggi."""
 It's not every day you experience the rolling of the dice."""
 
         numero = random.randint(1, sides)
-        await ctx.send("🎲 **You rolled ** ``" + str(numero) + "``.")
+        await ctx.send(f"🎲 **You rolled ** ``{numero}``.")
 
     @commands.command()
     @commands.guild_only()

@@ -15,7 +15,7 @@ from discord.ext import commands, tasks
 from discord.ext.menus import MenuPages
 from urllib.parse import urlsplit
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 records_aliases = ["logs", "modlogs", "infractions", "record"]
 m_aliases = ["moderation", "moderate", "mod"]
 

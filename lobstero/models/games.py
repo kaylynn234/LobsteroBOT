@@ -6,7 +6,7 @@ import collections
 
 from ..utils import misc
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 
 
 class uno_card():

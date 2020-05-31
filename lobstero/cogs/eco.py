@@ -15,7 +15,7 @@ from ..lobstero_config import LobsteroCredentials
 
 lc = LobsteroCredentials()
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 
 
 shop_item_values = {

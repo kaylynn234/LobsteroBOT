@@ -10,7 +10,7 @@ from discord.ext.menus import MenuPages
 from ..utils import embeds, strings
 from ..models import menus
 
-root_directory = sys.path[0] + "/"
+root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
 
 
 class Cog(commands.Cog, name="Bot Owner"):
