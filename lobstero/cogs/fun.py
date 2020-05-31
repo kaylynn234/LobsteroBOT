@@ -383,21 +383,11 @@ You can only hug one person this tightly."""
     @commands.command()
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def corpus(self, ctx, *, text: str = None):
+    async def corpus(self, ctx, *, text: str):
         """Cephalon lobstero"""
 
-        newtext = ""
-        for x in list(text):
-            strpos = 0
-            counter = -1
-            letter = str(x)
-            for y in """abcdefghijklymnopqrstuvwxyz""":
-                counter += 1
-                if str(y).lower() == str(x).lower():
-                    letter = "apykeppkipkkyypokqpyputj yz"[counter]
-            newtext += letter
-            strpos += 1
-        await ctx.send(newtext)
+        translator = str.maketrans("abcdefghijklymnopqrstuvwxyz", "apykeppkipkkyypokqpyputj yz")
+        await ctx.send(text.translate(translator))
 
     @commands.command()
     @commands.guild_only()
