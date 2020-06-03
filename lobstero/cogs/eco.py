@@ -78,8 +78,8 @@ If you're not willing to risk it, you'll never experience the ecstasy of true RN
     async def balance(self, ctx, who: discord.Member = None):
         """Shows the cheese balance of you or someone else."""
 
-        who = ctx.author if who is None else who
-        bal = db.economy_check(who.id)
+        who = who or ctx.author
+        bal = await db.economy_check(who.id)
         if bal == 0:
             await embeds.simple_embed("Looks like this person doesn't have any cheese. ", ctx)
         else:
@@ -169,7 +169,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
 
             if cardlist[item] == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 20)
+                await db.economy_manipulate(ctx.author.id, 20)
             else:
                 res = "Your guess was incorrect. Better luck next time!"
 
@@ -181,7 +181,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
             await sentembed.edit(embed=newembed)
 
         if msg.content == "3":
-            if not db.economy_check(ctx.author.id) >= 20:
+            if not await db.economy_check(ctx.author.id) >= 20:
                 await sentembed.edit(embed=embeds.eco_broke)
                 return
 
@@ -196,7 +196,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -20)
+            await db.economy_manipulate(ctx.author.id, -20)
 
             cardlist = []
             for _ in range(20):
@@ -222,7 +222,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
             await sentembed.edit(embed=newembed)
 
         if msg.content == "4":
-            if not db.economy_check(ctx.author.id) >= 50:
+            if not await db.economy_check(ctx.author.id) >= 50:
                 await sentembed.edit(embed=embeds.eco_broke)
                 return
 
@@ -230,7 +230,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
             if not msg2:
                 return
 
-            db.economy_manipulate(ctx.author.id, -50)
+            await db.economy_manipulate(ctx.author.id, -50)
             cardlist = []
 
             for letter in ["H", "D", "C", "S"]:
@@ -246,7 +246,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
 
             if cardlist[item].lower() == msg2.content.lower():
                 res = "Congratulations! You're correct!"
-                db.economy_manipulate(ctx.author.id, 5000)
+                await db.economy_manipulate(ctx.author.id, 5000)
             else:
                 res = "Aw shucks, your guess was incorrect. Better luck next time!"
 
@@ -350,7 +350,7 @@ This command took a fair chunk of inspiration from crimsoBOT. Thanks crimsoBOT."
         """Shows a leaderboard for cheese values.
 Who's the richest of them all?"""
 
-        richlist = db.return_all_balances()
+        richlist = await db.return_all_balances()
         userlist, i = [], 0
         while len(userlist) != 7:
             user = self.bot.get_user(int(richlist[i][1]))
