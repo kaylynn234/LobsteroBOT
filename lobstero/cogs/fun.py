@@ -441,40 +441,6 @@ Make sure to quote names "like so" if they're longer than two words."""
     @commands.command()
     @commands.guild_only()
     @handlers.blueprints_or()
-    async def activitygraph(self, ctx):
-        """It's educational!"""
-
-        messagelist = [str(x.author) async for x in ctx.channel.history(limit=250)]
-
-        counted_messages = Counter(messagelist)
-        main_people = counted_messages.most_common(5)
-        everyone_else = sum(counted_messages.values()) - sum([v[1] for v in main_people])
-        main_people.append(("Other users", everyone_else))
-        data, labels = [], []
-
-        for x in main_people:
-            labels.append(x[0])
-            data.append(x[1])
-
-        fig, axes = plotter.subplots()
-        axes.pie(data, labels=labels, autopct='%1.2f', startangle=0)
-        axes.axis('equal')
-        plotter.savefig(root_directory + 'lobstero/data/generated/activity_data.png')
-
-        image = discord.File(
-            f"{root_directory}lobstero/data/generated/activity_data.png",
-            filename="activity_data.png")
-
-        embed = discord.Embed(
-            title="Recent activity",
-            description="User activity in the last 250 messages is shown below.", color=16202876)
-
-        embed.set_image(url="attachment://activity_data.png")
-        await ctx.send(file=image, embed=embed)
-
-    @commands.command()
-    @commands.guild_only()
-    @handlers.blueprints_or()
     async def lmgtfy(self, ctx, *, query):
         """Too lazy to google something yourself? Lobstero can do it."""
 
