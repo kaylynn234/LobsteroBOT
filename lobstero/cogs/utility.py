@@ -404,7 +404,7 @@ Valid usage can also include the following:
             rn = pendulum.now("Atlantic/Reykjavik")  # utc+0
 
             if rn > expires_at:
-                user = self.bot.get_user(int(item["username"]))
+                user = self.bot.get_user(int(item["userid"]))
                 if user:
                     embed = discord.Embed(title=f"Reminder from {set_at.diff_for_humans()}", color=16202876)
                     embed.description = item["reason"]
@@ -414,7 +414,7 @@ Valid usage can also include the following:
                     except discord.errors.Forbidden:
                         pass
 
-                await db.negate_reminder(item["id"])
+                await db.negate_reminder(item["_id"])
 
     @commands.Cog.listener()
     @commands.guild_only()
