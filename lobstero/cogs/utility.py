@@ -404,7 +404,7 @@ Valid usage can also include the following:
             rn = pendulum.now("Atlantic/Reykjavik")  # utc+0
 
             if rn > expires_at:
-                user = self.bot.get_user(int(item["user"]))
+                user = self.bot.get_user(int(item["username"]))
                 if user:
                     embed = discord.Embed(title=f"Reminder from {set_at.diff_for_humans()}", color=16202876)
                     embed.description = item["reason"]
