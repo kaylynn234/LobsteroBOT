@@ -42,12 +42,15 @@ async def reload(ctx):
         for task in bot.background_tasks:
             try:
                 task.cancel()
-            except:  # sorry not sorry
+            except RuntimeError:
                 pass
 
         bot.handle_extensions(lc.config.cogs_to_load, True)
         for task in bot.background_tasks:
-            task.start()
+            try:
+                task.start()
+            except RuntimeError:
+                pass
 
         await status.edit(content="~~Attempting to reload modules...~~\nModules reloaded successfully.")
     except Exception:
