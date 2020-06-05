@@ -7,7 +7,7 @@ import discord
 
 from discord.ext import commands
 from discord.ext.menus import MenuPages
-from ..utils import embeds, strings
+from ..utils import embeds, strings, db
 from ..models import menus
 
 root_directory = f"{sys.path[0]}/LobsteroBOT/".replace("\\", "/")
@@ -105,6 +105,18 @@ You shouldn't even see this. if you do, you know what it does."""
         else:
             embed.add_field(name="Channels", value="There are too many channels to display.")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_owner()
+    async def db_execute(self, ctx, *, query):
+        await db.db.execute_query(query)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.is_owner()
+    async def db_fetch(self, ctx, *, query):
+        return await db.db.fetch_query(query)
 
 
 def setup(bot):
